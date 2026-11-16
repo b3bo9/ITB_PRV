@@ -10635,8 +10635,10 @@ const CelShadingSystem = {
 
         const prevCompile = material.onBeforeCompile;
         const prevKey = material.customProgramCacheKey;
-        material.customProgramCacheKey = () => {
-            const base = prevKey ? prevKey() : (material.type || 'mat');
+        const protoKeyFn = THREE.Material && THREE.Material.prototype ? THREE.Material.prototype.customProgramCacheKey : null;
+        const baseType = material.type || 'mat';
+        material.customProgramCacheKey = function() {
+            const base = (prevKey && prevKey !== protoKeyFn) ? prevKey.call(this) : baseType;
             return `${base}_cel2_${sig}`;
         };
         material.onBeforeCompile = (shader, renderer) => {
