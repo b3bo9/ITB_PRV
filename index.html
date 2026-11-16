@@ -5089,6 +5089,15 @@ const SkinSystem = {
                 );
             }
         };
+        CelShadingSystem.apply(mat, {
+            tag: 'menu_terr_' + mode,
+            bands: mode === 'cliff' ? 3 : 4,
+            shadowFloor: mode === 'cliff' ? 0.34 : 0.44,
+            midLevel: 0.78,
+            hiGain: 1.10,
+            coolShadow: 0.46,
+            specThreshold: 0.0
+        });
     },
 
     // Shader erba e chiome dedicato al menu: funziona a 360° su tutti gli smartphone senza mai sparire!
@@ -5145,10 +5154,13 @@ const SkinSystem = {
                 #include <color_fragment>
                 vec3 rootCol = ${isCanopy ? 'diffuseColor.rgb * 0.48' : 'diffuseColor.rgb * 0.28'};
                 vec3 tipCol = diffuseColor.rgb * mix(1.22, 1.45, vVar);
-                diffuseColor.rgb = mix(rootCol, tipCol, ${isCanopy ? 'smoothstep(0.0, 1.0, vH)' : 'pow(smoothstep(0.12, 0.88, vH), 1.5)'});
+                float baseRamp = ${isCanopy ? 'smoothstep(0.0, 1.0, vH)' : 'pow(smoothstep(0.12, 0.88, vH), 1.5)'};
+                float celRamp = mix(0.0, mix(0.55, 1.0, smoothstep(0.56, 0.70, baseRamp)), smoothstep(0.22, 0.35, baseRamp));
+                diffuseColor.rgb = mix(rootCol, tipCol, celRamp);
                 `
             );
         };
+        CelShadingSystem.apply(mat, { tag: isCanopy ? 'menu_canopy' : 'menu_grass', bands: isCanopy ? 3 : 2, shadowFloor: 0.44, hiGain: 1.14, coolShadow: 0.40 });
         return mat;
     },
 
@@ -5301,15 +5313,15 @@ const SkinSystem = {
 
     buildFloatingIslets(preset0, tRock) {
         this.floatingIslets = [];
-        this.isletRockMat = new THREE.MeshStandardMaterial({
+        this.isletRockMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
             color: preset0.rock, map: tRock, roughness: 0.9, metalness: 0.08, flatShading: true
-        });
-        this.isletTopMat = new THREE.MeshStandardMaterial({
+        }), { tag: 'menu_islet_r', bands: 3, shadowFloor: 0.34, specThreshold: 0.0 });
+        this.isletTopMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
             color: preset0.grass, roughness: 0.95, metalness: 0.02, flatShading: true
-        });
-        this.crystalMat = new THREE.MeshStandardMaterial({
+        }), { tag: 'menu_islet_t', bands: 3, shadowFloor: 0.40, specThreshold: 0.0 });
+        this.crystalMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
             color: preset0.elem, emissive: preset0.elem, emissiveIntensity: 1.45, roughness: 0.22, metalness: 0.15, flatShading: true
-        });
+        }), { tag: 'menu_crystal', bands: 3, shadowFloor: 0.45, specThreshold: 0.05, specGain: 0.95, rimStrength: 0.65 });
 
         // Spigolo conico rovesciato scolpito riusato fra tutte le isole satellite
         const spireGeo = new THREE.CylinderGeometry(18, 2.2, 28, 7, 2);
@@ -5766,15 +5778,17 @@ const SkinSystem = {
 
         // Piedistallo Altare centrale + Runico
         this.altarGroup = new THREE.Group();
-        this.altarMat = new THREE.MeshStandardMaterial({
+        this.altarMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
             color: 0x3b444b, map: tRock, roughness: 0.86, metalness: 0.14, flatShading: true
-        });
+        }), { tag: 'menu_altar', bands: 3, shadowFloor: 0.36, specThreshold: 0.10, rimStrength: 0.35 });
         const tierBottom = new THREE.Mesh(new THREE.CylinderGeometry(42, 46, 2.0, 8), this.altarMat);
         tierBottom.position.y = 0.8;
         tierBottom.receiveShadow = true; tierBottom.castShadow = true;
         const tierTop = new THREE.Mesh(new THREE.CylinderGeometry(34, 37, 1.4, 8), this.altarMat);
         tierTop.position.y = 1.65;
         tierTop.receiveShadow = true; tierTop.castShadow = true;
+        CelShadingSystem.attachOutline(tierBottom, 0.85);
+        CelShadingSystem.attachOutline(tierTop, 0.85);
         this.altarGroup.add(tierBottom, tierTop);
         this.worldGroup.add(this.altarGroup);
 
@@ -5813,7 +5827,7 @@ const SkinSystem = {
         waterGlow.position.y = -0.72;
         poolGroup.add(waterGlow, this.waterMesh);
 
-        this.rimRockMat = new THREE.MeshStandardMaterial({ color: 0x7a8774, map: tRock, roughness: 0.85, flatShading: true });
+        this.rimRockMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({ color: 0x7a8774, map: tRock, roughness: 0.85, flatShading: true }), { tag: 'menu_rimrock', bands: 3, shadowFloor: 0.38, specThreshold: 0.0 });
         for (let i = 0; i < 14; i++) {
             const a = (Math.PI * 2 / 14) * i + (i % 2) * 0.15;
             const rad = 39 + Math.sin(i * 2.3) * 3.0;
@@ -5825,10 +5839,11 @@ const SkinSystem = {
             stone.position.set(rx, gy + 0.5, rz);
             stone.rotation.y = a;
             stone.castShadow = true; stone.receiveShadow = true;
+            CelShadingSystem.attachOutline(stone, 0.72);
             poolGroup.add(stone);
         }
         const padGeo = new THREE.CylinderGeometry(5.0, 4.6, 0.5, 8);
-        const padMat = new THREE.MeshStandardMaterial({ color: 0x2e8538, emissive: 0x0d2b12, roughness: 0.65, flatShading: true });
+        const padMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({ color: 0x2e8538, emissive: 0x0d2b12, roughness: 0.65, flatShading: true }), { tag: 'menu_pad', bands: 3, shadowFloor: 0.42, specThreshold: 0.08 });
         [[-12, -7, 1.0], [11, 12, 0.85], [-4, 15, 0.7]].forEach(p => {
             const pad = new THREE.Mesh(padGeo, padMat);
             pad.position.set(p[0], -0.45, p[1]);
@@ -5869,7 +5884,7 @@ const SkinSystem = {
 
         // Alberi proporzionati in boschetti perimetrali asimmetrici: mai davanti alla linea di vista della camera
         if (!window.GLOBAL_TREE_GEO) window.GLOBAL_TREE_GEO = createDarkTreeGeometry();
-        const menuTreeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x1c1812, roughness: 0.9 });
+        const menuTreeTrunkMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({ color: 0x1c1812, roughness: 0.9 }), { tag: 'menu_trunk', bands: 3, shadowFloor: 0.34, rimStrength: 0.30 });
         this.menuCanopyMat = this.createMenuFoliageMaterial(preset0.canopy, true);
 
         const treeSpots = [
@@ -5911,14 +5926,15 @@ const SkinSystem = {
 
         // Obelisco + Cassa + Urna
         if (!window.GLOBAL_OBELISK_GEO) window.GLOBAL_OBELISK_GEO = createObeliskGeometry();
-        this.obeliskMat = new THREE.MeshStandardMaterial({
+        this.obeliskMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
             color: 0x24262c, emissive: preset0.elem, emissiveIntensity: 0.62, roughness: 0.7, metalness: 0.45, map: CHAR_GRUNGE_TEX
-        });
+        }), { tag: 'menu_obelisk', bands: 3, shadowFloor: 0.34, specThreshold: 0.08, rimStrength: 0.50 });
         const obelisk = new THREE.Mesh(window.GLOBAL_OBELISK_GEO, this.obeliskMat);
         const obY = this.getTerrainHeight(-84, -52);
         obelisk.position.set(-84, obY, -52);
         obelisk.scale.setScalar(0.90);
         obelisk.castShadow = true; obelisk.receiveShadow = true;
+        CelShadingSystem.attachOutline(obelisk, 0.95);
         this.obeliskOrbGlow = new THREE.Sprite(SharedMat[preset0.sprite]);
         this.obeliskOrbGlow.scale.set(38, 38, 1);
         this.obeliskOrbGlow.position.set(0, 66.5, 0);
@@ -5928,11 +5944,13 @@ const SkinSystem = {
         const crate = new THREE.Mesh(SharedGeo.crate, SharedMat.crate);
         crate.position.set(-46, crateY + 11, 66); crate.scale.setScalar(0.92); crate.rotation.y = 0.4;
         crate.castShadow = true; crate.receiveShadow = true;
+        CelShadingSystem.attachOutline(crate, 0.85);
 
         const urnY = this.getTerrainHeight(-26, 74);
         const urn = new THREE.Mesh(SharedGeo.urn, SharedMat.urn);
         urn.position.set(-26, urnY + 15, 74); urn.scale.setScalar(0.9);
         urn.castShadow = true; urn.receiveShadow = true;
+        CelShadingSystem.attachOutline(urn, 0.85);
         this.worldGroup.add(obelisk, crate, urn);
 
         // Fasci verticali di luce (God Rays) su Altare centrale e Obelisco
@@ -5971,11 +5989,11 @@ const SkinSystem = {
             const gy = this.getTerrainHeight(mx, mz);
             let mat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: colorHex, map: CHAR_GRUNGE_TEX }), 0.75);
             if (type === 'slime') {
-                mat = new THREE.MeshLambertMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 0.35, transparent: true, opacity: 0.9 });
+                mat = CelShadingSystem.apply(new THREE.MeshLambertMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 0.35, transparent: true, opacity: 0.9 }), { tag: 'slime_menu', shadowFloor: 0.42, rimStrength: 0.65 });
             }
             const obj = ModelFactory.buildEnemy(type, size, mat);
             obj.group.position.set(mx, gy, mz);
-            obj.group.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+            obj.group.traverse(c => { if (c.isMesh && !(c.userData && c.userData.isToonOutline)) { c.castShadow = true; c.receiveShadow = true; } });
             const lookAng = Math.atan2(-mz, -mx);
             obj.group.rotation.y = -lookAng + Math.PI / 2;
 
@@ -5994,7 +6012,7 @@ const SkinSystem = {
         spawnGuard('leaper', 13, 0xaa00ff, 138, 180);
 
         for (let g = 0; g < 2; g++) {
-            const gobMat = new THREE.MeshLambertMaterial({ color: 0xffcc00, emissive: 0xff2200, emissiveIntensity: 0.75 });
+            const gobMat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: 0xffcc00, emissive: 0xff2200, emissiveIntensity: 0.75 }), 0.70);
             const gob = ModelFactory.buildEnemy('goblin', 10.5, gobMat);
             this.worldGroup.add(gob.group);
             this.flyers.push({ group: gob.group, parts: gob.parts, angle: g * Math.PI, radius: 100 + g * 24, speed: 1.05 + g * 0.2 });
@@ -6004,9 +6022,10 @@ const SkinSystem = {
         this.boxGroup = new THREE.Group();
         this.boxGroup.position.set(0, 68, 0);
         const wallTex = this.prepareMenuTex('wall', 1, 1);
-        const boxMat = new THREE.MeshStandardMaterial({ color: 0x334155, map: wallTex, roughness: 0.36, metalness: 0.65 });
+        const boxMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({ color: 0x334155, map: wallTex, roughness: 0.36, metalness: 0.65 }), { tag: 'menu_box', bands: 3, shadowFloor: 0.36, specThreshold: 0.05, specGain: 0.90, rimStrength: 0.70 });
         const boxMesh = new THREE.Mesh(new THREE.BoxGeometry(22, 22, 22), boxMat);
         boxMesh.castShadow = true;
+        CelShadingSystem.attachOutline(boxMesh, 1.05);
         this.wireMat = new THREE.MeshBasicMaterial({ color: preset0.elem, wireframe: true, transparent: true, opacity: 0.85 });
         const wireMesh = new THREE.Mesh(new THREE.BoxGeometry(24.2, 24.2, 24.2), this.wireMat);
 
@@ -6137,12 +6156,12 @@ const SkinSystem = {
         }
 
         const skin = SkinSystem.getCurrentSkin();
-        const bodyMat = new THREE.MeshStandardMaterial({ color: skin.colors.body, roughness: 0.68, metalness: 0.12, map: getSkinTexture(skin.id) });
+        const bodyMat = applyCharacterShader(new THREE.MeshStandardMaterial({ color: skin.colors.body, roughness: 0.68, metalness: 0.12, map: getSkinTexture(skin.id) }), 0.72);
         const gemMat = new THREE.MeshPhongMaterial({ color: 0xffdd33, emissive: 0xffdd33, emissiveIntensity: 1.5 });
         this.heroParts = ModelFactory.buildPlayer(bodyMat, gemMat);
         this.heroGroup = this.heroParts.group;
         this.heroGroup.traverse(c => {
-            if (c.isMesh) {
+            if (c.isMesh && !(c.userData && c.userData.isToonOutline)) {
                 c.castShadow = true;
                 c.receiveShadow = true;
             }
@@ -6959,6 +6978,7 @@ const DeathSceneSystem = {
             if (c.isSprite) {
                 spritesToRemove.push(c);
             } else if (c.isMesh && c.material) {
+                if (c.userData && c.userData.isToonOutline) return;
                 if (c.name === 'auraMesh' || c.material.map === GLOW_TEX) {
                     c.visible = false;
                 }
@@ -7044,13 +7064,13 @@ const DeathSceneSystem = {
         let eColor = k.color || 0x5c4033;
         let eMat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: eColor, map: CHAR_GRUNGE_TEX, side: THREE.DoubleSide }), 0.75);
         if (eType === 'slime' || eType === 'slime_mini') {
-            eMat = new THREE.MeshLambertMaterial({ color: eColor, emissive: eColor, emissiveIntensity: 0.3, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+            eMat = CelShadingSystem.apply(new THREE.MeshLambertMaterial({ color: eColor, emissive: eColor, emissiveIntensity: 0.3, transparent: true, opacity: 0.9, side: THREE.DoubleSide }), { tag: 'slime_death', shadowFloor: 0.42, rimStrength: 0.65 });
         } else if (k.isPursuer) {
-            eMat = new THREE.MeshLambertMaterial({ color: 0x050505, emissive: 0xaa0000, emissiveIntensity: 1.4, side: THREE.DoubleSide });
+            eMat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: 0x050505, emissive: 0xaa0000, emissiveIntensity: 1.4, side: THREE.DoubleSide }), 0.80);
         } else if (k.isGolden) {
-            eMat = new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0xffaa00, emissiveIntensity: 1.1, side: THREE.DoubleSide });
+            eMat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0xffaa00, emissiveIntensity: 1.1, side: THREE.DoubleSide }), 0.80);
         } else if (k.isMegaElite) {
-            eMat = new THREE.MeshLambertMaterial({ color: eColor, emissive: 0x77001a, emissiveIntensity: 1.15, map: CHAR_GRUNGE_TEX, side: THREE.DoubleSide });
+            eMat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: eColor, emissive: 0x77001a, emissiveIntensity: 1.15, map: CHAR_GRUNGE_TEX, side: THREE.DoubleSide }), 0.80);
             baseSize *= 1.22;
         }
 
@@ -7189,12 +7209,12 @@ const DeathSceneSystem = {
         this.tombGroup = new THREE.Group();
         this.tombGroup.scale.setScalar(1.45);
 
-        const stoneMat = new THREE.MeshStandardMaterial({
+        const stoneMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
             color: 0x3b4252, roughness: 0.8, metalness: 0.22, map: CHAR_GRUNGE_TEX, side: THREE.DoubleSide
-        });
-        const darkTrimMat = new THREE.MeshStandardMaterial({
+        }), { tag: 'tomb_stone', shadowFloor: 0.34, specThreshold: 0.10, rimStrength: 0.45 });
+        const darkTrimMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
             color: 0x1e222a, roughness: 0.9, metalness: 0.28, map: CHAR_GRUNGE_TEX, side: THREE.DoubleSide
-        });
+        }), { tag: 'tomb_trim', shadowFloor: 0.32, specThreshold: 0.10, rimStrength: 0.45 });
         const runeCrossMat = new THREE.MeshBasicMaterial({ color: 0xe0f2fe, side: THREE.DoubleSide });
 
         const step1 = new THREE.Mesh(SharedGeo.box, darkTrimMat);
@@ -7221,6 +7241,7 @@ const DeathSceneSystem = {
         crossH.scale.set(8.2, 2.4, 7.6); crossH.position.set(0, 26.5, 0);
 
         this.tombGroup.add(step1, step2, slab, arch, pilL, pilR, crossV, crossH);
+        [step1, step2, slab, arch, pilL, pilR].forEach(m => CelShadingSystem.attachOutline(m, 0.92));
         this.stageGroup.add(this.tombGroup);
 
         const skin = SkinSystem.getCurrentSkin();
@@ -7288,6 +7309,9 @@ const DeathSceneSystem = {
         ];
 
         this.prepareModelForReflection(this.ghostGroup);
+        this.ghostGroup.traverse(c => {
+            if (c.userData && c.userData.isToonOutline) c.visible = false;
+        });
 
         this.ghostGroup.scale.setScalar(0.25);
         this.ghostGroup.position.set(0, 6, 0);
@@ -7343,12 +7367,23 @@ const DeathSceneSystem = {
         // RENDER A DOPPIO PASSAGGIO: Il pavimento nero riflette SOLO i personaggi e la tomba
         this.renderer.clear();
 
+        const hiddenOutlines = [];
+        if (this.stageGroup) {
+            this.stageGroup.traverse(c => {
+                if (c.userData && c.userData.isToonOutline && c.visible) {
+                    c.visible = false;
+                    hiddenOutlines.push(c);
+                }
+            });
+        }
+
         this.worldRoot.scale.y = -1;
         this.floorMesh.visible = false;
         this.renderer.render(this.scene, this.camera);
 
         this.renderer.clearDepth();
 
+        for (let i = 0; i < hiddenOutlines.length; i++) hiddenOutlines[i].visible = true;
         this.worldRoot.scale.y = 1;
         this.floorMesh.visible = true;
         this.renderer.render(this.scene, this.camera);
@@ -8867,7 +8902,7 @@ const PcUltraGraphics = {
     applyTerrainShader(mat, isWall = false) {
         if (!mat || mat._ultraTerrainHooked) return mat;
         mat._ultraTerrainHooked = true;
-        mat.customProgramCacheKey = () => isWall ? 'pc_ultra_wall_v2' : 'pc_ultra_floor_v3';
+        mat.customProgramCacheKey = () => isWall ? 'pc_ultra_wall_cel_v3' : 'pc_ultra_floor_cel_v4';
         mat.onBeforeCompile = (shader) => {
             shader.uniforms.uUltra = PcUltraGraphics.uUltra;
             shader.uniforms.uBiomeId = PcUltraGraphics.uBiomeId;
@@ -8923,6 +8958,17 @@ const PcUltraGraphics = {
                 `
             );
         };
+        CelShadingSystem.apply(mat, {
+            tag: isWall ? 'terr_wall' : 'terr_floor',
+            bands: isWall ? 3 : 4,
+            shadowFloor: isWall ? 0.34 : 0.44,
+            midLevel: isWall ? 0.76 : 0.80,
+            hiGain: 1.10,
+            coolShadow: 0.42,
+            specThreshold: isWall ? 0.11 : 0.0,
+            specGain: 0.55,
+            celMix: 0.86
+        });
         return mat;
     },
 
@@ -9090,16 +9136,24 @@ const PcUltraGraphics = {
                     float maxCh = max(col.r, max(col.g, col.b));
                     float minCh = min(col.r, min(col.g, col.b));
                     float satEst = maxCh > 0.0001 ? (maxCh - minCh) / maxCh : 0.0;
-                    float vibAmt = 0.09 * (1.0 - satEst * 0.65) * smoothstep(0.02, 0.12, gradedY) * (1.0 - smoothstep(0.60, 0.92, gradedY));
+                    float vibAmt = 0.16 * (1.0 - satEst * 0.55) * smoothstep(0.02, 0.12, gradedY) * (1.0 - smoothstep(0.60, 0.92, gradedY));
                     col = max(vec3(0.0), vec3(gradedY) + (col - vec3(gradedY)) * (1.0 + vibAmt));
                     if (gradedY > 0.72) {
-                        float hiDesat = smoothstep(0.72, 0.94, gradedY) * 0.16;
+                        float hiDesat = smoothstep(0.72, 0.94, gradedY) * 0.14;
                         col = mix(col, vec3(gradedY), hiDesat);
                     }
 
-                    vec3 shadowTint = uBiomeId > 1.5 ? vec3(0.96, 1.00, 1.04) : (uBiomeId > 0.5 ? vec3(1.04, 0.98, 0.97) : vec3(0.98, 1.02, 0.99));
+                    // Contorno ink cel-shading zero-extra-tap (Roberts Cross su luma vicini, preserva aloni/emissive)
+                    float rEdgeA = lumaNW - lumaSE;
+                    float rEdgeB = lumaNE - lumaSW;
+                    float robertsEdge = sqrt(rEdgeA * rEdgeA + rEdgeB * rEdgeB);
+                    float glowMask = 1.0 - smoothstep(0.62, 0.92, lumaMax);
+                    float inkContour = smoothstep(0.20, 0.42, robertsEdge) * glowMask * 0.50;
+                    col *= (1.0 - inkContour);
+
+                    vec3 shadowTint = uBiomeId > 1.5 ? vec3(0.95, 0.99, 1.05) : (uBiomeId > 0.5 ? vec3(1.05, 0.98, 0.96) : vec3(0.97, 1.02, 1.00));
                     float lum = getLuma(col);
-                    col *= mix(shadowTint, vec3(0.99, 0.99, 0.99), smoothstep(0.20, 0.85, lum));
+                    col *= mix(shadowTint, vec3(1.0), smoothstep(0.20, 0.85, lum));
 
                     gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
                     #include <encodings_fragment>
@@ -10384,7 +10438,7 @@ const GLOBAL_ALPHA_TEX = createOrganicAlphaMap();
     megaAuraDisc: new THREE.MeshBasicMaterial({ map: MEGA_AURA_TEX, color: 0xff1844, transparent: true, opacity: 0.78, blending: THREE.AdditiveBlending, depthWrite: false, alphaTest: 0.02 }),
     megaAuraRing: new THREE.MeshBasicMaterial({ color: 0xff2255, transparent: true, opacity: 0.88, blending: THREE.AdditiveBlending, depthWrite: false })
 };
-SharedMat.coin = new THREE.MeshStandardMaterial({color: 0xffd700, emissive: 0xaa6600, metalness: 1.0, roughness: 0.2});
+SharedMat.coin = new THREE.MeshStandardMaterial({color: 0xffd700, emissive: 0xaa6600, metalness: 0.45, roughness: 0.35});
 
 SharedGeo.crate = new THREE.BoxGeometry(24, 24, 24);
 
@@ -10402,63 +10456,320 @@ urnPoints.push(new THREE.Vector2(0, 34));
 SharedGeo.urn = new THREE.LatheGeometry(urnPoints, 24);
 SharedGeo.urn.translate(0, -17, 0);
 
-SharedMat.crate = new THREE.MeshPhongMaterial({ map: createPatternTexture('crate'), shininess: 10 });
-SharedMat.urn = new THREE.MeshPhongMaterial({ map: createPatternTexture('urn'), shininess: 30, flatShading: true });
+SharedMat.crate = new THREE.MeshPhongMaterial({ map: createPatternTexture('crate'), shininess: 18 });
+SharedMat.urn = new THREE.MeshPhongMaterial({ map: createPatternTexture('urn'), shininess: 35, flatShading: true });
 
 const SharedGeoSet = new Set(Object.values(SharedGeo));
+
+const CelShadingSystem = {
+    enabled: true,
+    _outlineMaterials: {},
+    ensureSmoothNormals(geo) {
+        if (!geo || !geo.attributes || !geo.attributes.position) return geo;
+        if (geo.attributes.aToonNormal) return geo;
+        const pos = geo.attributes.position;
+        if (!geo.attributes.normal) geo.computeVertexNormals();
+        const norm = geo.attributes.normal;
+        const count = pos.count;
+        const accum = Object.create(null);
+        for (let i = 0; i < count; i++) {
+            const px = Math.round(pos.getX(i) * 500);
+            const py = Math.round(pos.getY(i) * 500);
+            const pz = Math.round(pos.getZ(i) * 500);
+            const key = px + ',' + py + ',' + pz;
+            let entry = accum[key];
+            if (!entry) {
+                entry = [0, 0, 0];
+                accum[key] = entry;
+            }
+            entry[0] += norm.getX(i);
+            entry[1] += norm.getY(i);
+            entry[2] += norm.getZ(i);
+        }
+        const smoothArr = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+            const px = Math.round(pos.getX(i) * 500);
+            const py = Math.round(pos.getY(i) * 500);
+            const pz = Math.round(pos.getZ(i) * 500);
+            const key = px + ',' + py + ',' + pz;
+            const entry = accum[key];
+            let nx = entry[0], ny = entry[1], nz = entry[2];
+            const len = Math.hypot(nx, ny, nz);
+            if (len > 0.0001) {
+                nx /= len; ny /= len; nz /= len;
+            } else {
+                nx = norm.getX(i); ny = norm.getY(i); nz = norm.getZ(i);
+            }
+            const o = i * 3;
+            smoothArr[o] = nx;
+            smoothArr[o + 1] = ny;
+            smoothArr[o + 2] = nz;
+        }
+        geo.setAttribute('aToonNormal', new THREE.BufferAttribute(smoothArr, 3));
+        return geo;
+    },
+    getOutlineMaterial(width = 1.0, inkHex = 0x0b0a14) {
+        const key = `${width.toFixed(2)}_${inkHex}`;
+        if (this._outlineMaterials[key]) return this._outlineMaterials[key];
+        const inkColor = new THREE.Color(inkHex);
+        const mat = new THREE.ShaderMaterial({
+            uniforms: {
+                uOutlineWidth: { value: width },
+                uInkColor: { value: inkColor },
+                fogColor: { value: new THREE.Color(0x000000) },
+                fogNear: { value: 300 },
+                fogFar: { value: 1200 },
+                fogDensity: { value: 0.001 }
+            },
+            vertexShader: `
+                #include <common>
+                #include <fog_pars_vertex>
+                attribute vec3 aToonNormal;
+                uniform float uOutlineWidth;
+                void main() {
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    vec4 clipPos = projectionMatrix * mvPosition;
+                    float nLenSq = dot(aToonNormal, aToonNormal);
+                    vec3 safeN = (nLenSq > 0.0001) ? aToonNormal : normalize(normal);
+                    vec3 viewN = normalMatrix * safeN;
+                    float vLenSq = dot(viewN, viewN);
+                    viewN = (vLenSq > 0.0001) ? viewN * inversesqrt(vLenSq) : vec3(0.0, 0.0, 1.0);
+                    vec2 clipN = (projectionMatrix * vec4(viewN, 0.0)).xy;
+                    float cLenSq = dot(clipN, clipN);
+                    vec2 dir = (cLenSq > 0.00001) ? clipN * inversesqrt(cLenSq) : vec2(0.0);
+                    float objScale = length(modelViewMatrix[0].xyz);
+                    float scaleGuard = smoothstep(0.02, 0.25, objScale);
+                    float aspect = max(0.25, projectionMatrix[1][1] / max(0.0001, projectionMatrix[0][0]));
+                    float distScale = mix(1.08, 0.52, smoothstep(140.0, 780.0, clipPos.w));
+                    vec2 offset = vec2(1.0 / aspect, 1.0) * (0.0042 * uOutlineWidth * distScale * scaleGuard * clipPos.w);
+                    clipPos.xy += dir * offset;
+                    clipPos.z += 0.0009 * clipPos.w;
+                    gl_Position = clipPos;
+                    #include <fog_vertex>
+                }
+            `,
+            fragmentShader: `
+                #include <common>
+                #include <fog_pars_fragment>
+                uniform vec3 uInkColor;
+                void main() {
+                    gl_FragColor = vec4(uInkColor, 1.0);
+                    #include <fog_fragment>
+                }
+            `,
+            side: THREE.BackSide,
+            depthWrite: true,
+            fog: true
+        });
+        mat._isGlobalCached = true;
+        mat._isToonOutlineMat = true;
+        if (typeof SharedMatSet !== 'undefined') SharedMatSet.add(mat);
+        this._outlineMaterials[key] = mat;
+        return mat;
+    },
+    attachOutline(mesh, width = 1.0, inkHex = 0x0b0a14) {
+        if (!mesh || !mesh.isMesh || !mesh.geometry || (mesh.userData && (mesh.userData.isToonOutline || mesh.userData.noToonOutline))) return null;
+        if (mesh._toonOutlineChild && mesh._toonOutlineChild.parent === mesh) {
+            this.ensureSmoothNormals(mesh.geometry);
+            if (mesh._toonOutlineChild.geometry !== mesh.geometry) {
+                mesh._toonOutlineChild.geometry = mesh.geometry;
+            }
+            return mesh._toonOutlineChild;
+        }
+        this.ensureSmoothNormals(mesh.geometry);
+        const outlineMat = this.getOutlineMaterial(width, inkHex);
+        const outlineMesh = new THREE.Mesh(mesh.geometry, outlineMat);
+        outlineMesh.userData.isToonOutline = true;
+        outlineMesh.castShadow = false;
+        outlineMesh.receiveShadow = false;
+        outlineMesh.frustumCulled = mesh.frustumCulled;
+        outlineMesh.renderOrder = (mesh.renderOrder || 0);
+        mesh.add(outlineMesh);
+        mesh._toonOutlineChild = outlineMesh;
+        return outlineMesh;
+    },
+    attachGroupOutlines(root, width = 1.0, inkHex = 0x0b0a14, skipSet = null) {
+        if (!root) return;
+        const targets = [];
+        root.traverse(c => {
+            if (!c.isMesh || !c.geometry || !c.material) return;
+            if (c.userData && (c.userData.isToonOutline || c.userData.noToonOutline)) return;
+            if (skipSet && skipSet.has(c)) return;
+            const mat = Array.isArray(c.material) ? c.material[0] : c.material;
+            if (!mat || mat.wireframe || mat.transparent || mat.isMeshBasicMaterial) return;
+            if (mat === SharedMat.blobShadow || mat === SharedMat.telegraph || mat === SharedMat.scorchMark) return;
+            if ((mat.emissiveIntensity || 0) >= 1.25 && mat !== SharedMat.coin) return;
+            targets.push(c);
+        });
+        for (let i = 0; i < targets.length; i++) {
+            this.attachOutline(targets[i], width, inkHex);
+        }
+    },
+    syncOutlineGeometries(root) {
+        if (!root) return;
+        root.traverse(c => {
+            if (c.isMesh && c._toonOutlineChild && c.geometry) {
+                this.ensureSmoothNormals(c.geometry);
+                if (c._toonOutlineChild.geometry !== c.geometry) {
+                    c._toonOutlineChild.geometry = c.geometry;
+                }
+            }
+        });
+    },
+    apply(material, opts = {}) {
+        if (!material || material._celApplied || material.isMeshBasicMaterial || material.isShaderMaterial || material.isSpriteMaterial) return material;
+        material._celApplied = true;
+        const isPhongOrStd = !!(material.isMeshPhongMaterial || material.isMeshStandardMaterial);
+        const bands = opts.bands || 3;
+        const shadowFloor = (opts.shadowFloor !== undefined) ? opts.shadowFloor : 0.34;
+        const midLevel = (opts.midLevel !== undefined) ? opts.midLevel : 0.72;
+        const hiGain = (opts.hiGain !== undefined) ? opts.hiGain : 1.12;
+        const coolShadow = (opts.coolShadow !== undefined) ? opts.coolShadow : 0.50;
+        const specThreshold = (opts.specThreshold !== undefined) ? opts.specThreshold : (isPhongOrStd ? 0.08 : 0.0);
+        const specGain = (opts.specGain !== undefined) ? opts.specGain : 0.72;
+        const celMix = (opts.celMix !== undefined) ? opts.celMix : 0.90;
+        const rimStrength = (opts.rimStrength !== undefined) ? opts.rimStrength : 0.0;
+        const inkEdge = (opts.inkEdge !== undefined) ? opts.inkEdge : 0.0;
+        const tag = opts.tag || 'def';
+        const sig = `${tag}_${bands}_${shadowFloor.toFixed(2)}_${midLevel.toFixed(2)}_${hiGain.toFixed(2)}_${specThreshold.toFixed(2)}_${rimStrength.toFixed(2)}_${inkEdge.toFixed(2)}`;
+
+        const prevCompile = material.onBeforeCompile;
+        const prevKey = material.customProgramCacheKey;
+        material.customProgramCacheKey = () => {
+            const base = prevKey ? prevKey() : (material.type || 'mat');
+            return `${base}_cel2_${sig}`;
+        };
+        material.onBeforeCompile = (shader, renderer) => {
+            if (prevCompile) prevCompile.call(material, shader, renderer);
+
+            const needRim = rimStrength > 0.001 || inkEdge > 0.001;
+            if (needRim && !shader.vertexShader.includes('vCelRawRim')) {
+                shader.vertexShader = `
+                    varying float vCelRawRim;
+                    varying float vCelHeight;
+                ` + shader.vertexShader.replace(
+                    '#include <project_vertex>',
+                    `
+                    #include <project_vertex>
+                    vCelHeight = clamp((position.y + 5.0) / 32.0, 0.0, 1.0);
+                    vec3 celN = normalize(transformedNormal);
+                    vec3 celV = normalize(-mvPosition.xyz);
+                    vCelRawRim = 1.0 - max(dot(celV, celN), 0.0);
+                    `
+                );
+            }
+
+            if (needRim && !shader.fragmentShader.includes('vCelRawRim')) {
+                shader.fragmentShader = `
+                    varying float vCelRawRim;
+                    varying float vCelHeight;
+                ` + shader.fragmentShader;
+            }
+
+            const bandSnippet = `
+                vec3 celBaseAlb = max(diffuseColor.rgb, vec3(0.0001));
+                float celAlbLuma = max(dot(celBaseAlb, vec3(0.299, 0.587, 0.114)), 0.003);
+                float celDirLuma = dot(reflectedLight.directDiffuse, vec3(0.299, 0.587, 0.114));
+                float celLitRatio = celDirLuma / celAlbLuma;
+                float celStep = ${shadowFloor.toFixed(3)};
+                ${bands >= 4 ? `
+                celStep = mix(celStep, ${(shadowFloor + (midLevel - shadowFloor) * 0.52).toFixed(3)}, smoothstep(0.035, 0.075, celLitRatio));
+                celStep = mix(celStep, ${midLevel.toFixed(3)}, smoothstep(0.14, 0.20, celLitRatio));
+                celStep = mix(celStep, ${hiGain.toFixed(3)}, smoothstep(0.32, 0.40, celLitRatio));
+                ` : (bands === 2 ? `
+                celStep = mix(celStep, ${hiGain.toFixed(3)}, smoothstep(0.10, 0.17, celLitRatio));
+                ` : `
+                celStep = mix(celStep, ${midLevel.toFixed(3)}, smoothstep(0.045, 0.10, celLitRatio));
+                celStep = mix(celStep, ${hiGain.toFixed(3)}, smoothstep(0.24, 0.31, celLitRatio));
+                `)}
+                vec3 celQuantDir = (celDirLuma > 0.0001)
+                    ? (reflectedLight.directDiffuse * ((celStep * celAlbLuma) / celDirLuma))
+                    : vec3(0.0);
+                float celShadowMask = 1.0 - smoothstep(0.04, 0.12, celLitRatio);
+                reflectedLight.indirectDiffuse *= mix(vec3(1.0), vec3(0.76, 0.80, 0.96), celShadowMask * ${coolShadow.toFixed(3)});
+                reflectedLight.directDiffuse = mix(reflectedLight.directDiffuse, celQuantDir, ${celMix.toFixed(3)});
+                ${(isPhongOrStd && specThreshold > 0.0001) ? `
+                float celSpecLuma = dot(reflectedLight.directSpecular, vec3(0.299, 0.587, 0.114));
+                float celSpecStep = smoothstep(${specThreshold.toFixed(3)}, ${(specThreshold + 0.045).toFixed(3)}, celSpecLuma);
+                reflectedLight.directSpecular = (celSpecLuma > 0.0001)
+                    ? reflectedLight.directSpecular * (celSpecStep * ${specGain.toFixed(3)} / max(celSpecLuma, 0.02))
+                    : vec3(0.0);
+                ` : ''}
+            `;
+
+            if (shader.fragmentShader.includes('#include <lights_fragment_end>')) {
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <lights_fragment_end>',
+                    `#include <lights_fragment_end>\n${bandSnippet}`
+                );
+            } else if (shader.fragmentShader.includes('#include <aomap_fragment>')) {
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <aomap_fragment>',
+                    `${bandSnippet}\n#include <aomap_fragment>`
+                );
+            }
+
+            if (needRim && shader.fragmentShader.includes('#include <dithering_fragment>')) {
+                shader.fragmentShader = shader.fragmentShader.replace(
+                    '#include <dithering_fragment>',
+                    `
+                    // Cel vertical step AO + crisp comic rim light
+                    float celHStep = mix(0.68, 1.14, smoothstep(0.18, 0.45, vCelHeight));
+                    gl_FragColor.rgb *= celHStep;
+                    ${rimStrength > 0.001 ? `
+                    float celRimMask = smoothstep(0.56, 0.65, vCelRawRim);
+                    gl_FragColor.rgb += (gl_FragColor.rgb * 0.72 + vec3(0.18)) * celRimMask * ${rimStrength.toFixed(3)};
+                    ` : ''}
+                    ${inkEdge > 0.001 ? `
+                    float celInkMask = smoothstep(0.84, 0.93, vCelRawRim);
+                    gl_FragColor.rgb *= mix(1.0, ${(1.0 - inkEdge).toFixed(3)}, celInkMask);
+                    ` : ''}
+                    #include <dithering_fragment>
+                    `
+                );
+            }
+        };
+        return material;
+    }
+};
+
+SharedMat.toonOutline = CelShadingSystem.getOutlineMaterial(1.0, 0x0b0a14);
 const SharedMatSet = new Set(Object.values(SharedMat));
+
+CelShadingSystem.apply(SharedMat.orcClub, { tag: 'prop_club', shadowFloor: 0.34, rimStrength: 0.35 });
+CelShadingSystem.apply(SharedMat.enemyDark, { tag: 'prop_dark', shadowFloor: 0.36, rimStrength: 0.42 });
+CelShadingSystem.apply(SharedMat.golemArmor, { tag: 'prop_armor', shadowFloor: 0.34, specThreshold: 0.08, rimStrength: 0.55 });
+CelShadingSystem.apply(SharedMat.golemShieldFrame, { tag: 'prop_sframe', shadowFloor: 0.34, specThreshold: 0.07, rimStrength: 0.55 });
+CelShadingSystem.apply(SharedMat.deadObelisk, { tag: 'prop_deadob', shadowFloor: 0.36, specThreshold: 0.0 });
+CelShadingSystem.apply(SharedMat.coin, { tag: 'prop_coin', bands: 3, shadowFloor: 0.48, hiGain: 1.20, specThreshold: 0.05, specGain: 0.95, rimStrength: 0.45 });
+CelShadingSystem.apply(SharedMat.crate, { tag: 'prop_crate', bands: 3, shadowFloor: 0.38, specThreshold: 0.09, rimStrength: 0.25 });
+CelShadingSystem.apply(SharedMat.urn, { tag: 'prop_urn', bands: 3, shadowFloor: 0.38, specThreshold: 0.06, rimStrength: 0.30 });
+
 function applyCharacterShader(material, rimStrength = 0.65) {
-    material.customProgramCacheKey = () => 'char_rim_ultra2_' + rimStrength.toFixed(2);
-    material.onBeforeCompile = (shader) => {
-        shader.uniforms.uUltra = (typeof PcUltraGraphics !== 'undefined') ? PcUltraGraphics.uUltra : { value: 0.0 };
-        // Calcola Altezza e Rim Light nel Vertex Shader: 100% compatibile con MeshLambertMaterial (Mobile) e MeshPhongMaterial (PC)
-        shader.vertexShader = `
-            varying float vCharHeight;
-            varying float vCharRim;
-            varying float vCharRawRim;
-        ` + shader.vertexShader.replace(
-            '#include <project_vertex>',
-            `
-            #include <project_vertex>
-            vCharHeight = clamp(( position.y + 5.0 ) / 32.0, 0.0, 1.0);
-            vec3 charN = normalize( transformedNormal );
-            vec3 charV = normalize( -mvPosition.xyz );
-            float rawRim = 1.0 - max( dot( charV, charN ), 0.0 );
-            vCharRawRim = rawRim;
-            vCharRim = smoothstep( 0.50, 1.0, rawRim );
-            `
-        );
-        shader.fragmentShader = `
-            uniform float uUltra;
-            varying float vCharHeight;
-            varying float vCharRim;
-            varying float vCharRawRim;
-        ` + shader.fragmentShader.replace(
-            '#include <dithering_fragment>',
-            `
-            // 1. Gradiente Verticale (Ambient Occlusion ai piedi, luce sulla testa)
-            float hLo = mix(0.55, 0.50, uUltra);
-            float hHi = mix(1.18, 1.18, uUltra);
-            gl_FragColor.rgb *= mix(hLo, hHi, vCharHeight);
-
-            // 2. Stylized Rim Light + micro-contorno morbido sui bordi estremi in PC Ultra / MEGA
-            float rimMask = mix(vCharRim, smoothstep(0.47, 0.92, vCharRawRim) * 1.06, uUltra);
-            vec3 rimBias = mix(vec3(0.18), vec3(0.11), uUltra);
-            gl_FragColor.rgb += (gl_FragColor.rgb + rimBias) * rimMask * ${rimStrength.toFixed(2)};
-            float inkEdge = smoothstep(0.86, 0.99, vCharRawRim) * uUltra;
-            gl_FragColor.rgb *= mix(1.0, 0.72, inkEdge);
-
-            #include <dithering_fragment>
-            `
-        );
-    };
-    return material;
+    if (!material) return material;
+    return CelShadingSystem.apply(material, {
+        tag: 'char',
+        bands: 3,
+        shadowFloor: 0.30,
+        midLevel: 0.74,
+        hiGain: 1.15,
+        coolShadow: 0.52,
+        specThreshold: 0.075,
+        specGain: 0.80,
+        rimStrength: rimStrength * 0.85,
+        inkEdge: 0.24
+    });
 }
 
 const ModelFactory = {
     setupShadows(mesh) {
         mesh.traverse(c => {
             if (c.isMesh) {
+                if (c.userData && c.userData.isToonOutline) {
+                    c.castShadow = false;
+                    c.receiveShadow = false;
+                    return;
+                }
                 const isHolo = c.material && (c.material.wireframe || (c.material.transparent && c.material.opacity < 0.75));
                 c.castShadow = !isHolo;
                 c.receiveShadow = !isHolo;
@@ -10472,14 +10783,15 @@ const ModelFactory = {
         let cfg = getSkinMatConfig(skin.id);
         let group = new THREE.Group();
 
+        applyCharacterShader(mat, 0.72);
         let body = new THREE.Mesh(geos.body, mat);
         body.position.y = 12; // Centro di rotazione sul busto: non compenetra mai sciarpa o testa
 
-        let headMat = new THREE.MeshStandardMaterial({color: skin.colors.head, emissive: 0x222222, roughness: cfg.headRough, metalness: cfg.headMetal, map: skinTex});
+        let headMat = applyCharacterShader(new THREE.MeshStandardMaterial({color: skin.colors.head, emissive: 0x222222, roughness: cfg.headRough, metalness: cfg.headMetal, map: skinTex}), 0.72);
         let head = new THREE.Mesh(geos.head, headMat);
         head.position.y = 29;
 
-        let scarfMat = new THREE.MeshStandardMaterial({color: skin.colors.scarf, roughness: cfg.scarfRough, metalness: cfg.scarfMetal, map: skinTex, bumpMap: AppSettings.useMobileLimits ? null : skinTex, bumpScale: 0.05});
+        let scarfMat = applyCharacterShader(new THREE.MeshStandardMaterial({color: skin.colors.scarf, roughness: cfg.scarfRough, metalness: cfg.scarfMetal, map: skinTex, bumpMap: AppSettings.useMobileLimits ? null : skinTex, bumpScale: 0.05}), 0.65);
         let scarf = new THREE.Mesh(geos.scarf, scarfMat);
         scarf.position.y = 24;
 
@@ -10488,16 +10800,19 @@ const ModelFactory = {
         weaponGroup.position.set(12, 16, 8);
         let rest = PlayerGeometryBuilder.getRestPose(skin.id);
         weaponGroup.rotation.set(rest.rx, rest.ry, rest.rz);
-        let staffMat = new THREE.MeshStandardMaterial({color: skin.colors.staff, roughness: cfg.staffRough, metalness: cfg.staffMetal, map: skinTex});
+        let staffMat = applyCharacterShader(new THREE.MeshStandardMaterial({color: skin.colors.staff, roughness: cfg.staffRough, metalness: cfg.staffMetal, map: skinTex}), 0.55);
         let staff = new THREE.Mesh(geos.staff, staffMat);
         let gemOff = PlayerGeometryBuilder.getWeaponGemOffset(skin.id);
         let staffGem = new THREE.Mesh(geos.gem, gemMat);
+        staffGem.userData.noToonOutline = true;
         staffGem.position.set(0, gemOff.y, gemOff.z);
         let halo = new THREE.Mesh(geos.halo, gemMat);
+        halo.userData.noToonOutline = true;
         halo.position.set(0, gemOff.y, gemOff.z);
         weaponGroup.add(staff, staffGem, halo);
 
         let accentMesh = new THREE.Mesh(geos.accent || SharedGeo.box, gemMat);
+        accentMesh.userData.noToonOutline = true;
         accentMesh.visible = !!geos.accent;
         body.add(accentMesh);
 
@@ -10510,6 +10825,12 @@ const ModelFactory = {
         headAccentMesh.add(hatBandMesh);
 
         group.add(body, head, scarf, weaponGroup);
+        CelShadingSystem.attachOutline(body, 1.02);
+        CelShadingSystem.attachOutline(head, 1.02);
+        CelShadingSystem.attachOutline(scarf, 0.92);
+        CelShadingSystem.attachOutline(staff, 0.85);
+        CelShadingSystem.attachOutline(headAccentMesh, 0.92);
+        CelShadingSystem.attachOutline(hatBandMesh, 0.80);
         this.setupShadows(group);
 
         // Particellare Aura Sfumato 100% GPU (Usa GLOW_TEX come le lucciole del gioco, 0 costo CPU, 1 Draw Call)
@@ -11934,6 +12255,20 @@ const ModelFactory = {
             }
         }
 
+        if (type !== 'crystal') {
+            this.groupMatTarget = mat;
+            group.traverse(c => {
+                if (c.isMesh && c.material && !Array.isArray(c.material) && !c.material._celApplied && !c.material.isMeshBasicMaterial && !c.material.transparent) {
+                    CelShadingSystem.apply(c.material, { tag: 'e_sub', shadowFloor: 0.35, rimStrength: 0.42 });
+                }
+            });
+            const skipOutlines = new Set();
+            if (parts.fireRingDisc) skipOutlines.add(parts.fireRingDisc);
+            if (parts.fireRingCore) skipOutlines.add(parts.fireRingCore);
+            if (parts.core) skipOutlines.add(parts.core);
+            const outWidth = (type === 'boss') ? 1.18 : (type === 'golem' || type === 'orc' ? 1.05 : 0.92);
+            CelShadingSystem.attachGroupOutlines(group, outWidth, 0x0b0a14, skipOutlines);
+        }
         this.setupShadows(group);
         if (parts.fireRingDisc) { parts.fireRingDisc.castShadow = false; parts.fireRingDisc.receiveShadow = false; }
         if (parts.fireRingCore) { parts.fireRingCore.castShadow = false; parts.fireRingCore.receiveShadow = false; }
@@ -12910,16 +13245,14 @@ function ensureGlobalThemeMaterials(renderer) {
             rock: new MapMaterialClass({ map: tRock, shininess: isIceBiom ? 15 : 12, specular: isIceBiom ? 0x142433 : 0x161616, alphaMap: GLOBAL_ALPHA_TEX, transparent: true, depthWrite: false, alphaTest: 0.03 }),
             wall: new MapMaterialClass({ map: tWall || tRock, shininess: isIceBiom ? 12 : 8, specular: isIceBiom ? 0x101d29 : 0x121212, flatShading: true })
         };
-        if (!AppSettings.useMobileLimits) {
-            PcUltraGraphics.applyTerrainShader(mats.dirt, false);
-            PcUltraGraphics.applyTerrainShader(mats.grass, false);
-            PcUltraGraphics.applyTerrainShader(mats.rock, false);
-            PcUltraGraphics.applyTerrainShader(mats.wall, true);
-            if (AppSettings.isUltraPC) {
-                mats.dirt.normalMap = PcUltraGraphics.getNormalMap(tDirt, 1.5); if (mats.dirt.normalMap && mats.dirt.normalScale) mats.dirt.normalScale.set(0.45, 0.45);
-                mats.rock.normalMap = PcUltraGraphics.getNormalMap(tRock, 1.8); if (mats.rock.normalMap && mats.rock.normalScale) mats.rock.normalScale.set(0.55, 0.55);
-                mats.wall.normalMap = PcUltraGraphics.getNormalMap(tWall || tRock, 2.1); if (mats.wall.normalMap && mats.wall.normalScale) mats.wall.normalScale.set(0.65, 0.65);
-            }
+        PcUltraGraphics.applyTerrainShader(mats.dirt, false);
+        PcUltraGraphics.applyTerrainShader(mats.grass, false);
+        PcUltraGraphics.applyTerrainShader(mats.rock, false);
+        PcUltraGraphics.applyTerrainShader(mats.wall, true);
+        if (!AppSettings.useMobileLimits && AppSettings.isUltraPC) {
+            mats.dirt.normalMap = PcUltraGraphics.getNormalMap(tDirt, 1.5); if (mats.dirt.normalMap && mats.dirt.normalScale) mats.dirt.normalScale.set(0.45, 0.45);
+            mats.rock.normalMap = PcUltraGraphics.getNormalMap(tRock, 1.8); if (mats.rock.normalMap && mats.rock.normalScale) mats.rock.normalScale.set(0.55, 0.55);
+            mats.wall.normalMap = PcUltraGraphics.getNormalMap(tWall || tRock, 2.1); if (mats.wall.normalMap && mats.wall.normalScale) mats.wall.normalScale.set(0.65, 0.65);
         }
         window.GLOBAL_THEME_MATS.push(mats);
     }
@@ -14009,9 +14342,12 @@ prewarmShaders() {
         }
         this.debris = Array.from({length: maxDynamicDebris}, (_, i) => new Debris(i));
         this._debrisIdx = 0;
-        const debrisMat = useDesktopMat
-            ? new THREE.MeshStandardMaterial({roughness: 0.8, metalness: 0.2})
-            : new THREE.MeshLambertMaterial();
+        const debrisMat = CelShadingSystem.apply(
+            useDesktopMat
+                ? new THREE.MeshStandardMaterial({roughness: 0.8, metalness: 0.2})
+                : new THREE.MeshLambertMaterial(),
+            { tag: 'dyn_debris', bands: 3, shadowFloor: 0.36, specThreshold: 0.10 }
+        );
         if (!this._debrisGeos) {
             this._debrisGeos = [SharedGeo.tetrahedron, SharedGeo.box, new THREE.DodecahedronGeometry(0.8, 0)];
         }
@@ -17765,12 +18101,14 @@ const InteractiveGrassSystem = {
                 // Ancoraggio solido nei primi centimetri a terra (zero stacco col terreno),
                 // poi transizione fluida verso la punta che conserva l'attuale colorazione viva
                 float hCurve = pow(smoothstep(0.15, 0.85, vHeight), 1.6);
-                vec3 finalGrassColor = mix(groundRootCol, finalTipColor, hCurve);
+                float celBlade = mix(0.0, mix(0.55, 1.0, smoothstep(0.58, 0.72, hCurve)), smoothstep(0.22, 0.34, hCurve));
+                vec3 finalGrassColor = mix(groundRootCol, finalTipColor, celBlade);
                 
                 diffuseColor.rgb = finalGrassColor;
                 `
             );
         };
+        CelShadingSystem.apply(this.mat, { tag: 'grass_sys', bands: 2, shadowFloor: 0.48, hiGain: 1.12, coolShadow: 0.34 });
     }
 };
 function createDarkTreeGeometry() {
@@ -18100,10 +18438,12 @@ const TreeCanopySystem = {
                 vec3 warmTipColor = baseAlbedo * vec3(1.08, 1.00, 0.88);
                 vec3 finalTip = mix(outerTipColor, warmTipColor, vColorRandom * 0.55);
                 float curve = smoothstep(0.0, 1.0, vHeight * 0.75 + vCanopyShade * 0.25);
-                diffuseColor.rgb = mix(innerColor, finalTip, curve);
+                float celCurve = mix(0.0, mix(0.52, 1.0, smoothstep(0.55, 0.68, curve)), smoothstep(0.24, 0.36, curve));
+                diffuseColor.rgb = mix(innerColor, finalTip, celCurve);
                 `
             );
         };
+        CelShadingSystem.apply(this.mat, { tag: 'canopy_sys', bands: 3, shadowFloor: 0.42, midLevel: 0.76, hiGain: 1.14, coolShadow: 0.42 });
     }
 };
 
@@ -18283,9 +18623,12 @@ class GameMap {
         const maxDebris = floorCount * (AppSettings.useMobileLimits ? 8 : (AppSettings.isMega ? 14 : 20));
         if (!window.GLOBAL_DEBRIS_GEO) window.GLOBAL_DEBRIS_GEO = new THREE.DodecahedronGeometry(2.5, 0);
         if (!window.GLOBAL_DEBRIS_MAT) {
-            window.GLOBAL_DEBRIS_MAT = AppSettings.useMobileLimits
-                ? new THREE.MeshLambertMaterial({ color: 0x2c3628 })
-                : new THREE.MeshStandardMaterial({ color: 0x2c3628, roughness: 0.88, metalness: 0.08 });
+            window.GLOBAL_DEBRIS_MAT = CelShadingSystem.apply(
+                AppSettings.useMobileLimits
+                    ? new THREE.MeshLambertMaterial({ color: 0x2c3628 })
+                    : new THREE.MeshStandardMaterial({ color: 0x2c3628, roughness: 0.88, metalness: 0.08 }),
+                { tag: 'map_debris', bands: 3, shadowFloor: 0.36, specThreshold: 0.12, rimStrength: 0.25 }
+            );
         }
         if (MAP_THEMES[Game.currentThemeIndex] && MAP_THEMES[Game.currentThemeIndex].debris) {
             window.GLOBAL_DEBRIS_MAT.color.setHex(MAP_THEMES[Game.currentThemeIndex].debris);
@@ -18298,9 +18641,12 @@ class GameMap {
         const maxTrees = floorCount * (AppSettings.useMobileLimits ? 1 : 2);
         if (!window.GLOBAL_TREE_GEO) window.GLOBAL_TREE_GEO = createDarkTreeGeometry();
         if (!window.GLOBAL_TREE_MAT) {
-            window.GLOBAL_TREE_MAT = AppSettings.useMobileLimits
-                ? new THREE.MeshLambertMaterial({ color: 0x241f16, emissive: 0x020101 })
-                : new THREE.MeshStandardMaterial({ color: 0x241f16, emissive: 0x020101, roughness: 0.9 });
+            window.GLOBAL_TREE_MAT = CelShadingSystem.apply(
+                AppSettings.useMobileLimits
+                    ? new THREE.MeshLambertMaterial({ color: 0x241f16, emissive: 0x020101 })
+                    : new THREE.MeshStandardMaterial({ color: 0x241f16, emissive: 0x020101, roughness: 0.9 }),
+                { tag: 'map_trunk', bands: 3, shadowFloor: 0.34, specThreshold: 0.0, rimStrength: 0.28 }
+            );
         }
         const meshTrees = new THREE.InstancedMesh(window.GLOBAL_TREE_GEO, window.GLOBAL_TREE_MAT, maxTrees);
         meshTrees.receiveShadow = true;
@@ -19692,7 +20038,7 @@ class GameMap {
                     const specPit = Game.getThemeMaterialSpec(sIdx);
                     const sTex = bankTextures[sIdx];
                     if (!window.GLOBAL_PIT_SKIRT_MATS[sIdx]) {
-                        const cachedSkirtMat = new THREE.MeshPhongMaterial({
+                        const cachedSkirtMat = CelShadingSystem.apply(new THREE.MeshPhongMaterial({
                             color: 0xffffff,
                             map: sTex,
                             alphaMap: window.GLOBAL_PIT_SKIRT_ALPHA,
@@ -19701,7 +20047,7 @@ class GameMap {
                             depthWrite: false,
                             shininess: specPit.skirtShininess,
                             specular: specPit.skirtSpec
-                        });
+                        }), { tag: 'pit_skirt', bands: 3, shadowFloor: 0.36, specThreshold: 0.14 });
                         cachedSkirtMat._isGlobalCached = true;
                         window.GLOBAL_PIT_SKIRT_MATS[sIdx] = cachedSkirtMat;
                     }
@@ -19754,7 +20100,7 @@ class GameMap {
                     const bTex = bankTextures[bIdx];
                     const wantBump = AppSettings.useMobileLimits ? null : bTex;
                     if (!window.GLOBAL_PIT_BANK_MATS[bIdx]) {
-                        const cachedBankMat = new THREE.MeshPhongMaterial({
+                        const cachedBankMat = CelShadingSystem.apply(new THREE.MeshPhongMaterial({
                             color: 0xffffff,
                             map: bTex,
                             bumpMap: wantBump,
@@ -19762,7 +20108,7 @@ class GameMap {
                             vertexColors: true,
                             shininess: specPit.bankShininess,
                             specular: specPit.bankSpec
-                        });
+                        }), { tag: 'pit_bank', bands: 3, shadowFloor: 0.34, specThreshold: 0.10, specGain: 0.65 });
                         cachedBankMat._isGlobalCached = true;
                         window.GLOBAL_PIT_BANK_MATS[bIdx] = cachedBankMat;
                     }
@@ -19909,7 +20255,7 @@ class GameMap {
                     const specRim = Game.getThemeMaterialSpec(rIdx);
                     if (!window.GLOBAL_PIT_RIMSTONE_MATS[rIdx]) {
                         const baseWallMat = (window.GLOBAL_THEME_MATS && window.GLOBAL_THEME_MATS[rIdx]) ? window.GLOBAL_THEME_MATS[rIdx].wall : this.wallMat;
-                        const rMat = baseWallMat.clone();
+                        const rMat = CelShadingSystem.apply(baseWallMat.clone(), { tag: 'pit_rimstone', bands: 3, shadowFloor: 0.34, specThreshold: 0.11, coolShadow: 0.45 });
                         rMat._isGlobalCached = true;
                         window.GLOBAL_PIT_RIMSTONE_MATS[rIdx] = rMat;
                     }
@@ -19964,11 +20310,14 @@ class GameMap {
 
            const tempObj = new THREE.Object3D();
             const createPitPropMat = (opts) => {
+                let m;
                 if (AppSettings.useMobileLimits) {
                     const { roughness, metalness, flatShading, ...lambertOpts } = opts;
-                    return new THREE.MeshLambertMaterial(lambertOpts);
+                    m = new THREE.MeshLambertMaterial(lambertOpts);
+                } else {
+                    m = new THREE.MeshStandardMaterial(opts);
                 }
-                return new THREE.MeshStandardMaterial(opts);
+                return CelShadingSystem.apply(m, { tag: 'pit_prop', bands: 3, shadowFloor: 0.36, specThreshold: 0.08, rimStrength: 0.35 });
             };
             if (!window.GLOBAL_PIT_PAD_ASSETS) {
                 window.GLOBAL_PIT_PAD_ASSETS = {};
@@ -20082,29 +20431,32 @@ class GameMap {
 
         if (!window.GLOBAL_OBELISK_GEO) window.GLOBAL_OBELISK_GEO = createObeliskGeometry();
 
-       this.obeliskMat = AppSettings.useMobileLimits
-            ? new THREE.MeshLambertMaterial({
-                color: 0x383840,
-                emissive: 0x0c0c12,
-                emissiveIntensity: 0.25,
-                map: CHAR_GRUNGE_TEX,
-                transparent: false,
-                depthWrite: true,
-                depthTest: true
-            })
-            : new THREE.MeshStandardMaterial({
-                color: 0x383840,
-                emissive: 0x0c0c12,
-                emissiveIntensity: 0.25,
-                roughness: 0.84,
-                metalness: 0.38,
-                map: CHAR_GRUNGE_TEX,
-                bumpMap: CHAR_GRUNGE_TEX,
-                bumpScale: 0.15,
-                transparent: false,
-                depthWrite: true,
-                depthTest: true
-            });
+       this.obeliskMat = CelShadingSystem.apply(
+            AppSettings.useMobileLimits
+                ? new THREE.MeshLambertMaterial({
+                    color: 0x383840,
+                    emissive: 0x0c0c12,
+                    emissiveIntensity: 0.25,
+                    map: CHAR_GRUNGE_TEX,
+                    transparent: false,
+                    depthWrite: true,
+                    depthTest: true
+                })
+                : new THREE.MeshStandardMaterial({
+                    color: 0x383840,
+                    emissive: 0x0c0c12,
+                    emissiveIntensity: 0.25,
+                    roughness: 0.84,
+                    metalness: 0.38,
+                    map: CHAR_GRUNGE_TEX,
+                    bumpMap: CHAR_GRUNGE_TEX,
+                    bumpScale: 0.15,
+                    transparent: false,
+                    depthWrite: true,
+                    depthTest: true
+                }),
+            { tag: 'obelisk', bands: 3, shadowFloor: 0.32, specThreshold: 0.08, rimStrength: 0.45 }
+        );
 
         const obeliskMesh = new THREE.InstancedMesh(window.GLOBAL_OBELISK_GEO, this.obeliskMat, pillarCount);
         obeliskMesh.castShadow = true; obeliskMesh.receiveShadow = true;
@@ -20787,9 +21139,9 @@ Game.auras.push({
                     window.GLOBAL_WOW_PORTAL_GEO = new THREE.CircleGeometry(22, 24);
                 }
 
-                let frameMat = new THREE.MeshStandardMaterial({
-                    color: 0x222228, emissive: pColor, emissiveIntensity: 0.35, roughness: 0.6, metalness: 0.7
-                });
+                let frameMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({
+                    color: 0x222228, emissive: pColor, emissiveIntensity: 0.35, roughness: 0.55, metalness: 0.65
+                }), { tag: 'portal_frame', bands: 3, shadowFloor: 0.32, specThreshold: 0.06, rimStrength: 0.55 });
                 let vortexOuterMat = new THREE.MeshBasicMaterial({
                     map: GLOW_TEX, color: pColor, transparent: true, opacity: 0.85,
                     blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
@@ -21687,7 +22039,7 @@ class Player extends Entity {
     _buildRelicPetModels() {
 
         let grimoire = new THREE.Group();
-        let coverMat = new THREE.MeshStandardMaterial({ color: 0x581c87, emissive: 0x3b0764, roughness: 0.4 });
+        let coverMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({ color: 0x581c87, emissive: 0x3b0764, roughness: 0.4 }), { tag: 'pet', rimStrength: 0.55 });
         let pageMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
         let coverL = new THREE.Mesh(SharedGeo.box, coverMat);
         coverL.scale.set(6.2, 1.1, 8.8); coverL.position.set(-2.8, 0, 0); coverL.rotation.z = 0.32;
@@ -21699,27 +22051,32 @@ class Player extends Entity {
         gRing.scale.set(7.5, 7.5, 1.5); gRing.rotation.x = Math.PI / 2;
         let gGlow = new THREE.Sprite(SharedMat.spriteYellow); gGlow.scale.set(28, 28, 1);
         grimoire.add(coverL, coverR, pages, gRing, gGlow);
+        CelShadingSystem.attachOutline(coverL, 0.78);
+        CelShadingSystem.attachOutline(coverR, 0.78);
         grimoire.visible = false;
 
         let skull = new THREE.Group();
-        let boneMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, emissive: 0x330505, roughness: 0.5 });
+        let boneMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({ color: 0xf1f5f9, emissive: 0x330505, roughness: 0.5 }), { tag: 'pet_bone', rimStrength: 0.55 });
         let cranium = new THREE.Mesh(SharedGeo.sphere, boneMat); cranium.scale.set(5.2, 5.2, 5.8);
         let jaw = new THREE.Mesh(SharedGeo.box, boneMat); jaw.scale.set(4.6, 3.0, 4.6); jaw.position.set(0, -3.8, 1.0);
         let eyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye); eyeL.scale.set(1.7, 1.7, 1.7); eyeL.position.set(-1.8, 0.4, 4.6);
         let eyeR = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye); eyeR.scale.set(1.7, 1.7, 1.7); eyeR.position.set(1.8, 0.4, 4.6);
         let sGlow = new THREE.Sprite(SharedMat.spriteRed); sGlow.scale.set(30, 30, 1);
         skull.add(cranium, jaw, eyeL, eyeR, sGlow);
+        CelShadingSystem.attachOutline(cranium, 0.78);
+        CelShadingSystem.attachOutline(jaw, 0.78);
         skull.userData.glow = sGlow;
         skull.visible = false;
 
         let box = new THREE.Group();
-        let cubeMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, emissive: 0x082f49, metalness: 0.8, roughness: 0.2 });
+        let cubeMat = CelShadingSystem.apply(new THREE.MeshStandardMaterial({ color: 0x0f172a, emissive: 0x082f49, metalness: 0.65, roughness: 0.25 }), { tag: 'pet_cube', specThreshold: 0.05, rimStrength: 0.60 });
         let wireMat = new THREE.MeshBasicMaterial({ color: 0x00ddff, wireframe: true });
         let cube = new THREE.Mesh(SharedGeo.box, cubeMat); cube.scale.set(7.5, 7.5, 7.5);
         let wire = new THREE.Mesh(SharedGeo.box, wireMat); wire.scale.set(9.0, 9.0, 9.0);
         let outerRing = new THREE.Mesh(SharedGeo.torus, wireMat); outerRing.scale.set(7.8, 7.8, 2.0);
         let bGlow = new THREE.Sprite(SharedMat.spriteBlue); bGlow.scale.set(28, 28, 1);
         box.add(cube, wire, outerRing, bGlow);
+        CelShadingSystem.attachOutline(cube, 0.78);
         box.userData = { wireMat, bGlow, outerRing };
         box.visible = false;
 
@@ -22241,6 +22598,10 @@ class Player extends Entity {
             for (let i = 0; i < this.dashGhosts.length; i++) {
                 this.dashGhosts[i].mesh.geometry = geos.body;
             }
+        }
+
+        if (this.modelParts && this.modelParts.group) {
+            CelShadingSystem.syncOutlineGeometries(this.modelParts.group);
         }
 
         this.updateAppearance();
