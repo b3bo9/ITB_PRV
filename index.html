@@ -709,12 +709,12 @@
 
     #vignette {
         position: absolute; inset: 0;
-        background: radial-gradient(circle at center, transparent 74%, rgba(6, 12, 18, 0.16) 90%, rgba(2, 5, 10, 0.34) 100%);
+        background: radial-gradient(circle at center, transparent 65%, rgba(6, 12, 18, 0.25) 86%, rgba(2, 5, 10, 0.55) 100%);
         z-index: 3; pointer-events: none;
         transition: opacity 0.5s, background 0.6s ease;
     }
     .vignette-darkness-active {
-        background: radial-gradient(circle at center, transparent 36%, rgba(4, 2, 10, 0.72) 72%, rgba(2, 1, 6, 0.92) 100%) !important;
+        background: radial-gradient(circle at center, transparent 25%, rgba(0, 0, 0, 0.9) 65%, rgba(0, 0, 0, 1) 100%) !important;
         opacity: 1 !important;
         display: block !important;
         z-index: 8 !important;
@@ -739,30 +739,30 @@
     #low-hp-overlay.active {
         opacity: 1;
     }
-    /* Layer 1: Tunnel unico sovradimensionato (380vmax) con ampia finestra nitida sul personaggio */
+    /* Layer 1: Tunnel ottimizzato (180vmax) che lascia sempre una zona centrale pulita attorno al giocatore */
     #low-hp-tunnel {
         position: absolute;
         left: 50%;
         top: 50%;
-        width: 380vmax;
-        height: 380vmax;
-        margin-left: -190vmax;
-        margin-top: -190vmax;
+        width: 180vmax;
+        height: 180vmax;
+        margin-left: -90vmax;
+        margin-top: -90vmax;
         pointer-events: none;
         will-change: transform;
         background: radial-gradient(
             circle at center,
             transparent 0%,
-            transparent 15.5%,
-            rgba(120, 12, 24, 0.08) 19.5%,
-            rgba(165, 14, 28, 0.28) 24.5%,
-            rgba(95, 8, 18, 0.50) 31%,
-            rgba(28, 4, 10, 0.64) 40%,
-            rgba(14, 2, 6, 0.72) 100%
+            transparent 15%,
+            rgba(120, 12, 24, 0.34) 21%,
+            rgba(135, 10, 22, 0.70) 29%,
+            rgba(38, 4, 10, 0.88) 39%,
+            rgba(10, 2, 5, 0.95) 52%,
+            rgba(5, 1, 3, 0.98) 100%
         );
-        transform: translate3d(0px, 0px, 0px) scale3d(1.25, 1.25, 1);
+        transform: translate3d(0px, 0px, 0px) scale3d(1.12, 1.12, 1);
     }
-    /* Layer 2: Scanline CRT solo periferiche (maschera radiale lascia nitido il focus centrale sul personaggio) */
+    /* Layer 2: Scanline CRT mascherate radialmente per preservare il centro dello schermo pulito */
     #low-hp-crt {
         position: absolute;
         inset: 0;
@@ -774,17 +774,17 @@
             0deg,
             rgba(0, 0, 0, 0) 0px,
             rgba(0, 0, 0, 0) 2px,
-            rgba(18, 6, 10, 0.20) 3px,
-            rgba(0, 0, 0, 0.28) 4px
+            rgba(10, 12, 16, 0.38) 3px,
+            rgba(0, 0, 0, 0.50) 4px
         );
-        -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 46%, rgba(0, 0, 0, 0.45) 68%, rgba(0, 0, 0, 0.95) 94%);
-        mask-image: radial-gradient(circle at center, transparent 0%, transparent 46%, rgba(0, 0, 0, 0.45) 68%, rgba(0, 0, 0, 0.95) 94%);
+        -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 24%, rgba(0, 0, 0, 0.55) 38%, rgba(0, 0, 0, 1) 56%);
+        mask-image: radial-gradient(circle at center, transparent 0%, transparent 24%, rgba(0, 0, 0, 0.55) 38%, rgba(0, 0, 0, 1) 56%);
     }
-    /* Su PC desktop aggiunge una desaturazione periferica moderata senza compromettere la lettura centrale */
+    /* Su PC desktop aggiunge anche la desaturazione hardware sul layer CRT; su Android resta a costo 0 */
     @media (hover: hover) and (pointer: fine) {
         #low-hp-crt {
-            backdrop-filter: grayscale(0.55) contrast(1.08);
-            -webkit-backdrop-filter: grayscale(0.55) contrast(1.08);
+            backdrop-filter: grayscale(0.82) contrast(1.18);
+            -webkit-backdrop-filter: grayscale(0.82) contrast(1.18);
         }
     }
 
@@ -3016,7 +3016,7 @@ body.colorblind-mode .stack-dot.active.green {
 
            <div class="space-y-2.5 relative z-10">
                 <button id="btn-opt-gfx" onclick="AppSettings.toggleGraphics(); UIManager.updateOptionsUI();" class="btn-cyber bg-slate-950/90 border-2 border-cyan-500/40 hover:border-cyan-400 rounded-xl w-full py-3 text-[11px] sm:text-xs text-white justify-between px-4 shadow-[0_0_14px_rgba(34,211,238,0.12)]">
-                    <span>Grafica</span> <span id="opt-gfx-text"><i class="fa-solid fa-scale-balanced"></i> BILANCIATO</span>
+                    <span>Grafica</span> <span id="opt-gfx-text"><i class="fa-solid fa-scale-balanced"></i> BILANCIATA</span>
                 </button>
                 <button id="btn-opt-orientation" onclick="AppSettings.toggleOrientation(); UIManager.updateOptionsUI(); AudioEngine.playClick();" class="btn-cyber bg-slate-950/90 border-2 border-cyan-500/40 hover:border-cyan-400 rounded-xl w-full py-3 text-[11px] sm:text-xs text-white justify-between px-4 shadow-[0_0_14px_rgba(34,211,238,0.12)]">
                     <span>Visuale</span> <span id="opt-orientation-text" class="text-cyan-300"><i class="fa-solid fa-mobile-screen"></i> VERTICALE</span>
@@ -3553,36 +3553,36 @@ const AppSettings = {
     damageNumbers: true,
     orientation: 'portrait',
     get isLow() { return this.mode === 0; },
-    get isBalanced() { return this.mode === 1; },
     get isUltra() { return this.mode >= 2; },
+    get isBalanced() { return this.mode === 1; },
     get isMega() { return isTouchDevice && this.mode >= 2; },
     get isUltraPC() { return this.mode >= 2; },
     get isDesktopUltra() { return !isTouchDevice && this.mode >= 2; },
     get useMobileLimits() { return isTouchDevice && this.mode < 2; },
     _storageKey: 'intoTheBox_settings_v1',
-    get maxParticlesPerFrame() { return isTouchDevice ? (this.mode === 0 ? 7 : (this.mode === 1 ? 18 : 36)) : (this.mode === 0 ? 22 : (this.mode === 1 ? 38 : 55)); },
-    get maxDebrisPerFrame() { return isTouchDevice ? (this.mode === 0 ? 3 : (this.mode === 1 ? 7 : 12)) : (this.mode === 0 ? 7 : (this.mode === 1 ? 12 : 18)); },
-    get maxTextsDrawn() { return isTouchDevice ? (this.mode === 0 ? 6 : (this.mode === 1 ? 14 : 22)) : (this.mode === 0 ? 15 : (this.mode === 1 ? 25 : 35)); },
-    get maxWindSources() { return isTouchDevice ? (this.mode === 0 ? 2 : (this.mode === 1 ? 5 : 8)) : (this.mode === 0 ? 5 : (this.mode === 1 ? 8 : 10)); },
-    get grassDensityMult() { return this.mode === 0 ? (isTouchDevice ? 0.26 : 0.45) : (this.mode === 1 ? (isTouchDevice ? 0.62 : 0.75) : 1.0); },
-    get targetFogCount() { return this.mode === 0 ? 0 : (isTouchDevice ? (this.mode === 1 ? 22 : 42) : (this.mode === 1 ? 45 : 68)); },
-    get playerLightRadius() { return isTouchDevice ? (this.mode === 0 ? 560 : (this.mode === 1 ? 780 : 1050)) : 1050; },
-    get targetParticlePool() { return this.isLow ? (isTouchDevice ? 280 : 600) : (this.isBalanced ? (isTouchDevice ? 520 : 1200) : (isTouchDevice ? 850 : 2500)); },
-    get targetDebrisPool() { return this.isLow ? (isTouchDevice ? 60 : 110) : (this.isBalanced ? (isTouchDevice ? 95 : 170) : (isTouchDevice ? 135 : 250)); },
-    get targetMaxBlood() { return this.isLow ? (isTouchDevice ? 40 : 75) : (this.isBalanced ? (isTouchDevice ? 65 : 110) : (isTouchDevice ? 90 : 150)); },
-    get targetFlashLights() { return this.isLow ? 0 : (this.isBalanced ? (isTouchDevice ? 1 : 4) : (isTouchDevice ? 3 : 8)); },
-    get targetAmbientGpuCount() { return isTouchDevice ? 150 : 200; },
-    getTargetAnisotropy(maxCap) { return this.isLow ? 1 : (isTouchDevice ? Math.min(this.isUltra ? 4 : 2, maxCap || 1) : (maxCap || 1)); },
+    get maxParticlesPerFrame() { return isTouchDevice ? (this.mode === 0 ? 10 : (this.mode === 1 ? 22 : 34)) : (this.mode === 0 ? 22 : (this.mode === 1 ? 38 : 55)); },
+    get maxDebrisPerFrame() { return isTouchDevice ? (this.mode === 0 ? 4 : (this.mode === 1 ? 8 : 12)) : (this.mode === 0 ? 7 : (this.mode === 1 ? 12 : 18)); },
+    get maxTextsDrawn() { return isTouchDevice ? (this.mode === 0 ? 10 : (this.mode === 1 ? 16 : 24)) : (this.mode === 0 ? 15 : (this.mode === 1 ? 25 : 35)); },
+    get maxWindSources() { return isTouchDevice ? (this.mode === 0 ? 3 : (this.mode === 1 ? 6 : 8)) : (this.mode === 0 ? 5 : (this.mode === 1 ? 8 : 10)); },
+    get grassDensityMult() { return isTouchDevice ? (this.mode === 0 ? 0.45 : (this.mode === 1 ? 0.74 : 1.0)) : (this.mode === 0 ? 0.50 : (this.mode === 1 ? 0.78 : 1.0)); },
+    get targetFogCount() { return this.mode === 0 ? 0 : (isTouchDevice ? (this.mode === 1 ? 30 : 48) : (this.mode === 1 ? 58 : 95)); },
+    get playerLightRadius() { return isTouchDevice ? (this.mode === 0 ? 620 : (this.mode === 1 ? 820 : 1000)) : 1050; },
+    get targetParticlePool() { return isTouchDevice ? (this.isUltra ? 650 : 380) : 2500; },
+    get targetDebrisPool() { return isTouchDevice ? (this.isUltra ? 120 : 85) : 250; },
+    get targetMaxBlood() { return isTouchDevice ? (this.isUltra ? 80 : 55) : 150; },
+    get targetFlashLights() { return (this.isLow || this.useMobileLimits) ? 0 : (isTouchDevice ? 2 : 10); },
+    get targetAmbientGpuCount() { return isTouchDevice ? 120 : 200; },
+    getTargetAnisotropy(maxCap) { return isTouchDevice ? Math.min(4, maxCap || 1) : (maxCap || 1); },
     getTargetPixelRatio() {
         const dpr = window.devicePixelRatio || 1;
         if (isTouchDevice) {
-            if (this._batteryLow) return Math.min(dpr * 0.50, 0.80);
-            if (this.mode >= 2) return Math.max(1.15, Math.min(dpr * 0.78, 1.38));
-            if (this.mode === 1) return Math.max(0.92, Math.min(dpr * 0.62, 1.12));
-            return Math.max(0.65, Math.min(dpr * 0.45, 0.76));
+            if (this._batteryLow) return Math.min(dpr * 0.55, 0.82);
+            // In ULTRA la nitidezza è potenziata da FXAA + CAS Sharpen di ultraPostPass: 1.06 resta cristallino riducendo il fill-rate
+            if (this.mode >= 2) return Math.max(1.0, Math.min(dpr * 0.64, 1.06));
+            if (this.mode === 1) return Math.max(0.88, Math.min(dpr * 0.60, 1.0));
+            return Math.max(0.72, Math.min(dpr * 0.50, 0.82));
         }
-        if (this.mode >= 2) return Math.min(dpr, 1.35);
-        return this.mode === 1 ? Math.min(dpr, 1.0) : 0.78;
+        return this.mode >= 1 ? Math.min(dpr, 1.0) : 0.75;
     },
     getTargetUiDpr() {
         const dpr = window.devicePixelRatio || 1;
@@ -3677,12 +3677,13 @@ const AppSettings = {
    get showContactShadows() { return !this.shadowsEnabled || this.isUltraPC; },
     loadAndDetect() {
         let loaded = false;
+        const maxAllowedMode = 2;
         try {
             const raw = localStorage.getItem(this._storageKey);
             if (raw) {
                 const data = JSON.parse(raw);
                 if (typeof data.mode === 'number' && data.mode >= 0) {
-                    this.mode = Math.min(2, Math.floor(data.mode));
+                    this.mode = Math.min(maxAllowedMode, data.mode);
                     loaded = true;
                 }
                 if (data.fpsCap === 30 || data.fpsCap === 60) this.fpsCap = data.fpsCap;
@@ -3755,18 +3756,18 @@ const AppSettings = {
         if (typeof Game !== 'undefined' && Game.mistSystem) {
             Game.mistSystem.visible = !this.isLow;
             if (Game.mistMat1) {
-                Game.mistMat1.opacity = this.isUltra ? 0.22 : 0.18;
+                Game.mistMat1.opacity = this.isUltraPC ? 0.33 : (isTouchDevice ? (this.isUltra ? 0.35 : 0.30) : 0.33);
             }
         }
         if (typeof Game !== 'undefined' && Game.snowSystem) {
             Game.snowSystem.visible = (Game.currentThemeIndex === 2);
-            const snowBase = isTouchDevice ? (this.isUltra ? 180 : 130) : (Game.maxSnowCount || 220);
-            const snowMult = this.isLow ? 0.40 : (this.isUltra ? 1.0 : 0.75);
+            const snowBase = isTouchDevice ? (this.isUltra ? 160 : 130) : (Game.maxSnowCount || 220);
+            const snowMult = this.isLow ? 0.55 : (this.isUltra ? 1.0 : 0.80);
             const maxPos = Game.snowSystem.geometry.attributes.position ? Game.snowSystem.geometry.attributes.position.count : snowBase;
             Game.snowSystem.geometry.setDrawRange(0, Math.min(maxPos, Math.floor(snowBase * snowMult)));
             if (Game.snowMat && Game.snowMat.uniforms && Game.snowMat.uniforms.uSizeScale) {
                 const pr = this.getTargetPixelRatio();
-                Game.snowMat.uniforms.uSizeScale.value = (isTouchDevice ? (this.isUltra ? 1900.0 : 1650.0) : 2100.0) * pr;
+                Game.snowMat.uniforms.uSizeScale.value = (this.useMobileLimits ? 1650.0 : (this.isMega ? 1900.0 : 2100.0)) * pr;
             }
         }
 
@@ -3792,7 +3793,7 @@ const AppSettings = {
         }
 
         if (typeof Game !== 'undefined' && Game.renderer) {
-            if (!this.isLow && Game.ensureMegaPools) Game.ensureMegaPools();
+            if (!this.isLow && !this.useMobileLimits && Game.ensureMegaPools) Game.ensureMegaPools();
             const pr = this.getTargetPixelRatio();
             Game.renderer.setPixelRatio(pr);
             Game.resize();
@@ -3831,7 +3832,7 @@ const AppSettings = {
                 if (Game.map.debrisStaticMesh) {
                     Game.map.debrisStaticMesh.castShadow = !isTouchDevice && this.isUltraPC;
                     if (Game.map.totalDebrisStaticSpawned !== undefined) {
-                        const debMult = this.isLow ? 0.35 : (this.isUltra ? 1.0 : 0.70);
+                        const debMult = this.isLow ? 0.45 : (this.isUltra ? 1.0 : 0.75);
                         Game.map.debrisStaticMesh.count = Math.floor(Game.map.totalDebrisStaticSpawned * debMult);
                     }
                 }
@@ -3856,7 +3857,7 @@ const AppSettings = {
                 if (Game.player.light) Game.player.light.distance = this.playerLightRadius;
                 if (Game.player.modelParts && Game.player.modelParts.body && Game.player.modelParts.body.material) {
                     const bodyMat = Game.player.modelParts.body.material;
-                    const wantBump = (!isTouchDevice || this.isUltra) ? wantCharTex : null;
+                    const wantBump = (!isTouchDevice || !this.isLow) ? wantCharTex : null;
                     if (bodyMat.bumpMap !== wantBump) {
                         bodyMat.bumpMap = wantBump;
                         bodyMat.needsUpdate = true;
@@ -3877,7 +3878,7 @@ const AppSettings = {
             if (Game.flashLights) {
                 const activeFlashCap = this.targetFlashLights;
                 for (let i = 0; i < Game.flashLights.length; i++) {
-                    if (activeFlashCap <= 0 || i >= activeFlashCap) {
+                    if (this.isLow || this.useMobileLimits || i >= activeFlashCap) {
                         Game.flashLights[i].life = 0;
                         Game.flashLights[i].light.intensity = 0;
                     }
@@ -4763,29 +4764,29 @@ const MathUtils = {
 const TILE_SIZE = 64; const CHUNK_SIZE = 30; const FIXED_TIME_STEP = 1 / 60; const MAX_TIME_STEP = 0.1;
 
   const MAP_THEMES = [
-    // TEMA 1: FORESTA INCANTATA (Verde smeraldo vivo, terra calda equilibrata e luce solare limpida)
+
     {
-        dirt: 0x9ea88e, grass: 0x9ed484, rock: 0x92a38c, wall: 0x74886e,
-        grassShader: 0x1f5c18, grassEmissive: 0x051203, grassRoot: 0x28661e,
-        canopyShader: 0x23611b, canopyEmissive: 0x061404, tree: 0x362a1e,
-        debris: 0x3d4d38, groundMist: 0x5c8f6c,
-        ambient: 0x3d5432, dirLight: 0xf4ffd8, fog: 0x0e1c10
+        dirt: 0x828c78, grass: 0x8eb07c, rock: 0x7a8774, wall: 0x5c6b56,
+        grassShader: 0x13380d, grassEmissive: 0x030802, grassRoot: 0x194310,
+        canopyShader: 0x153b0f, canopyEmissive: 0x040802, tree: 0x1c1812,
+        debris: 0x232b20, groundMist: 0x4a6e54,
+        ambient: 0x24301c, dirLight: 0xe8f8c8, fog: 0x091208
     },
-    // TEMA 2: FUCINA INFERNALE (Basalto bronzo/terracotta luminoso + luce ambra dorata che stacca i telegraphs rossi)
+    // TEMA 2: FUCINA INFERNALE (Basalto scuro ad alto contrasto + luce ambra dorata che preserva i blu/verdi e stacca i telegraphs rossi)
     {
-        dirt: 0xb07868, grass: 0xc97258, rock: 0x96665c, wall: 0x72483e,
-        grassShader: 0x7a2414, grassEmissive: 0x2e0903, grassRoot: 0x54150a,
-        canopyShader: 0x6b1e10, canopyEmissive: 0x240702, tree: 0x381812,
-        debris: 0x4d261e, groundMist: 0xb84a2c,
-        ambient: 0x59261e, dirLight: 0xffbe88, fog: 0x1f0a0c
+        dirt: 0x8c5e52, grass: 0xa85c4a, rock: 0x764e46, wall: 0x523028,
+        grassShader: 0x52140a, grassEmissive: 0x240602, grassRoot: 0x350704,
+        canopyShader: 0x441006, canopyEmissive: 0x1c0401, tree: 0x220b08,
+        debris: 0x321612, groundMist: 0x9e3820,
+        ambient: 0x3e1814, dirLight: 0xffa870, fog: 0x150506
     },
-    // TEMA 3: REGNO GLACIALE (Azzurro artico cristallino, turchese vivo e luce celeste nitida)
+
     {
-        dirt: 0x78a8cf, grass: 0x8cc2e8, rock: 0x6fa0c7, wall: 0x527ea3,
-        grassShader: 0x186ea8, grassEmissive: 0x061a2e, grassRoot: 0x124973,
-        canopyShader: 0x1d74ad, canopyEmissive: 0x08243d, tree: 0x1e3658,
-        debris: 0x345e82, groundMist: 0x5ca8d6,
-        ambient: 0x2b5078, dirLight: 0xdcf0ff, fog: 0x0c1b36
+        dirt: 0x557fa3, grass: 0x6b9bc0, rock: 0x4f7699, wall: 0x385a78,
+        grassShader: 0x0e5280, grassEmissive: 0x02101d, grassRoot: 0x092946,
+        canopyShader: 0x14567f, canopyEmissive: 0x051b2f, tree: 0x11223a,
+        debris: 0x203e5a, groundMist: 0x488eba,
+        ambient: 0x1b3554, dirLight: 0xbad9f0, fog: 0x081225
     }
 ];
 
@@ -5486,27 +5487,27 @@ const SkinSystem = {
 
     THEME_PRESETS: [
         {
-            fog: 0x0b0618, skyTop: 0x080616, skyHorizon: 0x221044,
-            voidDeep: 0x220842, voidGlow: 0xa855f7, mist: 0x8b5cf6,
-            dirt: 0x96a188, grass: 0x98cf7e, rock: 0x788a72,
-            foliage: 0x1f5c18, canopy: 0x23611b,
+            fog: 0x090414, skyTop: 0x060412, skyHorizon: 0x1a0b36,
+            voidDeep: 0x1e063a, voidGlow: 0x9b4dff, mist: 0x7c3aed,
+            dirt: 0x7b8570, grass: 0x86ad72, rock: 0x5d6b57,
+            foliage: 0x143b0e, canopy: 0x174011,
             water: 0x38bdf8, elem: 0x22FF44,
             sprite: 'spriteGreen', suffix: ''
         },
         {
-            fog: 0x18060c, skyTop: 0x100408, skyHorizon: 0x401218,
-            voidDeep: 0x3a080a, voidGlow: 0xff6b2b, mist: 0xf97316,
-            dirt: 0xa87264, grass: 0xc26e54, rock: 0x7c544c,
-            foliage: 0x7a2414, canopy: 0x6b1e10,
-            water: 0xff5514, elem: 0xFF1838,
+            fog: 0x12040a, skyTop: 0x0c0206, skyHorizon: 0x340c12,
+            voidDeep: 0x320506, voidGlow: 0xff5a1f, mist: 0xea580c,
+            dirt: 0x8a5d52, grass: 0xa65a48, rock: 0x5c3c36,
+            foliage: 0x52140a, canopy: 0x441006,
+            water: 0xff4500, elem: 0xFF1838,
             sprite: 'spriteRed', suffix: '_lava'
         },
         {
-            fog: 0x081026, skyTop: 0x050c1e, skyHorizon: 0x123466,
-            voidDeep: 0x0a2452, voidGlow: 0x38bdf8, mist: 0x22d3ee,
-            dirt: 0x72a0c6, grass: 0x86bce2, rock: 0x5d82a3,
-            foliage: 0x186ea8, canopy: 0x1d74ad,
-            water: 0x3288bf, elem: 0x00CCFF,
+            fog: 0x060a1c, skyTop: 0x030816, skyHorizon: 0x0c274d,
+            voidDeep: 0x061b3e, voidGlow: 0x38bdf8, mist: 0x0ea5e9,
+            dirt: 0x5882a6, grass: 0x6f9ec2, rock: 0x466685,
+            foliage: 0x0e5280, canopy: 0x14567f,
+            water: 0x286f9e, elem: 0x00CCFF,
             sprite: 'spriteBlue', suffix: '_ice'
         }
     ],
@@ -6058,7 +6059,8 @@ const SkinSystem = {
         this.composer.addPass(renderScene);
 
         if (typeof THREE.UnrealBloomPass !== 'undefined') {
-            this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(Math.max(1, Math.floor(w / 2)), Math.max(1, Math.floor(h / 2))), 0.22, 0.28, 0.84);
+            const bloomDiv = isTouchDevice ? 3 : 2;
+            this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(Math.max(1, Math.floor(w / bloomDiv)), Math.max(1, Math.floor(h / bloomDiv))), 0.22, 0.28, 0.84);
             this.composer.addPass(this.bloomPass);
         }
         if (typeof PcUltraGraphics !== 'undefined' && PcUltraGraphics.createPostPass) {
@@ -6080,6 +6082,7 @@ const SkinSystem = {
         const prevShadows = this.renderer.shadowMap.enabled;
         this.renderer.shadowMap.enabled = wantShadows;
         this.renderer.shadowMap.type = isTouchDevice ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
+        this.renderer.shadowMap.autoUpdate = !(isTouchDevice && wantShadows);
         if (this.rimLight) {
             this.rimLight.castShadow = wantShadows;
             if (wantShadows) {
@@ -6090,11 +6093,12 @@ const SkinSystem = {
                 sc.updateProjectionMatrix();
                 this.rimLight.shadow.bias = -0.0003;
                 this.rimLight.shadow.normalBias = 0.7;
-                this.rimLight.shadow.radius = isTouchDevice ? 1.0 : 1.45;
+                this.rimLight.shadow.radius = isTouchDevice ? 1.25 : 1.45;
                 if (this.rimLight.shadow.mapSize.width !== mapSize) {
                     this.rimLight.shadow.mapSize.set(mapSize, mapSize);
                     if (this.rimLight.shadow.map) { this.rimLight.shadow.map.dispose(); this.rimLight.shadow.map = null; }
                 }
+                this.renderer.shadowMap.needsUpdate = true;
             } else if (this.rimLight.shadow && this.rimLight.shadow.map) {
                 this.rimLight.shadow.map.dispose();
                 this.rimLight.shadow.map = null;
@@ -6110,14 +6114,17 @@ const SkinSystem = {
             });
         }
 
-        // Post-processing attivo solo su PC (Bilanciato/Ultra); su smartphone rendering nativo diretto più nitido e fresco
-        this.useComposer = !isTouchDevice && !AppSettings.isLow;
+        // Post-processing attivo su Bilanciata/Ultra PC e Mobile Mega; diretto su mobile base
+        this.useComposer = !AppSettings.isLow && !AppSettings.useMobileLimits;
         if (this.useComposer) {
             this.ensureMenuComposer();
             if (this.composer) {
                 if (this.composer.setPixelRatio) this.composer.setPixelRatio(pr);
                 this.composer.setSize(w, h);
-                if (this.bloomPass) this.bloomPass.setSize(Math.max(1, Math.floor(w / 2)), Math.max(1, Math.floor(h / 2)));
+                if (this.bloomPass) {
+                    const bloomDiv = isTouchDevice ? 3 : 2;
+                    this.bloomPass.setSize(Math.max(1, Math.floor(w / bloomDiv)), Math.max(1, Math.floor(h / bloomDiv)));
+                }
                 if (this.ultraPostPass) {
                     this.ultraPostPass.enabled = AppSettings.isUltraPC || AppSettings.isBalanced;
                     if (this.ultraPostPass.uniforms && this.ultraPostPass.uniforms.uResolution) {
@@ -6131,10 +6138,10 @@ const SkinSystem = {
             this.disposeComposer();
         }
 
-        // Environment PBR (solo PC) e Normal Map su Ultra
+        // Environment PBR e Normal Map su Ultra / Mega
         const wantUltraPBR = AppSettings.isUltraPC && typeof PcUltraGraphics !== 'undefined';
         if (this.scene) {
-            this.scene.environment = (!isTouchDevice && wantUltraPBR) ? PcUltraGraphics.getEnvMap(this.renderer, this.themeCycle) : null;
+            this.scene.environment = wantUltraPBR ? PcUltraGraphics.getEnvMap(this.renderer, this.themeCycle) : null;
         }
         const applyNormal = (mat, tex, sx, sy) => {
             if (!mat) return;
@@ -6789,7 +6796,7 @@ const SkinSystem = {
 
         if (AppSettings.isUltraPC && typeof PcUltraGraphics !== 'undefined') {
             if (this.scene && this.renderer) {
-                this.scene.environment = !isTouchDevice ? PcUltraGraphics.getEnvMap(this.renderer, this.themeCycle) : null;
+                this.scene.environment = PcUltraGraphics.getEnvMap(this.renderer, this.themeCycle);
             }
             if (this.groundDirtMat && this.groundDirtMat.map) {
                 this.groundDirtMat.normalMap = PcUltraGraphics.getNormalMap(this.groundDirtMat.map, 1.4);
@@ -6889,6 +6896,11 @@ const SkinSystem = {
         const safeDt = Math.min(dt, 0.033);
         this.time += safeDt;
         this.uMenuTime.value = this.time;
+        if (isTouchDevice && AppSettings.shadowsEnabled && this.renderer) {
+            this._shadowFrame = (this._shadowFrame || 0) + 1;
+            this.renderer.shadowMap.autoUpdate = false;
+            if (this._shadowFrame % 2 === 0) this.renderer.shadowMap.needsUpdate = true;
+        }
         if (this.uShockwave.value > 0) {
             this.uShockwave.value = Math.max(0, this.uShockwave.value - safeDt * 1.8);
         }
@@ -8647,8 +8659,8 @@ const UIManager = {
         const gfxTxt = document.getElementById('opt-gfx-text');
         const btnGfx = document.getElementById('btn-opt-gfx');
         btnGfx.classList.remove('text-yellow-500', 'text-green-400', 'text-cyan-400', 'text-fuchsia-400');
-        if (AppSettings.mode === 0) { gfxTxt.innerHTML = '<i class="fa-solid fa-bolt"></i> PERFORMANCE'; btnGfx.classList.add('text-yellow-500'); }
-        else if (AppSettings.mode === 1) { gfxTxt.innerHTML = '<i class="fa-solid fa-scale-balanced"></i> BILANCIATO'; btnGfx.classList.add('text-green-400'); }
+        if (AppSettings.mode === 0) { gfxTxt.innerHTML = isTouchDevice ? '<i class="fa-solid fa-bolt"></i> PERF.' : '<i class="fa-solid fa-mobile-screen-button"></i> PERF.'; btnGfx.classList.add('text-yellow-500'); }
+        else if (AppSettings.mode === 1) { gfxTxt.innerHTML = '<i class="fa-solid fa-scale-balanced"></i> BILANC.'; btnGfx.classList.add('text-green-400'); }
         else { gfxTxt.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ULTRA'; btnGfx.classList.add('text-cyan-400'); }
 
         const musTxt = document.getElementById('opt-music-text');
@@ -9337,9 +9349,8 @@ const PcUltraGraphics = {
             const r = (22 + rand() * 36) * sc;
             const cx = rand() * size, cy = rand() * size;
             const g = ctx.createRadialGradient(cx, cy, 2 * sc, cx, cy, r);
-            const isDark = rand() > 0.32;
-            const alpha = (isDark ? (0.14 + rand() * 0.16) : (0.10 + rand() * 0.08)).toFixed(3);
-            g.addColorStop(0, isDark ? `rgba(12,16,26,${alpha})` : `rgba(255,255,255,${alpha})`);
+            const alpha = (0.04 + rand() * 0.07).toFixed(3);
+            g.addColorStop(0, rand() > 0.35 ? `rgba(18,22,32,${alpha})` : `rgba(255,255,255,${alpha})`);
             g.addColorStop(1, 'rgba(255,255,255,0)');
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, size, size);
@@ -9347,7 +9358,7 @@ const PcUltraGraphics = {
 
         ctx.lineWidth = Math.max(0.8, 1.2 * (0.7 + 0.3 * sc));
         for (let i = 0; i < 650; i++) {
-            ctx.strokeStyle = rand() > 0.42 ? 'rgba(16,20,32,0.24)' : 'rgba(255,255,255,0.28)';
+            ctx.strokeStyle = rand() > 0.45 ? 'rgba(20,24,36,0.12)' : 'rgba(255,255,255,0.22)';
             const x = rand() * size, y = rand() * size, len = (10 + rand() * 24) * sc;
             ctx.beginPath();
             ctx.moveTo(x, y);
@@ -9357,7 +9368,7 @@ const PcUltraGraphics = {
 
         for (let i = 0; i < 95; i++) {
             ctx.lineWidth = (0.9 + rand() * 1.1) * (0.75 + 0.25 * sc);
-            ctx.strokeStyle = i % 4 === 0 ? 'rgba(255,255,255,0.42)' : 'rgba(10,12,18,0.44)';
+            ctx.strokeStyle = i % 4 === 0 ? 'rgba(255,255,255,0.35)' : 'rgba(12,14,20,0.28)';
             const x = rand() * size, y = rand() * size;
             ctx.beginPath();
             ctx.moveTo(x, y);
@@ -9408,7 +9419,7 @@ const PcUltraGraphics = {
             const cx = rand() * size, cy = rand() * size, rad = (18 + rand() * 34) * sc;
             const g = ctx.createRadialGradient(cx, cy, 1 * sc, cx, cy, rad);
             const useAcc = rand() > 0.68;
-            g.addColorStop(0, useAcc ? `rgba(${p.accent},0.24)` : `rgba(${p.dark},0.22)`);
+            g.addColorStop(0, useAcc ? `rgba(${p.accent},0.16)` : `rgba(${p.dark},0.14)`);
             g.addColorStop(1, 'rgba(255,255,255,0)');
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, size, size);
@@ -9418,14 +9429,14 @@ const PcUltraGraphics = {
             const step = Math.max(3, Math.round(6 * sc));
             ctx.lineWidth = Math.max(0.8, 1.2 * (0.7 + 0.3 * sc));
             for (let x = 0; x < size; x += step) {
-                ctx.strokeStyle = ((x / step) % 2 === 0) ? `rgba(${p.dark},0.20)` : 'rgba(255,255,255,0.22)';
+                ctx.strokeStyle = ((x / step) % 2 === 0) ? `rgba(${p.dark},0.11)` : 'rgba(255,255,255,0.16)';
                 ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, size); ctx.stroke();
             }
         } else if (p.hex) {
             const stepY = Math.max(12, Math.round(24 * sc));
             const stepX = Math.max(14, Math.round(28 * sc));
             const boxSz = Math.max(5, Math.round(10 * sc));
-            ctx.strokeStyle = `rgba(${p.accent},0.26)`;
+            ctx.strokeStyle = `rgba(${p.accent},0.16)`;
             ctx.lineWidth = 1.0;
             for (let y = 0; y < size; y += stepY) {
                 for (let x = ((y / stepY) % 2 === 0 ? 0 : Math.floor(stepX * 0.5)); x < size; x += stepX) {
@@ -9445,7 +9456,7 @@ const PcUltraGraphics = {
         } else if (p.forged) {
             for (let i = 0; i < 85; i++) {
                 ctx.lineWidth = (1.0 + rand() * 1.4) * (0.75 + 0.25 * sc);
-                ctx.strokeStyle = i % 3 === 0 ? `rgba(${p.accent},0.40)` : `rgba(${p.dark},0.40)`;
+                ctx.strokeStyle = i % 3 === 0 ? `rgba(${p.accent},0.32)` : `rgba(${p.dark},0.28)`;
                 const x = rand() * size, y = rand() * size;
                 ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (rand() - 0.5) * 38 * sc, y + (rand() - 0.5) * 24 * sc); ctx.stroke();
             }
@@ -9592,7 +9603,7 @@ const PcUltraGraphics = {
     applyTerrainShader(mat, isWall = false) {
         if (!mat || mat._ultraTerrainHooked) return mat;
         mat._ultraTerrainHooked = true;
-        mat.customProgramCacheKey = () => isWall ? 'pc_ultra_wall_v3' : 'pc_ultra_floor_v4';
+        mat.customProgramCacheKey = () => isWall ? 'pc_ultra_wall_v2' : 'pc_ultra_floor_v3';
         mat.onBeforeCompile = (shader) => {
             shader.uniforms.uUltra = PcUltraGraphics.uUltra;
             shader.uniforms.uBiomeId = PcUltraGraphics.uBiomeId;
@@ -9621,31 +9632,29 @@ const PcUltraGraphics = {
                 isWall
                 ? `
                 #include <color_fragment>
-                if (uUltra > 0.25) {
+                if (uUltra > 0.5) {
                     vec2 wp = vUltraWPos.xz * 0.018;
                     float strata = sin(vUltraWPos.y * 0.28 + sin(wp.x * 2.0 + wp.y * 1.7) * 1.6);
                     float blockVar = sin(wp.x * 1.3 + cos(wp.y * 1.1) * 1.5) * 0.5 + 0.5;
                     float baseAO = smoothstep(-4.0, 18.0, vUltraWPos.y);
                     float topCrest = smoothstep(26.0, 48.0, vUltraWPos.y);
-                    diffuseColor.rgb = clamp(vec3(0.38) + (diffuseColor.rgb - vec3(0.38)) * mix(1.0, 1.14, uUltra) + vec3(0.02) * uUltra, 0.0, 1.0);
-                    diffuseColor.rgb *= mix(0.78, 1.10, baseAO) * (0.95 + 0.11 * blockVar + 0.05 * strata);
-                    vec3 rimTint = uBiomeId > 1.5 ? vec3(0.07, 0.14, 0.22) : (uBiomeId > 0.5 ? vec3(0.18, 0.07, 0.03) : vec3(0.08, 0.14, 0.06));
-                    diffuseColor.rgb += rimTint * topCrest * 0.30 * uUltra;
+                    diffuseColor.rgb *= mix(0.68, 1.08, baseAO) * (0.94 + 0.12 * blockVar + 0.05 * strata);
+                    vec3 rimTint = uBiomeId > 1.5 ? vec3(0.05, 0.11, 0.18) : (uBiomeId > 0.5 ? vec3(0.15, 0.05, 0.02) : vec3(0.06, 0.10, 0.05));
+                    diffuseColor.rgb += rimTint * topCrest * 0.28;
                 }
                 `
                 : `
                 #include <color_fragment>
-                if (uUltra > 0.25) {
+                if (uUltra > 0.5) {
                     // Anti-tiling world-space macro variazione che spezza la griglia 64x64 su schermi grandi
                     vec2 wp = vUltraWPos.xz * 0.0085;
                     float macroWaveA = sin(wp.x * 1.9 + cos(wp.y * 1.6) * 1.4);
                     float macroWaveB = cos(wp.y * 2.3 - sin(wp.x * 1.4) * 1.3);
                     float macro = clamp(0.5 + 0.26 * macroWaveA + 0.24 * macroWaveB, 0.0, 1.0);
-                    float micro = sin(vUltraWPos.x * 0.22) * cos(vUltraWPos.z * 0.22) * 0.035;
-                    vec3 coolShift = uBiomeId > 1.5 ? vec3(0.95, 1.01, 1.07) : (uBiomeId > 0.5 ? vec3(0.97, 0.91, 0.93) : vec3(0.94, 1.02, 0.95));
-                    vec3 warmShift = uBiomeId > 1.5 ? vec3(1.04, 1.07, 1.11) : (uBiomeId > 0.5 ? vec3(1.10, 0.98, 0.92) : vec3(1.06, 1.04, 0.94));
-                    diffuseColor.rgb = clamp(vec3(0.38) + (diffuseColor.rgb - vec3(0.38)) * mix(1.0, 1.14, uUltra) + vec3(0.02) * uUltra, 0.0, 1.0);
-                    diffuseColor.rgb *= mix(coolShift, warmShift, macro) * (0.96 + macro * 0.10 + micro);
+                    float micro = sin(vUltraWPos.x * 0.22) * cos(vUltraWPos.z * 0.22) * 0.04;
+                    vec3 coolShift = uBiomeId > 1.5 ? vec3(0.92, 0.98, 1.05) : (uBiomeId > 0.5 ? vec3(0.93, 0.87, 0.90) : vec3(0.91, 0.99, 0.93));
+                    vec3 warmShift = uBiomeId > 1.5 ? vec3(1.02, 1.05, 1.09) : (uBiomeId > 0.5 ? vec3(1.09, 0.95, 0.89) : vec3(1.05, 1.02, 0.91));
+                    diffuseColor.rgb *= mix(coolShift, warmShift, macro) * (0.91 + macro * 0.11 + micro);
                 }
                 `
             );
@@ -9741,7 +9750,7 @@ const PcUltraGraphics = {
                 varying vec2 vUv;
 
                 float getLuma(vec3 c) {
-                    return dot(sqrt(max(c, vec3(0.0))), vec3(0.299, 0.587, 0.114));
+                    return sqrt(max(0.0, dot(c, vec3(0.299, 0.587, 0.114))));
                 }
 
                 void main() {
@@ -9765,13 +9774,13 @@ const PcUltraGraphics = {
                     float edgeContrast = lumaMax - lumaMin;
 
                     vec3 col = rgbM;
-                    if (edgeContrast >= max(0.0625, lumaMax * 0.16)) {
+                    if (edgeContrast >= max(0.03125, lumaMax * 0.125)) {
                         vec2 dir;
                         dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
                         dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
                         float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * 0.03125, 0.0078125);
                         float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
-                        dir = clamp(dir * rcpDirMin, vec2(-3.5), vec2(3.5)) * invRes;
+                        dir = clamp(dir * rcpDirMin, vec2(-6.0), vec2(6.0)) * invRes;
 
                         vec3 rgbA = 0.5 * (
                             texture2D(tDiffuse, vUv + dir * (1.0 / 3.0 - 0.5)).rgb +
@@ -9787,7 +9796,7 @@ const PcUltraGraphics = {
 
                     // 2. Contrast-Adaptive Sharpen zero-extra-tap: riusa i 4 campioni diagonali già in memoria
                     vec3 blur4 = (rgbNW + rgbNE + rgbSW + rgbSE) * 0.25;
-                    float sharpAmt = mix(0.24, 0.10, smoothstep(0.08, 0.45, edgeContrast));
+                    float sharpAmt = mix(0.11, 0.03, smoothstep(0.08, 0.45, edgeContrast));
                     col = clamp(col + (col - blur4) * sharpAmt, 0.0, 4.0);
 
                     // 3. Aberrazione cromatica radiale sugli impatti pesanti (trauma)
@@ -9799,17 +9808,17 @@ const PcUltraGraphics = {
                         col.b = mix(col.b, texture2D(tDiffuse, vUv - shift).b, 0.65);
                     }
 
-                    // 4. Bilanciamento Esposizione, Contrasto S-Curve e Tone-Mapping a luminanza preservata (vivido e definito)
-                    col = max(col, vec3(0.0));
+                    // 4. Bilanciamento Esposizione, Contrasto S-Curve e Tone-Mapping a luminanza preservata (riposante ma vivido)
+                    col = max(col, vec3(0.0)) * 0.95;
                     float linY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                     if (linY > 0.0001) {
                         float percY = sqrt(linY);
-                        float sCurve = 0.028 * sin(min(1.0, percY / 0.92) * 3.14159265) - 0.018 * sin(min(1.0, percY / 0.90) * 6.2831853);
+                        float sCurve = -0.028 * sin(min(1.0, percY / 0.88) * 6.2831853) * (1.0 - smoothstep(0.65, 1.0, percY));
                         float percMapped = max(0.0, percY + sCurve);
                         float targetY = percMapped * percMapped;
-                        if (targetY > 0.86) {
-                            float overY = targetY - 0.86;
-                            targetY = 0.86 + (0.28 * overY) / (0.28 + overY);
+                        if (targetY > 0.58) {
+                            float overY = targetY - 0.58;
+                            targetY = 0.58 + (0.36 * overY) / (0.36 + overY);
                         }
                         col *= (targetY / linY);
                     }
@@ -9817,12 +9826,16 @@ const PcUltraGraphics = {
                     float maxCh = max(col.r, max(col.g, col.b));
                     float minCh = min(col.r, min(col.g, col.b));
                     float satEst = maxCh > 0.0001 ? (maxCh - minCh) / maxCh : 0.0;
-                    float vibAmt = 0.16 * (1.0 - satEst * 0.65) * smoothstep(0.02, 0.12, gradedY) * (1.0 - smoothstep(0.68, 0.96, gradedY));
+                    float vibAmt = 0.09 * (1.0 - satEst * 0.65) * smoothstep(0.02, 0.12, gradedY) * (1.0 - smoothstep(0.60, 0.92, gradedY));
                     col = max(vec3(0.0), vec3(gradedY) + (col - vec3(gradedY)) * (1.0 + vibAmt));
+                    if (gradedY > 0.72) {
+                        float hiDesat = smoothstep(0.72, 0.94, gradedY) * 0.16;
+                        col = mix(col, vec3(gradedY), hiDesat);
+                    }
 
                     vec3 shadowTint = uBiomeId > 1.5 ? vec3(0.96, 1.00, 1.04) : (uBiomeId > 0.5 ? vec3(1.04, 0.98, 0.97) : vec3(0.98, 1.02, 0.99));
                     float lum = getLuma(col);
-                    col *= mix(shadowTint, vec3(1.0), smoothstep(0.20, 0.85, lum));
+                    col *= mix(shadowTint, vec3(0.99, 0.99, 0.99), smoothstep(0.20, 0.85, lum));
 
                     gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
                     #include <encodings_fragment>
@@ -9836,7 +9849,7 @@ const PcUltraGraphics = {
         if (typeof Game === 'undefined' || !Game.scene || !Game.renderer) return;
         this.uBiomeId.value = (themeIdx === 1 || themeIdx === 2) ? themeIdx : 0;
         const isDarkness = !!(Game.isCorrupted && !Game.isBossFloor && Game.corruptedType === 'darkness');
-        if (!isTouchDevice && typeof AppSettings !== 'undefined' && AppSettings.isUltraPC && !isDarkness && !Game.arenaEvolution) {
+        if (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC && !isDarkness && !Game.arenaEvolution) {
             Game.scene.environment = this.getEnvMap(Game.renderer, themeIdx);
         } else {
             Game.scene.environment = null;
@@ -9845,32 +9858,27 @@ const PcUltraGraphics = {
 
     syncState() {
         const isUltraPC = (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC);
-        const isLow = (typeof AppSettings !== 'undefined' && AppSettings.isLow);
         const isDarkness = (typeof Game !== 'undefined' && Game.isCorrupted && !Game.isBossFloor && Game.corruptedType === 'darkness');
-        this.uUltra.value = isUltraPC ? 1.0 : (!isLow ? 0.65 : 0.0);
+        this.uUltra.value = isUltraPC ? 1.0 : 0.0;
 
         const themeIdx = (typeof Game !== 'undefined' && Game.currentThemeIndex !== undefined) ? Game.currentThemeIndex : 0;
         this.applyEnvironment(themeIdx);
 
         if (typeof Game !== 'undefined') {
             if (Game.rimLight) {
-                Game.rimLight.intensity = (!isLow && !isDarkness && !Game.arenaEvolution) ? (isUltraPC ? 0.26 : 0.14) : 0.0;
+                Game.rimLight.intensity = (isUltraPC && !isDarkness && !Game.arenaEvolution) ? 0.20 : 0.0;
                 const rimHex = themeIdx === 2 ? 0x55bbff : (themeIdx === 1 ? 0xff7744 : 0x66cc99);
                 Game.rimLight.color.setHex(rimHex);
             }
             if (Game.ultraPostPass) {
-                Game.ultraPostPass.enabled = !isTouchDevice && isUltraPC;
+                Game.ultraPostPass.enabled = isUltraPC;
                 if (Game.ultraPostPass.uniforms && Game.ultraPostPass.uniforms.uResolution && Game.renderer) {
                     const pr = AppSettings.getTargetPixelRatio();
                     Game.ultraPostPass.uniforms.uResolution.value.set(Math.max(1, Game.width * pr), Math.max(1, Game.height * pr));
                 }
             }
             if (Game.ambientGpuSystem) {
-                Game.ambientGpuSystem.visible = !isLow && (themeIdx !== 2) && !isDarkness;
-                if (Game.ambientGpuSystem.geometry && Game.ambientGpuSystem.geometry.attributes && Game.ambientGpuSystem.geometry.attributes.position) {
-                    const maxAmb = Game.ambientGpuSystem.geometry.attributes.position.count;
-                    Game.ambientGpuSystem.geometry.setDrawRange(0, Math.floor(maxAmb * (isUltraPC ? 1.0 : 0.55)));
-                }
+                Game.ambientGpuSystem.visible = isUltraPC && (themeIdx !== 2) && !isDarkness;
                 if (Game.ambientGpuMat && Game.ambientGpuMat.uniforms) {
                     const pr = AppSettings.getTargetPixelRatio();
                     Game.ambientGpuMat.uniforms.uTheme.value = themeIdx;
@@ -9880,7 +9888,7 @@ const PcUltraGraphics = {
             if (Game.ensureFlashLights) Game.ensureFlashLights();
         }
 
-        // Normal Maps procedurali su Terreno, Muri e Props solo in Ultra
+        // Normal Maps procedurali su Terreno, Muri e Props solo in PC Ultra
         if (window.GLOBAL_THEME_MATS && typeof Preloader !== 'undefined' && Preloader.textures) {
             const variants = ['', '_lava', '_ice'];
             for (let i = 0; i < window.GLOBAL_THEME_MATS.length; i++) {
@@ -9888,9 +9896,9 @@ const PcUltraGraphics = {
                 const v = variants[i] || '';
                 if (!mats) continue;
                 const pairs = [
-                    { mat: mats.dirt, tex: Preloader.textures['dirt' + v], str: 1.5, scale: 0.52 },
-                    { mat: mats.rock, tex: Preloader.textures['rock' + v], str: 1.8, scale: 0.62 },
-                    { mat: mats.wall, tex: Preloader.textures['wall' + v] || Preloader.textures['rock' + v], str: 2.1, scale: 0.72 }
+                    { mat: mats.dirt, tex: Preloader.textures['dirt' + v], str: 1.5, scale: 0.45 },
+                    { mat: mats.rock, tex: Preloader.textures['rock' + v], str: 1.8, scale: 0.55 },
+                    { mat: mats.wall, tex: Preloader.textures['wall' + v] || Preloader.textures['rock' + v], str: 2.1, scale: 0.65 }
                 ];
                 for (let j = 0; j < pairs.length; j++) {
                     const pr = pairs[j];
@@ -9908,8 +9916,8 @@ const PcUltraGraphics = {
 
         if (typeof SharedMat !== 'undefined') {
             const propPairs = [
-                { mat: SharedMat.crate, str: 1.7, scale: 0.55 },
-                { mat: SharedMat.urn, str: 1.5, scale: 0.48 }
+                { mat: SharedMat.crate, str: 1.7, scale: 0.50 },
+                { mat: SharedMat.urn, str: 1.5, scale: 0.42 }
             ];
             for (let i = 0; i < propPairs.length; i++) {
                 const pm = propPairs[i];
@@ -9923,7 +9931,7 @@ const PcUltraGraphics = {
                 }
             }
             if (SharedMat.coin) {
-                SharedMat.coin.envMapIntensity = (!isTouchDevice && isUltraPC) ? 1.18 : 1.0;
+                SharedMat.coin.envMapIntensity = isUltraPC ? 1.18 : 1.0;
             }
         }
 
@@ -9932,7 +9940,7 @@ const PcUltraGraphics = {
             for (let i = 0; i < Game.enemies.length; i++) {
                 const e = Game.enemies[i];
                 if (!e || !e.mat || e.type === 'crystal' || e.isPursuer) continue;
-                const wantBump = (!AppSettings.useMobileLimits && (e.mat.isMeshPhongMaterial || e.mat.isMeshStandardMaterial)) ? cTex : null;
+                const wantBump = !AppSettings.useMobileLimits ? cTex : null;
                 if (e.mat.map !== cTex || e.mat.bumpMap !== wantBump) {
                     const chg = (!!e.mat.bumpMap !== !!wantBump);
                     e.mat.map = cTex;
@@ -11172,8 +11180,8 @@ function applyCharacterShader(material, rimStrength = 0.65) {
             '#include <dithering_fragment>',
             `
             // 1. Gradiente Verticale (Ambient Occlusion ai piedi, luce sulla testa)
-            float hLo = mix(0.66, 0.62, uUltra);
-            float hHi = mix(1.22, 1.24, uUltra);
+            float hLo = mix(0.55, 0.50, uUltra);
+            float hHi = mix(1.18, 1.18, uUltra);
             gl_FragColor.rgb *= mix(hLo, hHi, vCharHeight);
 
             // 2. Stylized Rim Light + micro-contorno morbido sui bordi estremi in PC Ultra / MEGA
@@ -13748,15 +13756,15 @@ function ensureGlobalThemeMaterials(renderer) {
             rock: new MapMaterialClass({ map: tRock, shininess: isIceBiom ? 15 : 12, specular: isIceBiom ? 0x142433 : 0x161616, alphaMap: GLOBAL_ALPHA_TEX, transparent: true, depthWrite: false, alphaTest: 0.03 }),
             wall: new MapMaterialClass({ map: tWall || tRock, shininess: isIceBiom ? 12 : 8, specular: isIceBiom ? 0x101d29 : 0x121212, flatShading: true })
         };
-        if (!AppSettings.isLow) {
+        if (!AppSettings.useMobileLimits) {
             PcUltraGraphics.applyTerrainShader(mats.dirt, false);
             PcUltraGraphics.applyTerrainShader(mats.grass, false);
             PcUltraGraphics.applyTerrainShader(mats.rock, false);
             PcUltraGraphics.applyTerrainShader(mats.wall, true);
             if (AppSettings.isUltraPC) {
-                mats.dirt.normalMap = PcUltraGraphics.getNormalMap(tDirt, 1.5); if (mats.dirt.normalMap && mats.dirt.normalScale) mats.dirt.normalScale.set(0.52, 0.52);
-                mats.rock.normalMap = PcUltraGraphics.getNormalMap(tRock, 1.8); if (mats.rock.normalMap && mats.rock.normalScale) mats.rock.normalScale.set(0.62, 0.62);
-                mats.wall.normalMap = PcUltraGraphics.getNormalMap(tWall || tRock, 2.1); if (mats.wall.normalMap && mats.wall.normalScale) mats.wall.normalScale.set(0.72, 0.72);
+                mats.dirt.normalMap = PcUltraGraphics.getNormalMap(tDirt, 1.5); if (mats.dirt.normalMap && mats.dirt.normalScale) mats.dirt.normalScale.set(0.45, 0.45);
+                mats.rock.normalMap = PcUltraGraphics.getNormalMap(tRock, 1.8); if (mats.rock.normalMap && mats.rock.normalScale) mats.rock.normalScale.set(0.55, 0.55);
+                mats.wall.normalMap = PcUltraGraphics.getNormalMap(tWall || tRock, 2.1); if (mats.wall.normalMap && mats.wall.normalScale) mats.wall.normalScale.set(0.65, 0.65);
             }
         }
         window.GLOBAL_THEME_MATS.push(mats);
@@ -14174,8 +14182,8 @@ const UI = {
             if (this.els.lowHpOverlay && !this.els.lowHpOverlay.classList.contains('active')) {
                 this.els.lowHpOverlay.classList.add('active');
             }
-            if (!document.body.classList.contains('crt-active')) {
-                document.body.classList.add('crt-active');
+            if (document.body.classList.contains('crt-active')) {
+                document.body.classList.remove('crt-active');
             }
             this.cache.isLowHp = true;
 
@@ -14183,21 +14191,21 @@ const UI = {
                 let t = Math.max(0, Math.min(1, (0.30 - hpRatio) / 0.30));
                 let pulseWave = Math.sin(Game.playTime * 7.85);
                 let beat = Math.pow(Math.max(0, pulseWave), 4) * (0.035 + t * 0.045);
-                let tunnelScale = Math.max(0.86, (1.28 - t * 0.34) - beat);
+                let tunnelScale = Math.max(0.88, (1.16 - t * 0.22) - beat);
 
                 let offX = 0, offY = 0;
                 if (typeof Game.toScreenPosition === 'function' && Game.camera) {
                     let sp = Game.toScreenPosition(Game.player.x, 14, Game.player.y);
                     if (sp && Number.isFinite(sp.x) && Number.isFinite(sp.y)) {
-                        let maxOffX = Game.width * 0.32;
-                        let maxOffY = Game.height * 0.32;
+                        let maxOffX = Game.width * 0.12;
+                        let maxOffY = Game.height * 0.12;
                         offX = Math.round(MathUtils.clamp(sp.x - Game.width * 0.5, -maxOffX, maxOffX));
                         offY = Math.round(MathUtils.clamp(sp.y - Game.height * 0.5, -maxOffY, maxOffY));
                     }
                 }
 
                 this.els.lowHpTunnel.style.transform = `translate3d(${offX}px, ${offY}px, 0) scale3d(${tunnelScale.toFixed(3)}, ${tunnelScale.toFixed(3)}, 1)`;
-                this.els.lowHpCrt.style.opacity = Math.min(0.72, 0.25 + t * 0.32 + beat * 0.85).toFixed(2);
+                this.els.lowHpCrt.style.opacity = Math.min(1, 0.45 + t * 0.40 + beat * 1.2).toFixed(2);
             }
         }
 
@@ -14383,7 +14391,7 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
         this.scene.add(this.dirLight.target);
         this.updateShadowConfig();
 
-        this.rimLight = new THREE.DirectionalLight(0x88bbff, !AppSettings.isLow ? (AppSettings.isUltraPC ? 0.26 : 0.14) : 0.0);
+        this.rimLight = new THREE.DirectionalLight(0x88bbff, AppSettings.isUltraPC ? 0.20 : 0.0);
         this.rimLight.position.set(420, 460, 420);
         this.rimLight.castShadow = false;
         this.scene.add(this.rimLight);
@@ -14499,7 +14507,7 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
                         float core = smoothstep(0.55, 0.92, d) * filament;
 
                         float r = length(vLocal);
-                        float clearZone = mix(0.14, 1.0, smoothstep(95.0, 380.0, r));
+                        float clearZone = mix(0.42, 1.0, smoothstep(65.0, 290.0, r));
                         float farFade = 1.0 - smoothstep(1650.0, 2450.0, r);
 
                         // Colore fantasy atmosferico con velatura luminosa interna
@@ -14515,18 +14523,22 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
                         // 0.0 dentro la mappa -> 1.0 dietro ai muri all'esterno della mappa
                         float outsideMask = 1.0 - smoothstep(-28.0, 20.0, insideDist);
 
-                        // Energia oscura abissale che copre il fumo esterno con venature viola/indaco
-                        float darkPulse = 0.5 + 0.5 * sin(uTime * 1.6 + (s1.r - s2.g) * 6.2831);
-                        float darkVeins = pow(smoothstep(0.32, 0.82, s2.r * 0.6 + s1.g * 0.4), 1.8);
-                        float auraRim = smoothstep(-95.0, 0.0, insideDist) * outsideMask;
+                        vec3 finalCol = mistCol;
+                        float finalAlpha = mistAlpha;
+                        if (outsideMask > 0.001) {
+                            // Energia oscura abissale che copre il fumo esterno con venature viola/indaco
+                            float darkPulse = 0.5 + 0.5 * sin(uTime * 1.6 + (s1.r - s2.g) * 6.2831);
+                            float darkVeins = pow(smoothstep(0.32, 0.82, s2.r * 0.6 + s1.g * 0.4), 1.8);
+                            float auraRim = smoothstep(-95.0, 0.0, insideDist) * outsideMask;
 
-                        vec3 voidBase = vec3(0.012, 0.006, 0.028);
-                        vec3 voidEnergy = mix(vec3(0.11, 0.02, 0.22), vec3(0.28, 0.06, 0.48), darkPulse);
-                        vec3 darkCol = mix(voidBase, voidEnergy, darkVeins * (0.35 + 0.45 * auraRim));
-                        float darkAlpha = outsideMask * farFade * mix(0.92, 0.98, darkVeins);
+                            vec3 voidBase = vec3(0.012, 0.006, 0.028);
+                            vec3 voidEnergy = mix(vec3(0.11, 0.02, 0.22), vec3(0.28, 0.06, 0.48), darkPulse);
+                            vec3 darkCol = mix(voidBase, voidEnergy, darkVeins * (0.35 + 0.45 * auraRim));
+                            float darkAlpha = outsideMask * farFade * mix(0.92, 0.98, darkVeins);
 
-                        vec3 finalCol = mix(mistCol, darkCol, outsideMask);
-                        float finalAlpha = mix(mistAlpha, darkAlpha, outsideMask);
+                            finalCol = mix(mistCol, darkCol, outsideMask);
+                            finalAlpha = mix(mistAlpha, darkAlpha, outsideMask);
+                        }
 
                         gl_FragColor = vec4(finalCol, finalAlpha);
                     }
@@ -14534,7 +14546,7 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
                 transparent: true, depthWrite: false, depthTest: true, fog: false,
                 blending: THREE.NormalBlending
             });
-            this.mistMat1.opacity = AppSettings.isUltra ? 0.22 : 0.18;
+            this.mistMat1.opacity = AppSettings.isUltraPC ? 0.33 : (isTouchDevice ? (AppSettings.isUltra ? 0.35 : 0.30) : 0.33);
             this.mistMat1.color = this.mistMat1.uniforms.uColor.value;
             this.mistMat2 = null;
 
@@ -14564,15 +14576,15 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
             const snowGeo = new THREE.BufferGeometry();
             snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
             snowGeo.setAttribute('aSeed', new THREE.BufferAttribute(snowSeed, 3));
-            const effectiveSnow = isTouchDevice ? (AppSettings.isUltra ? 180 : 130) : maxSnow;
-            const snowMult = AppSettings.isLow ? 0.40 : (AppSettings.isUltra ? 1.0 : 0.75);
+            const effectiveSnow = AppSettings.useMobileLimits ? 140 : 220;
+            const snowMult = AppSettings.isLow ? 0.55 : (AppSettings.isUltra ? 1.0 : 0.80);
             snowGeo.setDrawRange(0, Math.floor(effectiveSnow * snowMult));
 
             this.snowMat = new THREE.ShaderMaterial({
                 uniforms: {
                     uTime: { value: 0.0 },
                     uFocusPos: { value: new THREE.Vector2(960, 960) },
-                    uSizeScale: { value: (isTouchDevice ? (AppSettings.isUltra ? 1900.0 : 1650.0) : 2100.0) * pixelRatio }
+                    uSizeScale: { value: (AppSettings.useMobileLimits ? 1650.0 : 2100.0) * pixelRatio }
                 },
                 vertexShader: `
                     attribute vec3 aSeed;
@@ -14637,7 +14649,7 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
             this.scene.add(this.snowSystem);
         }
 
-        if (!AppSettings.isLow) {
+        if (AppSettings.isUltraPC) {
             this.ensureAmbientGpuSystem();
         }
 
@@ -14719,13 +14731,15 @@ prewarmShaders() {
     getBloomSpec(themeIdx) {
         const isIce = (themeIdx === 2);
         return {
-            strength: isIce ? 0.08 : 0.11,
+            strength: isIce
+                ? (AppSettings.isUltraPC ? 0.10 : 0.12)
+                : (AppSettings.isUltraPC ? 0.13 : 0.16),
             radius: isIce ? 0.13 : 0.16,
-            threshold: isIce ? 0.92 : 0.89
+            threshold: isIce ? 0.90 : 0.86
         };
     },
     applyBloomSpec(themeIdx = this.currentThemeIndex) {
-        const bloomOn = !isTouchDevice && !AppSettings.isLow && !!this.composer;
+        const bloomOn = !AppSettings.isLow && !AppSettings.useMobileLimits && !!this.composer;
         if (typeof InteractiveGrassSystem !== 'undefined' && InteractiveGrassSystem.uniforms && InteractiveGrassSystem.uniforms.uBloomActive) {
             InteractiveGrassSystem.uniforms.uBloomActive.value = bloomOn ? 1.0 : 0.0;
         }
@@ -14736,10 +14750,11 @@ prewarmShaders() {
         this.bloomPass.threshold = b.threshold;
     },
     ensureComposer() {
-        if (isTouchDevice || this.composer || !this.renderer || !this.scene || !this.camera || AppSettings.isLow) return;
+        if (this.composer || !this.renderer || !this.scene || !this.camera || AppSettings.useMobileLimits) return;
         const renderScene = new THREE.RenderPass(this.scene, this.camera);
         const bSpec = this.getBloomSpec(this.currentThemeIndex);
-        this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(Math.max(1, this.width / 2), Math.max(1, this.height / 2)), bSpec.strength, bSpec.radius, bSpec.threshold);
+        const bloomDiv = isTouchDevice ? 3 : 2;
+        this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(Math.max(1, Math.floor(this.width / bloomDiv)), Math.max(1, Math.floor(this.height / bloomDiv))), bSpec.strength, bSpec.radius, bSpec.threshold);
         this.composer = new THREE.EffectComposer(this.renderer);
         if (this.composer.setPixelRatio) this.composer.setPixelRatio(AppSettings.getTargetPixelRatio());
         this.composer.addPass(renderScene);
@@ -14769,7 +14784,6 @@ prewarmShaders() {
         const ambGeo = new THREE.BufferGeometry();
         ambGeo.setAttribute('position', new THREE.BufferAttribute(ambPos, 3));
         ambGeo.setAttribute('aData', new THREE.BufferAttribute(ambData, 3));
-        ambGeo.setDrawRange(0, Math.floor(ambCount * (AppSettings.isUltra ? 1.0 : 0.55)));
         this.ambientGpuMat = new THREE.ShaderMaterial({
             uniforms: {
                 uTime: { value: 0 },
@@ -14824,11 +14838,11 @@ prewarmShaders() {
         this.ambientGpuSystem = new THREE.Points(ambGeo, this.ambientGpuMat);
         this.ambientGpuSystem.frustumCulled = false;
         this.ambientGpuSystem.renderOrder = 6;
-        this.ambientGpuSystem.visible = !AppSettings.isLow && this.currentThemeIndex !== 2 && !(this.isCorrupted && !this.isBossFloor && this.corruptedType === 'darkness');
+        this.ambientGpuSystem.visible = AppSettings.isUltraPC && this.currentThemeIndex !== 2 && !(this.isCorrupted && !this.isBossFloor && this.corruptedType === 'darkness');
         this.scene.add(this.ambientGpuSystem);
     },
     ensureFlashLights() {
-        if (!this.scene || AppSettings.isLow) return;
+        if (!this.scene || AppSettings.isLow || AppSettings.useMobileLimits) return;
         if (!this.flashLights) this.flashLights = [];
         const targetCount = AppSettings.targetFlashLights;
         while (this.flashLights.length < targetCount) {
@@ -14872,23 +14886,25 @@ prewarmShaders() {
         }
     },
     ensureMegaPools() {
-        if (AppSettings.isLow || !this.scene) return;
+        if (AppSettings.isLow || AppSettings.useMobileLimits || !this.scene) return;
         this.ensureComposer();
         this.ensureFlashLights();
-        this.ensureAmbientGpuSystem();
-        if (window.GLOBAL_THEME_MATS && typeof PcUltraGraphics !== 'undefined') {
-            for (let i = 0; i < window.GLOBAL_THEME_MATS.length; i++) {
-                const tm = window.GLOBAL_THEME_MATS[i];
-                if (!tm) continue;
-                [
-                    [tm.dirt, false], [tm.grass, false],
-                    [tm.rock, false], [tm.wall, true]
-                ].forEach(([m, isWall]) => {
-                    if (m && !m._ultraTerrainHooked) {
-                        PcUltraGraphics.applyTerrainShader(m, isWall);
-                        m.needsUpdate = true;
-                    }
-                });
+        if (AppSettings.isUltraPC) {
+            this.ensureAmbientGpuSystem();
+            if (window.GLOBAL_THEME_MATS && typeof PcUltraGraphics !== 'undefined') {
+                for (let i = 0; i < window.GLOBAL_THEME_MATS.length; i++) {
+                    const tm = window.GLOBAL_THEME_MATS[i];
+                    if (!tm) continue;
+                    [
+                        [tm.dirt, false], [tm.grass, false],
+                        [tm.rock, false], [tm.wall, true]
+                    ].forEach(([m, isWall]) => {
+                        if (m && !m._ultraTerrainHooked) {
+                            PcUltraGraphics.applyTerrainShader(m, isWall);
+                            m.needsUpdate = true;
+                        }
+                    });
+                }
             }
         }
         const wantParticles = AppSettings.targetParticlePool;
@@ -14904,12 +14920,12 @@ prewarmShaders() {
         }
         const wantDebris = AppSettings.targetDebrisPool;
         if (this.debris && this.debris.length < wantDebris) {
-            this.initDebrisPool(wantDebris, !isTouchDevice);
+            this.initDebrisPool(wantDebris, true);
         }
     },
     initPools() {
         const maxDynamicDebris = AppSettings.targetDebrisPool;
-        this.initDebrisPool(maxDynamicDebris, !isTouchDevice);
+        this.initDebrisPool(maxDynamicDebris, !AppSettings.useMobileLimits);
         this.enemyPool = Array.from({length: 80}, () => new Enemy());
 
         this.propsCrates = Array.from({length: isTouchDevice ? 25 : 60}, (_, i) => new Prop(i, 'crate'));
@@ -14969,7 +14985,7 @@ pushDebris(px, pz, radius, force) {
         }
     },
     spawnLightFlash(x, z, colorHex, intensity, distance, duration = 0.2) {
-        if (AppSettings.isLow || !this.flashLights || this.flashLights.length === 0) return;
+        if (AppSettings.useMobileLimits || AppSettings.isLow || !this.flashLights || this.flashLights.length === 0) return;
         const activeCap = AppSettings.targetFlashLights || 0;
         if (activeCap <= 0) return;
         const poolCount = Math.min(this.flashLights.length, activeCap);
@@ -15139,7 +15155,7 @@ pushDebris(px, pz, radius, force) {
             uNova.spawn(this.player.x, 20, this.player.y, SharedMat.spritePurple, 'nova');
             uNova.baseSize = 220;
 
-            let pCount = AppSettings.isLow ? 8 : (AppSettings.useMobileLimits ? 16 : (AppSettings.isUltraPC ? 60 : 32));
+            let pCount = AppSettings.isLow ? 8 : (AppSettings.useMobileLimits ? 16 : (AppSettings.isDesktopUltra ? 60 : 32));
             for (let i = 0; i < pCount; i++) {
                 let a = (Math.PI * 2 / pCount) * i;
                 let mat = (i % 3 === 0) ? SharedMat.spritePink : ((i % 3 === 1) ? SharedMat.spritePurple : SharedMat.spriteWhite);
@@ -15188,7 +15204,7 @@ pushDebris(px, pz, radius, force) {
             // normalBias calibrato per risoluzione shadow map mobile (1024) e PC (1536): zero acne e ombre incollate alla base
             this.dirLight.shadow.bias = isTouchDevice ? -0.00025 : -0.0002;
             this.dirLight.shadow.normalBias = isTouchDevice ? 0.80 : 0.65;
-            this.dirLight.shadow.radius = isTouchDevice ? 1.0 : 1.4;
+            this.dirLight.shadow.radius = AppSettings.useMobileLimits ? 1.0 : (AppSettings.isMega ? 1.25 : 1.4);
 
             if (this.dirLight.shadow.mapSize.width !== targetMapSize) {
                 this.dirLight.shadow.mapSize.set(targetMapSize, targetMapSize);
@@ -15214,15 +15230,6 @@ pushDebris(px, pz, radius, force) {
         }
     },
 
-    getCameraPlayerDist() {
-        let mScale = Math.max(0.62, this.getMobileAspectScale());
-        let isLandMobile = (AppSettings.orientation === 'landscape' && this.width > this.height);
-        let distFactor = isLandMobile ? 0.88 : 1.0;
-        let h = isTouchDevice ? 750 : 600;
-        let d = (isTouchDevice ? 500 : 400) * distFactor;
-        return Math.hypot(h, d) * mScale;
-    },
-
     resize() {
         const vp = AppSettings.getViewportSize();
         this.width = vp.width; this.height = vp.height; this.renderer.setSize(this.width, this.height);
@@ -15240,7 +15247,10 @@ pushDebris(px, pz, radius, force) {
             if (this.composer.setPixelRatio) this.composer.setPixelRatio(AppSettings.getTargetPixelRatio());
             this.composer.setSize(this.width, this.height);
         }
-        if (this.bloomPass) this.bloomPass.setSize(Math.max(1, Math.floor(this.width / 2)), Math.max(1, Math.floor(this.height / 2)));
+        if (this.bloomPass) {
+            const bloomDiv = isTouchDevice ? 3 : 2;
+            this.bloomPass.setSize(Math.max(1, Math.floor(this.width / bloomDiv)), Math.max(1, Math.floor(this.height / bloomDiv)));
+        }
         if (this.ultraPostPass && this.ultraPostPass.uniforms && this.ultraPostPass.uniforms.uResolution) {
             const pr = AppSettings.getTargetPixelRatio();
             this.ultraPostPass.uniforms.uResolution.value.set(Math.max(1, this.width * pr), Math.max(1, this.height * pr));
@@ -15248,15 +15258,10 @@ pushDebris(px, pz, radius, force) {
         if (this.ambientGpuMat && this.ambientGpuMat.uniforms && this.ambientGpuMat.uniforms.uSizeScale) {
             this.ambientGpuMat.uniforms.uSizeScale.value = 1950.0 * AppSettings.getTargetPixelRatio();
         }
-        if (this.scene && this.scene.fog && !this.bossLightClear) {
-            let camDist = this.getCameraPlayerDist();
-            if (this.isCorrupted && !this.isBossFloor && this.corruptedType === 'darkness') {
-                this.scene.fog.near = camDist - 35;
-                this.scene.fog.far = camDist + 390;
-            } else {
-                this.scene.fog.near = camDist + (this.currentThemeIndex === 2 ? 220 : 240);
-                this.scene.fog.far = camDist + (this.currentThemeIndex === 2 ? 960 : 920);
-            }
+        if (this.scene && this.scene.fog && !(this.isCorrupted && this.corruptedType === 'darkness')) {
+            let fScale = Math.max(1.05, this.getMobileAspectScale());
+            this.scene.fog.near = 700 * fScale;
+            this.scene.fog.far = 1850 * fScale;
         }
         this.updateShadowConfig();
     },
@@ -15456,19 +15461,18 @@ if (this.floor >= 3 && type !== 'dark_prophet' && Math.random() < (this.floor <=
 
         if (Game.arenaEvolution) {
             if (!Game._colorDarkRed) {
-                Game._colorDarkRed = new THREE.Color(0x7a3848);
-                Game._colorBrightRed = new THREE.Color(0xff9878);
-                Game._colorPitchBlack = new THREE.Color(0x1a0810);
+                Game._colorDarkRed = new THREE.Color(0x3a0010);
+                Game._colorBrightRed = new THREE.Color(0xff1100);
+                Game._colorPitchBlack = new THREE.Color(0x050000);
             }
-            this.ambientLight.intensity += (0.62 - this.ambientLight.intensity) * dt * 1.5;
+            this.ambientLight.intensity += (0.12 - this.ambientLight.intensity) * dt * 1.5;
             this.ambientLight.color.lerp(Game._colorDarkRed, dt * 0.4);
             if (this.dirLight) {
-                this.dirLight.intensity += (0.98 - this.dirLight.intensity) * dt;
+                this.dirLight.intensity += (0.15 - this.dirLight.intensity) * dt;
                 this.dirLight.color.lerp(Game._colorBrightRed, dt * 0.4);
             }
             if (this.rimLight) {
-                const targetEnrageRim = !AppSettings.isLow ? (AppSettings.isUltraPC ? 0.22 : 0.14) : 0.0;
-                this.rimLight.intensity += (targetEnrageRim - this.rimLight.intensity) * Math.min(1, dt * 1.5);
+                this.rimLight.intensity += (0.0 - this.rimLight.intensity) * Math.min(1, dt * 1.5);
             }
             if (this.scene.environment) this.scene.environment = null;
             this.scene.background.lerp(Game._colorPitchBlack, dt * 0.4);
@@ -15490,7 +15494,7 @@ if (this.floor >= 3 && type !== 'dark_prophet' && Math.random() < (this.floor <=
                 this.dirLight.color.lerp(Game._colorDawnLight, dt * 1.4);
             }
             if (this.rimLight) {
-                const targetRim = !AppSettings.isLow ? (AppSettings.isUltraPC ? 0.24 : 0.14) : 0.0;
+                const targetRim = (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? 0.20 : 0.0;
                 this.rimLight.intensity += (targetRim - this.rimLight.intensity) * Math.min(1, dt * 1.4);
             }
             if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && AppSettings.isUltraPC && this.scene && !this.scene.environment) {
@@ -15980,7 +15984,8 @@ loop(timestamp) {
         this.map = new GameMap(CHUNK_SIZE, CHUNK_SIZE); this.map.generate(this.isBossFloor);
 
        let floorColor = 0xffffff; let mutatorText = "";
-        let camDist = this.getCameraPlayerDist();
+        let camScale = Math.max(0.62, this.getMobileAspectScale());
+        let camDist = (isTouchDevice ? 1150 : 750) * camScale;
 
         this.themeTransition = null;
 
@@ -16003,7 +16008,7 @@ loop(timestamp) {
                 if (this.mistMat1.uniforms && this.mistMat1.uniforms.uEdgeColor) {
                     this.mistMat1.uniforms.uEdgeColor.value.copy(this._edgeTintTmp);
                 }
-                this.mistMat1.opacity = AppSettings.isUltra ? 0.22 : 0.18;
+                this.mistMat1.opacity = AppSettings.isUltraPC ? 0.33 : (isTouchDevice ? (AppSettings.isUltra ? 0.35 : 0.30) : 0.33);
             }
         }
         if (this.snowSystem) {
@@ -16017,8 +16022,8 @@ loop(timestamp) {
             window.GLOBAL_DEBRIS_MAT.color.setHex(currentTheme.debris);
         }
 
-        let fogNear = camDist + (this.currentThemeIndex === 2 ? 220 : 240);
-        let fogFar = camDist + (this.currentThemeIndex === 2 ? 960 : 920);
+        let fogNear = camDist - (this.currentThemeIndex === 2 ? 80 : (this.currentThemeIndex === 1 ? 90 : 100));
+        let fogFar = camDist + (this.currentThemeIndex === 2 ? 500 : 480);
         if (!this.scene.fog) {
             this.scene.fog = new THREE.Fog(currentTheme.fog, fogNear, fogFar);
         } else {
@@ -16030,8 +16035,8 @@ loop(timestamp) {
         Game.arenaEvolution = false;
         Game.bossLightClear = false;
 
-        let targetDirInt = (this.currentThemeIndex === 2) ? 1.22 : 1.30;
-        let targetAmbInt = (this.currentThemeIndex === 2) ? 0.72 : 0.76;
+        let targetDirInt = (this.currentThemeIndex === 2) ? 1.00 : (this.currentThemeIndex === 1 ? 1.16 : 1.16);
+        let targetAmbInt = (this.currentThemeIndex === 2) ? 0.58 : (this.currentThemeIndex === 1 ? 0.68 : 0.68);
         if (this.dirLight) {
             this.dirLight.intensity = targetDirInt;
             this.dirLight.color.setHex(currentTheme.dirLight);
@@ -16072,26 +16077,25 @@ loop(timestamp) {
             vignetteEl.style.opacity = AppSettings.isLow ? '0' : '1';
             if (this.currentThemeIndex === 0) {
 
-                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 74%, rgba(14, 24, 8, 0.16) 90%, rgba(5, 10, 3, 0.34) 100%)';
+                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 68%, rgba(14, 24, 8, 0.22) 88%, rgba(5, 10, 3, 0.48) 100%)';
             } else if (this.currentThemeIndex === 1) {
 
-                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 74%, rgba(38, 10, 8, 0.16) 90%, rgba(16, 4, 4, 0.34) 100%)';
+                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 68%, rgba(38, 10, 8, 0.22) 88%, rgba(16, 4, 4, 0.48) 100%)';
             } else {
 
-                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 74%, rgba(8, 16, 38, 0.18) 90%, rgba(3, 6, 16, 0.36) 100%)';
+                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 68%, rgba(8, 16, 38, 0.24) 88%, rgba(3, 6, 16, 0.50) 100%)';
             }
         }
         if (this.isCorrupted && !this.isBossFloor) {
             this.difficultyMult *= 1.20;
             if (this.corruptedType === 'darkness') {
                 mutatorText = "OSCURITÀ OPPRIMENTE"; floorColor = "#aa00ff";
-                this.scene.fog.color.setHex(0x05030a);
+                this.scene.fog.color.setHex(0x000000);
 
-                this.scene.fog.near = camDist - 35;
-                this.scene.fog.far = camDist + 390;
-                this.scene.background.setHex(0x05030a);
-                if (this.dirLight) this.dirLight.intensity = 0.28;
-                if (this.ambientLight) this.ambientLight.intensity = 0.64;
+                this.scene.fog.near = camDist - 150;
+                this.scene.fog.far = camDist + 220;
+                this.scene.background.setHex(0x000000);
+                if (this.dirLight) this.dirLight.intensity = 0.00;
 
                 if (vignetteEl) vignetteEl.classList.add('vignette-darkness-active');
             }
@@ -16261,10 +16265,10 @@ startGame(diffMult) {
                 skirtShininess: 20, skirtSpec: 0x1a3348,
                 bankShininess: 24, bankSpec: 0x1e3c56,
                 rimShininess: 12, rimSpec: 0x101d29,
-                fogOp: 0.12, dirInt: 1.22, ambInt: 0.72,
+                fogOp: 0.12, dirInt: 1.00, ambInt: 0.58,
                 bedHex: 0x0d4a80, shoreY: -8.38, padY: -8.25,
                 portalHex: 0x00ddff, portalSprite: SharedMat.spriteBlue,
-                vignette: 'radial-gradient(circle at center, transparent 74%, rgba(8, 16, 38, 0.18) 90%, rgba(3, 6, 16, 0.36) 100%)'
+                vignette: 'radial-gradient(circle at center, transparent 68%, rgba(8, 16, 38, 0.24) 88%, rgba(3, 6, 16, 0.50) 100%)'
             };
         } else if (themeIdx === 1) {
             return {
@@ -16273,10 +16277,10 @@ startGame(diffMult) {
                 skirtShininess: 8, skirtSpec: 0x111111,
                 bankShininess: 10, bankSpec: 0x26100c,
                 rimShininess: 8, rimSpec: 0x121212,
-                fogOp: 0.13, dirInt: 1.30, ambInt: 0.76,
+                fogOp: 0.13, dirInt: 1.16, ambInt: 0.68,
                 bedHex: 0x240602, shoreY: -17.35, padY: -17.12,
                 portalHex: 0xff3300, portalSprite: SharedMat.spriteRed,
-                vignette: 'radial-gradient(circle at center, transparent 74%, rgba(38, 10, 8, 0.16) 90%, rgba(16, 4, 4, 0.34) 100%)'
+                vignette: 'radial-gradient(circle at center, transparent 68%, rgba(38, 10, 8, 0.22) 88%, rgba(16, 4, 4, 0.48) 100%)'
             };
         }
         return {
@@ -16285,10 +16289,10 @@ startGame(diffMult) {
             skirtShininess: 8, skirtSpec: 0x111111,
             bankShininess: 12, bankSpec: 0x182218,
             rimShininess: 8, rimSpec: 0x121212,
-            fogOp: 0.15, dirInt: 1.30, ambInt: 0.76,
+            fogOp: 0.15, dirInt: 1.16, ambInt: 0.68,
             bedHex: 0x166aa3, shoreY: -17.26, padY: -17.12,
             portalHex: 0x33ff66, portalSprite: SharedMat.spriteGreen,
-            vignette: 'radial-gradient(circle at center, transparent 74%, rgba(14, 24, 8, 0.16) 90%, rgba(5, 10, 3, 0.34) 100%)'
+            vignette: 'radial-gradient(circle at center, transparent 68%, rgba(14, 24, 8, 0.22) 88%, rgba(5, 10, 3, 0.48) 100%)'
         };
     },
 
@@ -16346,7 +16350,6 @@ startGame(diffMult) {
             fromBgCol: new THREE.Color(), toBgCol: new THREE.Color(),
             fromFogCol: new THREE.Color(), toFogCol: new THREE.Color(),
             fromDirCol: new THREE.Color(), toDirCol: new THREE.Color(),
-            fromRimCol: new THREE.Color(), toRimCol: new THREE.Color(),
             fromAmbCol: new THREE.Color(), toAmbCol: new THREE.Color(),
             fromAmbGround: new THREE.Color(), toAmbGround: new THREE.Color(),
             fromGrassShader: new THREE.Color(), toGrassShader: new THREE.Color(),
@@ -16431,10 +16434,6 @@ startGame(diffMult) {
         }
         tr.toDirCol.setHex(targetTheme.dirLight);
         tr.toDirInt = spec.dirInt;
-        if (this.rimLight) {
-            tr.fromRimCol.copy(this.rimLight.color);
-        }
-        tr.toRimCol.setHex(targetThemeIdx === 2 ? 0x55bbff : (targetThemeIdx === 1 ? 0xff7744 : 0x66cc99));
 
         if (this.ambientLight) {
             tr.fromAmbCol.copy(this.ambientLight.color);
@@ -16653,7 +16652,7 @@ startGame(diffMult) {
             tr.hasBloomTr = false;
         }
         if (typeof InteractiveGrassSystem !== 'undefined' && InteractiveGrassSystem.uniforms && InteractiveGrassSystem.uniforms.uBloomActive) {
-            InteractiveGrassSystem.uniforms.uBloomActive.value = (!isTouchDevice && !AppSettings.isLow && !!this.composer) ? 1.0 : 0.0;
+            InteractiveGrassSystem.uniforms.uBloomActive.value = (!AppSettings.isLow && !AppSettings.useMobileLimits && !!this.composer) ? 1.0 : 0.0;
         }
 
         this.themeTransition = tr;
@@ -16689,9 +16688,6 @@ startGame(diffMult) {
             if (this.dirLight) {
                 this.dirLight.color.copy(tr.fromDirCol).lerp(tr.toDirCol, t);
                 this.dirLight.intensity = tr.fromDirInt + (tr.toDirInt - tr.fromDirInt) * t;
-            }
-            if (this.rimLight) {
-                this.rimLight.color.copy(tr.fromRimCol).lerp(tr.toRimCol, t);
             }
             if (this.ambientLight) {
                 this.ambientLight.color.copy(tr.fromAmbCol).lerp(tr.toAmbCol, t);
@@ -17436,7 +17432,7 @@ startGame(diffMult) {
                     if (this.dirLight && !this.arenaEvolution && !this.bossLightClear) {
                         // FIX: Ripristina colore e intensità esatti del tema attuale definiti in setupFloor
                         let currentTheme = MAP_THEMES[this.currentThemeIndex] || MAP_THEMES[0];
-                        this.dirLight.intensity = (this.isCorrupted && !this.isBossFloor && this.corruptedType === 'darkness') ? 0.28 : ((this.currentThemeIndex === 2) ? 1.22 : 1.30);
+                        this.dirLight.intensity = (this.isCorrupted && this.corruptedType === 'darkness') ? 0.0 : ((this.currentThemeIndex === 2) ? 1.00 : 1.16);
                         this.dirLight.color.setHex(currentTheme.dirLight);
                     }
                 }, 180);
@@ -17996,17 +17992,14 @@ startGame(diffMult) {
 
         if (isTouchDevice && AppSettings.shadowsEnabled) {
             const activeMotion = (this.state === 'PLAYING' || this.state === 'WARPING_IN' || this.state === 'WARPING_OUT') && !(this.hitStopTimer && this.hitStopTimer > 0);
+            const shouldStepShadow = activeMotion ? ((AppSettings.fpsCap <= 30) || (this.frameCount % 2 === 0)) : (this.frameCount % 16 === 0);
             this.renderer.shadowMap.autoUpdate = false;
-            if (activeMotion) {
-                if (this.frameCount % 2 === 0) this.renderer.shadowMap.needsUpdate = true;
-            } else if (this.frameCount % 16 === 0) {
-                this.renderer.shadowMap.needsUpdate = true;
-            }
+            if (shouldStepShadow) this.renderer.shadowMap.needsUpdate = true;
         } else {
             this.renderer.shadowMap.autoUpdate = true;
         }
 
-        if (!isTouchDevice && !AppSettings.isLow && this.composer) {
+        if (!AppSettings.isLow && !AppSettings.useMobileLimits && this.composer) {
             PcUltraGraphics.uTrauma.value = this.trauma || 0;
             this.composer.render();
         } else {
@@ -18537,7 +18530,7 @@ const InteractiveGrassSystem = {
                 vColorRandom = fract(sin(dot(basePos.xz, vec2(12.9898, 78.233))) * 43758.5453);
 
         // Scarta i fili d'erba fuori dall'inquadratura mantenendo ampio margine attorno alla camera
-                if (abs(basePos.x - uCamPos.x) > 1080.0 || basePos.z > uCamPos.z + 120.0 || basePos.z < uCamPos.z - 1420.0) {
+                if (abs(basePos.x - uCamPos.x) > 1400.0 || basePos.z > uCamPos.z + 250.0 || basePos.z < uCamPos.z - 1700.0) {
                     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
                     return;
                 }
@@ -18550,22 +18543,20 @@ const InteractiveGrassSystem = {
                     windDir = vec2(windWave * 6.0, windWave * 4.0);
 
 // 2. Interazioni fisiche senza trigonometria superflua su mobile
-                    if (uWindCount > 0) {
-                        for(int i = 0; i < MAX_WIND; i++) {
-                            if (i >= uWindCount) break;
-                            
-                            vec3 windData = uWindSources[i];
-                            vec2 dir = basePos.xz - vec2(windData.x, windData.z);
-                            float distSq = dot(dir, dir);
-                            
-                            // Raggio d'azione 150 unità (distSq < 22500)
-                            if(distSq < 22500.0 && distSq > 0.1) {
-                                float invDist = inversesqrt(distSq);
-                                float dist = distSq * invDist;
-                                float falloff = 1.0 - (dist * 0.0066667);
-                                float pushForce = falloff * falloff;
-                                interactDir += (dir * invDist) * (pushForce * 40.0 * windData.y);
-                            }
+                    for(int i = 0; i < MAX_WIND; i++) {
+                        if (i >= uWindCount) break;
+                        
+                        vec3 windData = uWindSources[i];
+                        vec2 dir = basePos.xz - vec2(windData.x, windData.z);
+                        float distSq = dot(dir, dir);
+                        
+                        // Raggio d'azione 150 unità (distSq < 22500)
+                        if(distSq < 22500.0 && distSq > 0.1) {
+                            float invDist = inversesqrt(distSq);
+                            float dist = distSq * invDist;
+                            float falloff = 1.0 - (dist * 0.0066667);
+                            float pushForce = falloff * falloff;
+                            interactDir += (dir * invDist) * (pushForce * 40.0 * windData.y);
                         }
                     }
                 }
@@ -18614,18 +18605,18 @@ const InteractiveGrassSystem = {
                 #include <color_fragment>
                 
                 // Colore punta viva del ciuffo d'erba (colorazione attuale Three.js)
-                vec3 bladeTipCol = diffuseColor.rgb * 1.48;
-                vec3 dryTipColor = diffuseColor.rgb * vec3(1.18, 1.12, 0.94) * 1.36;
-                vec3 finalTipColor = mix(bladeTipCol, dryTipColor, vColorRandom * 0.35); float maxTipLuma = max(finalTipColor.r, max(finalTipColor.g, finalTipColor.b)); if (maxTipLuma > 0.90) { finalTipColor *= (0.90 + 0.16 * smoothstep(0.90, 1.35, maxTipLuma)) / maxTipLuma; }
+                vec3 bladeTipCol = diffuseColor.rgb * 1.35; 
+                vec3 dryTipColor = diffuseColor.rgb * vec3(1.16, 1.10, 0.92) * 1.28;
+                vec3 finalTipColor = mix(bladeTipCol, dryTipColor, vColorRandom * 0.35); float maxTipLuma = max(finalTipColor.r, max(finalTipColor.g, finalTipColor.b)); if (maxTipLuma > 0.82) { finalTipColor *= (0.82 + 0.18 * smoothstep(0.82, 1.25, maxTipLuma)) / maxTipLuma; }
                 
                 // Base del ciuffo: perfettamente calibrata sulla tonalitÃ  della texture del terreno sottostante (piÃ¹ scura)
                 // con micro-occlusione ambientale (AO) alla radice e leggera variazione organica per zero stacco
-                vec3 groundRootCol = uGroundGrassColor * mix(0.62, 0.88, vColorRandom);
+                vec3 groundRootCol = uGroundGrassColor * mix(0.52, 0.78, vColorRandom);
                 
                 // Sfumatura morbida radice-punta:
                 // Ancoraggio solido nei primi centimetri a terra (zero stacco col terreno),
                 // poi transizione fluida verso la punta che conserva l'attuale colorazione viva
-                float hCurve = pow(smoothstep(0.10, 0.82, vHeight), 1.35);
+                float hCurve = pow(smoothstep(0.15, 0.85, vHeight), 1.6);
                 vec3 finalGrassColor = mix(groundRootCol, finalTipColor, hCurve);
                 
                 diffuseColor.rgb = finalGrassColor;
@@ -18883,7 +18874,7 @@ const TreeCanopySystem = {
                 vec3 treeBase = (modelMatrix * basePos4).xyz;
 
                 // 1. Frustum Culling istantaneo su GPU prima di calcolare vento e matrici
-                if (abs(treeBase.x - uCamPos.x) > 1080.0 || treeBase.z > uCamPos.z + 120.0 || treeBase.z < uCamPos.z - 1420.0) {
+                if (abs(treeBase.x - uCamPos.x) > 1400.0 || treeBase.z > uCamPos.z + 240.0 || treeBase.z < uCamPos.z - 1750.0) {
                     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
                     return;
                 }
@@ -18956,9 +18947,9 @@ const TreeCanopySystem = {
                 `
                 #include <color_fragment>
                 vec3 baseAlbedo = diffuseColor.rgb;
-                vec3 innerColor = baseAlbedo * 0.58;
-                vec3 outerTipColor = baseAlbedo * 1.34;
-                vec3 warmTipColor = baseAlbedo * vec3(1.14, 1.06, 0.94);
+                vec3 innerColor = baseAlbedo * 0.50;
+                vec3 outerTipColor = baseAlbedo * 1.15;
+                vec3 warmTipColor = baseAlbedo * vec3(1.08, 1.00, 0.88);
                 vec3 finalTip = mix(outerTipColor, warmTipColor, vColorRandom * 0.55);
                 float curve = smoothstep(0.0, 1.0, vHeight * 0.75 + vCanopyShade * 0.25);
                 diffuseColor.rgb = mix(innerColor, finalTip, curve);
@@ -19118,7 +19109,7 @@ class GameMap {
             }
         }
 
-        const useDesktopMapMats = !isTouchDevice;
+        const useDesktopMapMats = !AppSettings.useMobileLimits;
         if (window._mapMatDesktop !== useDesktopMapMats) {
             window._mapMatDesktop = useDesktopMapMats;
             window.GLOBAL_DEBRIS_MAT = null;
@@ -19130,8 +19121,8 @@ class GameMap {
             window.GLOBAL_PIT_ACCENT_ASSETS = null;
         }
 
-        const grassModeMult = 1.0; // Allocata a capacità piena per scalare live tra Performance (26%), Bilanciato (62%) e Ultra (100%)
-        const maxGrassClusters = Math.ceil(floorCount * (isTouchDevice ? 125 : 150) * grassModeMult);
+        const grassModeMult = 1.0; // Allocata a capacità piena per scalare live tra Performance (30%), Bilanciata (68%) e Ultra (100%)
+        const maxGrassClusters = Math.ceil(floorCount * (isTouchDevice ? 72 : 150) * grassModeMult);
         const interactiveGrassMesh = new THREE.InstancedMesh(InteractiveGrassSystem.geo, InteractiveGrassSystem.mat, maxGrassClusters);
         interactiveGrassMesh.receiveShadow = true;
         interactiveGrassMesh.castShadow = false;
@@ -19141,10 +19132,10 @@ class GameMap {
         };
         let idxInteractiveGrass = 0; const grassPassTag = new Uint8Array(maxGrassClusters);
 
-        const maxDebris = Math.ceil(floorCount * (isTouchDevice ? 6 : 12));
+        const maxDebris = floorCount * (AppSettings.useMobileLimits ? 8 : (AppSettings.isMega ? 14 : 20));
         if (!window.GLOBAL_DEBRIS_GEO) window.GLOBAL_DEBRIS_GEO = new THREE.DodecahedronGeometry(2.5, 0);
         if (!window.GLOBAL_DEBRIS_MAT) {
-            window.GLOBAL_DEBRIS_MAT = isTouchDevice
+            window.GLOBAL_DEBRIS_MAT = AppSettings.useMobileLimits
                 ? new THREE.MeshLambertMaterial({ color: 0x2c3628 })
                 : new THREE.MeshStandardMaterial({ color: 0x2c3628, roughness: 0.88, metalness: 0.08 });
         }
@@ -19156,10 +19147,10 @@ class GameMap {
         meshDebris.castShadow = !isTouchDevice && AppSettings.isUltraPC;
         let idxDebris = 0;
 
-        const maxTrees = Math.max(32, Math.ceil(floorCount * 0.15));
+        const maxTrees = floorCount * (AppSettings.useMobileLimits ? 1 : 2);
         if (!window.GLOBAL_TREE_GEO) window.GLOBAL_TREE_GEO = createDarkTreeGeometry();
         if (!window.GLOBAL_TREE_MAT) {
-            window.GLOBAL_TREE_MAT = isTouchDevice
+            window.GLOBAL_TREE_MAT = AppSettings.useMobileLimits
                 ? new THREE.MeshLambertMaterial({ color: 0x241f16, emissive: 0x020101 })
                 : new THREE.MeshStandardMaterial({ color: 0x241f16, emissive: 0x020101, roughness: 0.9 });
         }
@@ -19274,7 +19265,7 @@ class GameMap {
 
        // Materiali rigorosamente Additive e senza scrittura sul Depth Buffer (per non buggare le particelle dietro)
         let runeMat = new THREE.MeshBasicMaterial({map: RUNE_TEX, color: 0xffffff, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false});
-        let rayMat = !AppSettings.isLow ? PcUltraGraphics.createGodRayMaterial() : new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.03, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide});
+        let rayMat = !AppSettings.useMobileLimits ? PcUltraGraphics.createGodRayMaterial() : new THREE.MeshBasicMaterial({color: 0xffffff, transparent: true, opacity: 0.03, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide});
         let floorGlowMat = new THREE.MeshBasicMaterial({map: GLOW_TEX, color: 0xffffff, transparent: true, opacity: 0.35, blending: THREE.AdditiveBlending, depthWrite: false});
         let imRunes = new THREE.InstancedMesh(window.GLOBAL_RUNE_GEO, runeMat, pillarCount + 1);
         this.runesMesh = imRunes;
@@ -19303,6 +19294,14 @@ class GameMap {
             tempDummy.position.set(bx, 0, bz); tempDummy.rotation.set(0, 0, 0); tempDummy.scale.setScalar(3.0); tempDummy.updateMatrix();
             imRays.setColorAt(idxRay, tempInstColor.setHex(bossRayHex));
             imRays.setMatrixAt(idxRay++, tempDummy.matrix);
+
+            if (!AppSettings.isLow) {
+                tempDummy.position.set(bx, 0, bz);
+                tempDummy.rotation.set(0, 0, 0);
+                tempDummy.scale.setScalar(3.0);
+                tempDummy.updateMatrix();
+
+            }
         }
 
         const maxCrates = isTouchDevice ? 25 : 60;
@@ -19462,7 +19461,7 @@ class GameMap {
                 } else {
                     pitColor = 0x2288d8; pitEmissive = 0x0f4d8a; pitOpacity = 0.96; pitRoughness = 0.45; pitMetalness = 0.05;
                 }
-            const useMobPit = isTouchDevice;
+            const useMobPit = AppSettings.useMobileLimits;
             const PitMatClass = useMobPit ? THREE.MeshPhongMaterial : THREE.MeshStandardMaterial;
             const pitMatParams = {
                 color: pitColor, emissive: pitEmissive,
@@ -19875,7 +19874,7 @@ class GameMap {
                 iceTex.needsUpdate = true;
 
                 if (!window.GLOBAL_ICE_MAT) {
-                    const useMobIce = isTouchDevice;
+                    const useMobIce = AppSettings.useMobileLimits;
                     const IceMatClass = useMobIce ? THREE.MeshPhongMaterial : THREE.MeshStandardMaterial;
                     const iceMatParams = {
                         color: 0xb8e6ff, emissive: 0x165a8a,
@@ -20777,7 +20776,7 @@ class GameMap {
                 const meshPitRimStones = new THREE.InstancedMesh(window.GLOBAL_PIT_BOULDER_GEO, rimStoneMat, rimStoneSpawns.length);
                 meshPitRimStones.renderOrder = -4;
                 meshPitRimStones.receiveShadow = true;
-                meshPitRimStones.castShadow = !isTouchDevice && AppSettings.shadowsEnabled;
+                meshPitRimStones.castShadow = AppSettings.shadowsEnabled;
 
                 const stoneObj = new THREE.Object3D();
                 const stoneCol = new THREE.Color();
@@ -20817,7 +20816,7 @@ class GameMap {
 
            const tempObj = new THREE.Object3D();
             const createPitPropMat = (opts) => {
-                if (isTouchDevice) {
+                if (AppSettings.useMobileLimits) {
                     const { roughness, metalness, flatShading, ...lambertOpts } = opts;
                     return new THREE.MeshLambertMaterial(lambertOpts);
                 }
@@ -20915,7 +20914,7 @@ class GameMap {
                 dynAccentMat.emissiveIntensity = refAccentMat.emissiveIntensity || 0.70;
 
                 const meshPitAccents = new THREE.InstancedMesh(accentGeo, dynAccentMat, accentSpawns.length);
-                meshPitAccents.castShadow = !isTouchDevice && AppSettings.shadowsEnabled;
+                meshPitAccents.castShadow = AppSettings.shadowsEnabled && !isTouchDevice;
                 meshPitAccents.receiveShadow = true;
                 meshPitAccents.renderOrder = 5;
                 meshPitAccents.position.y = padY;
@@ -21179,7 +21178,7 @@ class GameMap {
                         let patchScore = bandCore * 0.55 + meadowWave * 0.45;
                         if (patchScore > 0.15) {
                             let intensity = Math.min(1.0, (patchScore - 0.15) / 0.62);
-                            let baseMax = 110;
+                            let baseMax = Math.ceil((isTouchDevice ? 64 : 110));
                             let numBlades = Math.floor(baseMax * (0.5 + 0.5 * intensity));
                             let patchOffX = Math.sin(x * 1.7 + y * 2.3) * (nearPit ? 4 : 8);
                             let patchOffZ = Math.cos(x * 2.1 - y * 1.9) * (nearPit ? 4 : 8);
@@ -21221,8 +21220,8 @@ class GameMap {
                                 );
                                 dummy.updateMatrix();
                                 if (idxInteractiveGrass < maxGrassClusters) {
-                                    // Assegnazione concentrica per chiazza (0: Cuore 26% PERF, 1: Corpo 62% BILANC, 2: Bordo 100% ULTRA)
-                                    grassPassTag[idxInteractiveGrass] = radialT < 0.26 ? 0 : (radialT < 0.62 ? 1 : 2);
+                                    // Assegnazione concentrica per chiazza (0: Cuore 50% PERF, 1: Corpo 78% BILANC, 2: Bordo 100% ULTRA)
+                                    grassPassTag[idxInteractiveGrass] = radialT < 0.50 ? 0 : (radialT < 0.78 ? 1 : 2);
                                     interactiveGrassMesh.setMatrixAt(idxInteractiveGrass++, dummy.matrix);
                                 }
                             }
@@ -21284,7 +21283,7 @@ class GameMap {
                             let sz = 0.98 + ((hash * 3.7) % 1) * 0.10;
                             dummy.scale.set(sx, sy, sz);
                             dummy.rotation.set(0, hash * Math.PI * 2, 0);
-                            let shade = 0.88 + hash * 0.18;
+                            let shade = 0.78 + hash * 0.18;
                             window._wallTint.setRGB(shade, shade, shade);
                             dummy.updateMatrix();
                             wallMesh.setColorAt(wIdx, window._wallTint);
@@ -21367,7 +21366,15 @@ class GameMap {
                         imRays.setColorAt(idxRay, tempInstColor.setHex(obRayHex));
                         imRays.setMatrixAt(idxRay++, dummy.matrix);
 
-                        let currentRayIdx = _preRayIdx;
+                      let currentRayIdx = _preRayIdx;
+
+if (!AppSettings.isLow) {
+    dummy.position.set(px, 0, pz);
+    dummy.rotation.set(0, 0, 0);
+    dummy.scale.setScalar(1.4);
+    dummy.updateMatrix();
+    currentRayIdx = _preRayIdx;
+}
 
 let iconMat = aType === 'blue' ? SharedMat.iconTime : (aType === 'green' ? SharedMat.iconMountain : (aType === 'corrupted' ? SharedMat.iconCorrupted : SharedMat.iconHysteria));
 let iconSprite = new THREE.Sprite(iconMat);
@@ -21430,7 +21437,7 @@ Game.auras.push({
         }
         this.debrisStaticMesh = meshDebris;
         this.totalDebrisStaticSpawned = idxDebris;
-        meshDebris.count = Math.floor(idxDebris * (AppSettings.isLow ? 0.35 : (AppSettings.isUltra ? 1.0 : 0.70)));
+        meshDebris.count = Math.floor(idxDebris * (AppSettings.isLow ? 0.45 : (AppSettings.isUltra ? 1.0 : 0.75)));
         meshDebris.instanceMatrix.needsUpdate = true;
        meshTrees.count = idxTree;
         meshTrees.instanceMatrix.needsUpdate = true;
@@ -21555,7 +21562,7 @@ Game.auras.push({
 
         const texSmoke = Preloader.textures.smoke;
 
-        let fogCount = isTouchDevice ? 42 : 68; this.maxFogAllocated = fogCount;
+        let fogCount = isTouchDevice ? 48 : 95; this.maxFogAllocated = fogCount;
         // Allocata alla capienza massima del dispositivo per permettere il cambio live da Opzioni!
         // La visibilità e il .count effettivo sono regolati da AppSettings.targetFogCount
 
@@ -22224,7 +22231,7 @@ class Entity {
             }
         }
 
-       let pCount = AppSettings.isLow ? (isCrit ? 2 : 1) : (isCrit ? (AppSettings.useMobileLimits ? 4 : (AppSettings.isUltraPC ? 16 : 8)) : (AppSettings.useMobileLimits ? 2 : (AppSettings.isUltraPC ? 8 : 4)));
+       let pCount = AppSettings.isLow ? (isCrit ? 2 : 1) : (isCrit ? (AppSettings.useMobileLimits ? 4 : (AppSettings.isDesktopUltra ? 16 : 8)) : (AppSettings.useMobileLimits ? 2 : (AppSettings.isDesktopUltra ? 8 : 4)));
         for(let i=0; i<pCount; i++) Game.getParticle().spawn(this.x, 20, this.y, SharedMat.spriteBlood, 'blood');
 
         if (source === Game.player) {
@@ -22367,7 +22374,7 @@ class Player extends Entity {
                 roughness: 0.7,
                 metalness: 0.1,
                 map: PcUltraGraphics.getCharTex(),
-                bumpMap: (!isTouchDevice || AppSettings.isUltra) ? PcUltraGraphics.getCharTex() : null,
+                bumpMap: (!isTouchDevice || !AppSettings.isLow) ? PcUltraGraphics.getCharTex() : null,
                 bumpScale: 0.08
             }),
             new THREE.MeshPhongMaterial({color: 0xffff00, emissive: 0xffff00})
@@ -22847,7 +22854,7 @@ class Player extends Entity {
             else if (counts.red > 0 && counts.green > 0 && counts.blue === 0) {
                 comboName = "NOVA TOSSICA!"; color = "#99FF00";
                 Game.getHazard().spawn(this.x, this.y, 250, 1.5, this.stats.maxDmg * 2.2 * this.modifiers.dmgMult, 0x99FF00, 'nova_ring');
-                let pCount = AppSettings.isLow ? 15 : (AppSettings.isUltraPC ? 80 : 40);
+                let pCount = AppSettings.isLow ? 15 : (AppSettings.isDesktopUltra ? 80 : 40);
                 for(let i=0; i<pCount; i++) { let a = (Math.PI * 2 / pCount) * i; Game.getParticle().spawn(this.x, 20, this.y, SharedMat.spriteGreen, 'trail', a); }
                 if (!AppSettings.isLow) { let flash = Game.getParticle(); flash.spawn(this.x, 20, this.y, SharedMat.spriteGreen, 'flame'); flash.baseSize = 90; }
                 AudioEngine.playShoot('explosive_arrow');
@@ -22863,7 +22870,7 @@ class Player extends Entity {
                         e.takeDamage(this.stats.maxDmg * 2.5 * this.modifiers.dmgMult, this, true, true);
                     }
                 }
-                let pCount = AppSettings.isLow ? 30 : (AppSettings.isUltraPC ? 120 : 60);
+                let pCount = AppSettings.isLow ? 30 : (AppSettings.isDesktopUltra ? 120 : 60);
                 if (!AppSettings.isLow) {
                     let novaR = Game.getParticle(); novaR.spawn(this.x, 20, this.y, SharedMat.spriteRed, 'nova'); novaR.baseSize = 280;
                     let novaG = Game.getParticle(); novaG.spawn(this.x, 20, this.y, SharedMat.spriteGreen, 'nova'); novaG.baseSize = 240;
@@ -22908,7 +22915,7 @@ class Player extends Entity {
         let odColorHex = '#' + ESSENCE_COLORS[this.essence].toString(16).padStart(6, '0');
         Game.getFloatingText().spawn(this.x, this.y, "OVERDRIVE", odColorHex, 42, true);
         let mat = this.essence === 'red' ? SharedMat.spriteRed : (this.essence === 'blue' ? SharedMat.spriteBlue : SharedMat.spriteGreen);
-        let pCount = AppSettings.isLow ? 4 : (AppSettings.useMobileLimits ? 10 : (AppSettings.isUltraPC ? 60 : 30));
+        let pCount = AppSettings.isLow ? 4 : (AppSettings.useMobileLimits ? 10 : (AppSettings.isDesktopUltra ? 60 : 30));
         for(let i=0; i<pCount; i++) Game.getParticle().spawn(this.x, 20, this.y, mat, 'trail');
         this.fireGrimoireBolts();
     }
@@ -23243,9 +23250,9 @@ class Player extends Entity {
             this.modelParts.body.material.emissiveIntensity = 0.0;
         }
 
-        if (Game.isCorrupted && !Game.isBossFloor && Game.corruptedType === 'darkness') {
-            this.light.intensity = Game.ultimateActive ? 6.5 : 4.8;
-            this.light.distance = AppSettings.useMobileLimits ? 620 : 850;
+        if (Game.isCorrupted && Game.corruptedType === 'darkness') {
+            this.light.intensity = Game.ultimateActive ? 6.0 : 4.0;
+            this.light.distance = AppSettings.useMobileLimits ? 500 : 750;
         }
 
         if (this.shieldMesh.visible) {
@@ -24513,7 +24520,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
   flamethrower(dt) {
         if (Game.frameCount % (AppSettings.useMobileLimits ? 2 : 1) === 0) {
 
-            let pCount = AppSettings.isLow ? 2 : (AppSettings.useMobileLimits ? 4 : (AppSettings.isUltraPC ? 12 : 6));
+            let pCount = AppSettings.isLow ? 2 : (AppSettings.useMobileLimits ? 4 : (AppSettings.isDesktopUltra ? 12 : 6));
             for(let i=0; i<pCount; i++) {
 
                 let spread = MathUtils.randomRange(-0.8, 0.8);
@@ -25375,7 +25382,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             }
             this.stats.minDmg += 3; this.stats.maxDmg += 5;
             this.baseStats.minDmg += 3; this.baseStats.maxDmg += 5;
-            for(let i=0; i< (AppSettings.useMobileLimits?10:(AppSettings.isUltraPC?60:30)); i++) Game.getParticle().spawn(this.x, 20, this.y, SharedMat.spriteLevel, 'level');
+            for(let i=0; i< (AppSettings.useMobileLimits?10:(AppSettings.isDesktopUltra?60:30)); i++) Game.getParticle().spawn(this.x, 20, this.y, SharedMat.spriteLevel, 'level');
             Game.getFloatingText().spawn(this.x, this.y, "LEVEL UP!", '#ffffff', 28, true);
             AudioEngine.playLevelUp();
             Game.pushDebris(this.x, this.y, 250, 400);
@@ -28523,7 +28530,7 @@ if (this.type === 'roller') {
                 Game.getProjectile().spawn(this.x, this.y, a, speed, dmg, 'enemy', 'enemy_bolt', false, false, this);
             }
             Game.addTrauma(0.2);
-            let pCount = AppSettings.isLow ? 5 : (AppSettings.isUltraPC ? 40 : 20);
+            let pCount = AppSettings.isLow ? 5 : (AppSettings.isDesktopUltra ? 40 : 20);
             for (let i = 0; i < pCount; i++) Game.getParticle().spawn(this.x, 20, this.y, SharedMat.spritePink, 'spark');
             AudioEngine.playShoot('explosive_arrow');
             this.active = false; this.mesh.visible = false;
@@ -29795,7 +29802,7 @@ class BossEnemy extends Enemy {
         bigNova.spawn(this.x, 35, this.y, SharedMat.spriteWhite, 'nova');
         bigNova.baseSize = 340;
 
-        let pCount = AppSettings.isLow ? 8 : (AppSettings.useMobileLimits ? 20 : (AppSettings.isUltraPC ? 80 : 40));
+        let pCount = AppSettings.isLow ? 8 : (AppSettings.useMobileLimits ? 20 : (AppSettings.isDesktopUltra ? 80 : 40));
         for (let i = 0; i < pCount; i++) {
             Game.getParticle().spawn(this.x, 30, this.y, bloodMat, 'blood');
             Game.getParticle().spawn(this.x, 35, this.y, SharedMat.spriteYellow, 'spark');
@@ -29928,7 +29935,7 @@ class Projectile {
     }
 
     ensureStreakMesh() {
-        if (this.streakMesh || AppSettings.isLow || typeof PcUltraGraphics === 'undefined') return;
+        if (this.streakMesh || AppSettings.useMobileLimits || typeof PcUltraGraphics === 'undefined') return;
         if (!window.GLOBAL_STREAK_GEO) {
             window.GLOBAL_STREAK_GEO = new THREE.PlaneGeometry(1, 1);
             window.GLOBAL_STREAK_GEO.rotateX(-Math.PI / 2);
@@ -30110,7 +30117,7 @@ if (type === 'arrow' || type === 'homing_arrow') {
             this.groundGlow.visible = false;
         }
         if (this.streakMesh) {
-            if (!AppSettings.isLow && this.type !== 'arrow' && this.type !== 'orc_club' && isVisibleToCam && trailFormed) {
+            if (AppSettings.isUltraPC && this.type !== 'arrow' && this.type !== 'orc_club' && isVisibleToCam && trailFormed) {
                 const targetLen = this._streakLen || 40;
                 const formedLen = Math.min(targetLen, this._travelDist - trailClearDist);
                 if (formedLen > 0.5) {
@@ -30300,7 +30307,7 @@ if (type === 'arrow' || type === 'homing_arrow') {
        if (this.type === 'chain_lightning' || this.type === 'enemy_bolt') pMat = SharedMat.spriteBlue;
         if (this.type === 'homing_arrow') pMat = SharedMat.spriteGreen;
         if (this.type === 'orc_club') pMat = SharedMat.spriteWoodDust;
-        let count = AppSettings.isLow ? 1 : (AppSettings.useMobileLimits ? 2 : (AppSettings.isUltraPC ? 12 : 6));
+        let count = AppSettings.isLow ? 1 : (AppSettings.useMobileLimits ? 2 : (AppSettings.isDesktopUltra ? 12 : 6));
         for(let i=0; i<count; i++) Game.getParticle().spawn(this.x, 15, this.y, pMat, 'spark');
         if (this.type === 'fire_shape') Game.getHazard().spawn(this.x, this.y, 45, 8.0, this.damage, 0xff3300, 'enemy_fire');
        if (this.type === 'explosive_arrow') {
@@ -30346,7 +30353,7 @@ class Particle {
         if (type === 'nova') {
             this.life = 0.15;
 
-            this.baseSize = AppSettings.useMobileLimits ? MathUtils.randomRange(30, 50) : MathUtils.randomRange(60, 100);
+            this.baseSize = isTouchDevice ? (AppSettings.isUltra ? MathUtils.randomRange(36, 58) : MathUtils.randomRange(30, 50)) : MathUtils.randomRange(60, 100);
             this.vx = 0; this.vy = 0; this.vz = 0;
         } else if (type === 'ambient') {
 
@@ -30377,7 +30384,7 @@ class Particle {
             this.life = type === 'flame' ? MathUtils.randomRange(0.15, 0.45) : MathUtils.randomRange(0.2, 0.5);
 
             let defaultSize = type === 'blood' ? 12 : (type==='level'? 16 : (type==='flame'? 24 : 10));
-            this.baseSize = AppSettings.useMobileLimits ? defaultSize * 0.6 : defaultSize;
+            this.baseSize = isTouchDevice ? (AppSettings.isUltra ? defaultSize * 0.72 : defaultSize * 0.6) : defaultSize;
 
             let a = dirAngle !== null ? dirAngle + MathUtils.randomRange(-0.4, 0.4) : Math.random() * Math.PI * 2;
             let speed = type==='blood' ? MathUtils.randomRange(50, 200) : (type==='flame' ? MathUtils.randomRange(250, 750) : MathUtils.randomRange(100, 350));
@@ -31258,20 +31265,13 @@ function hideHighScores() { AudioEngine.playClick(); document.getElementById('hi
 
 const Preloader = {
     textures: {},
-    createCanvasNoise(baseColor, spotColor, count = 350, size = 128, highlightColor = 'rgba(255,255,255,0.16)') {
+    createCanvasNoise(baseColor, spotColor, count = 350, size = 128) {
         const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = baseColor; ctx.fillRect(0, 0, size, size);
         for(let i = 0; i < count; i++) {
             ctx.fillStyle = spotColor;
             ctx.fillRect(Math.random() * size, Math.random() * size, Math.random() * 3 + 1, Math.random() * 3 + 1);
-        }
-        if (highlightColor) {
-            const hiCount = Math.floor(count * 0.65);
-            ctx.fillStyle = highlightColor;
-            for(let i = 0; i < hiCount; i++) {
-                ctx.fillRect(Math.random() * size, Math.random() * size, Math.random() * 2.5 + 1, Math.random() * 2.5 + 1);
-            }
         }
         const tex = new THREE.CanvasTexture(canvas);
         tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
@@ -31284,11 +31284,12 @@ const Preloader = {
         const ctx = canvas.getContext('2d');
         let baseColor, darkColor, lightColor;
         if (type === '_lava') {
-            baseColor = '#8a4232'; darkColor = 'rgba(42,14,10,0.42)'; lightColor = 'rgba(235,118,68,0.38)';
+            baseColor = '#56100a'; darkColor = 'rgba(14,2,2,0.85)'; lightColor = 'rgba(215,62,18,0.52)';
         } else if (type === '_ice') {
-            baseColor = '#4a88b0'; darkColor = 'rgba(22,52,82,0.38)'; lightColor = 'rgba(145,215,250,0.36)';
+            baseColor = '#1c557d'; darkColor = 'rgba(12,30,50,0.55)'; lightColor = 'rgba(70,155,215,0.30)';
         } else {
-            baseColor = '#4a9438'; darkColor = 'rgba(24,58,18,0.36)'; lightColor = 'rgba(110,192,78,0.34)';
+
+            baseColor = '#3a7d2c'; darkColor = 'rgba(22,55,16,0.42)'; lightColor = 'rgba(78,158,54,0.30)';
         }
         ctx.fillStyle = baseColor;
         ctx.fillRect(0, 0, size, size);
@@ -31490,7 +31491,7 @@ const Preloader = {
                     tex._clones[i].image = imgSource;
                     tex._clones[i].needsUpdate = true;
                 }
-                if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && !AppSettings.isLow) {
+                if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) {
                     PcUltraGraphics.syncState();
                 }
             };
@@ -31557,17 +31558,17 @@ const Preloader = {
         const variants = ['', '_lava', '_ice'];
         const prefixMap = { '': 'forest', '_lava': 'lava', '_ice': 'ice' };
         const palette = {
-            '': { dirt: '#9e8c7a', rock: '#949ca3', wall: '#828b94' },
-            '_lava': { dirt: '#a68276', rock: '#9e7b72', wall: '#87655d' },
-            '_ice': { dirt: '#8ca6bd', rock: '#849fb8', wall: '#738ea6' }
+            '': { dirt: '#2e2518', rock: '#4b5563', wall: '#374151' },
+            '_lava': { dirt: '#280605', rock: '#8f1a1a', wall: '#400606' },
+            '_ice': { dirt: '#0f172a', rock: '#1e293b', wall: '#334155' }
         };
 
         variants.forEach(v => {
             const p = palette[v];
             const pref = prefixMap[v];
-            this.textures['dirt' + v] = loadTerrainTex(`${pref}_dirt.png`, () => this.createCanvasNoise(p.dirt, 'rgba(0,0,0,0.22)', 320));
+            this.textures['dirt' + v] = loadTerrainTex(`${pref}_dirt.png`, () => this.createCanvasNoise(p.dirt, 'rgba(0,0,0,0.4)', 350));
             this.textures['grass' + v] = loadTerrainTex(`${pref}_grass.png`, () => this.createGrassTexture(v));
-            this.textures['rock' + v] = loadTerrainTex(`${pref}_rock.png`, () => this.createCanvasNoise(p.rock, 'rgba(0,0,0,0.26)', 320));
+            this.textures['rock' + v] = loadTerrainTex(`${pref}_rock.png`, () => this.createCanvasNoise(p.rock, 'rgba(0,0,0,0.5)', 350));
             this.textures['wall' + v] = this.textures['rock' + v].clone();
         });
 // Pre-decodifica bg_piano.png e smoke.png in VRAM per eliminare il flash all'apertura dello Shop su Android WebView
