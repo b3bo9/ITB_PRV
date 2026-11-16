@@ -709,12 +709,12 @@
 
     #vignette {
         position: absolute; inset: 0;
-        background: radial-gradient(circle at center, transparent 65%, rgba(6, 12, 18, 0.25) 86%, rgba(2, 5, 10, 0.55) 100%);
+        background: radial-gradient(circle at center, transparent 74%, rgba(6, 12, 18, 0.16) 90%, rgba(2, 5, 10, 0.34) 100%);
         z-index: 3; pointer-events: none;
         transition: opacity 0.5s, background 0.6s ease;
     }
     .vignette-darkness-active {
-        background: radial-gradient(circle at center, transparent 25%, rgba(0, 0, 0, 0.9) 65%, rgba(0, 0, 0, 1) 100%) !important;
+        background: radial-gradient(circle at center, transparent 36%, rgba(4, 2, 10, 0.72) 72%, rgba(2, 1, 6, 0.92) 100%) !important;
         opacity: 1 !important;
         display: block !important;
         z-index: 8 !important;
@@ -739,7 +739,7 @@
     #low-hp-overlay.active {
         opacity: 1;
     }
-    /* Layer 1: Tunnel unico sovradimensionato (380vmax) così anche pulsando al minimo copre sempre il 100% degli angoli */
+    /* Layer 1: Tunnel unico sovradimensionato (380vmax) con ampia finestra nitida sul personaggio */
     #low-hp-tunnel {
         position: absolute;
         left: 50%;
@@ -753,16 +753,16 @@
         background: radial-gradient(
             circle at center,
             transparent 0%,
-            transparent 7.5%,
-            rgba(34, 38, 46, 0.45) 10.5%,
-            rgba(115, 10, 22, 0.78) 14.5%,
-            rgba(32, 4, 10, 0.94) 20%,
-            rgba(6, 2, 4, 0.98) 28%,
-            rgba(4, 2, 4, 1) 100%
+            transparent 15.5%,
+            rgba(120, 12, 24, 0.08) 19.5%,
+            rgba(165, 14, 28, 0.28) 24.5%,
+            rgba(95, 8, 18, 0.50) 31%,
+            rgba(28, 4, 10, 0.64) 40%,
+            rgba(14, 2, 6, 0.72) 100%
         );
         transform: translate3d(0px, 0px, 0px) scale3d(1.25, 1.25, 1);
     }
-    /* Layer 2: Solo Scanline CRT uniformi (nessun secondo cerchio che si sdoppia sul cellulare) */
+    /* Layer 2: Scanline CRT solo periferiche (maschera radiale lascia nitido il focus centrale sul personaggio) */
     #low-hp-crt {
         position: absolute;
         inset: 0;
@@ -774,15 +774,17 @@
             0deg,
             rgba(0, 0, 0, 0) 0px,
             rgba(0, 0, 0, 0) 2px,
-            rgba(10, 12, 16, 0.38) 3px,
-            rgba(0, 0, 0, 0.50) 4px
+            rgba(18, 6, 10, 0.20) 3px,
+            rgba(0, 0, 0, 0.28) 4px
         );
+        -webkit-mask-image: radial-gradient(circle at center, transparent 0%, transparent 46%, rgba(0, 0, 0, 0.45) 68%, rgba(0, 0, 0, 0.95) 94%);
+        mask-image: radial-gradient(circle at center, transparent 0%, transparent 46%, rgba(0, 0, 0, 0.45) 68%, rgba(0, 0, 0, 0.95) 94%);
     }
-    /* Su PC desktop aggiunge anche la desaturazione hardware sul layer CRT; su Android resta a costo 0 */
+    /* Su PC desktop aggiunge una desaturazione periferica moderata senza compromettere la lettura centrale */
     @media (hover: hover) and (pointer: fine) {
         #low-hp-crt {
-            backdrop-filter: grayscale(0.82) contrast(1.18);
-            -webkit-backdrop-filter: grayscale(0.82) contrast(1.18);
+            backdrop-filter: grayscale(0.55) contrast(1.08);
+            -webkit-backdrop-filter: grayscale(0.55) contrast(1.08);
         }
     }
 
@@ -4761,29 +4763,29 @@ const MathUtils = {
 const TILE_SIZE = 64; const CHUNK_SIZE = 30; const FIXED_TIME_STEP = 1 / 60; const MAX_TIME_STEP = 0.1;
 
   const MAP_THEMES = [
-
+    // TEMA 1: FORESTA INCANTATA (Verde smeraldo vivo, terra calda equilibrata e luce solare limpida)
     {
-        dirt: 0x828c78, grass: 0x8eb07c, rock: 0x7a8774, wall: 0x5c6b56,
-        grassShader: 0x13380d, grassEmissive: 0x030802, grassRoot: 0x194310,
-        canopyShader: 0x153b0f, canopyEmissive: 0x040802, tree: 0x1c1812,
-        debris: 0x232b20, groundMist: 0x4a6e54,
-        ambient: 0x24301c, dirLight: 0xe8f8c8, fog: 0x091208
+        dirt: 0x9ea88e, grass: 0x9ed484, rock: 0x92a38c, wall: 0x74886e,
+        grassShader: 0x1f5c18, grassEmissive: 0x051203, grassRoot: 0x28661e,
+        canopyShader: 0x23611b, canopyEmissive: 0x061404, tree: 0x362a1e,
+        debris: 0x3d4d38, groundMist: 0x5c8f6c,
+        ambient: 0x3d5432, dirLight: 0xf4ffd8, fog: 0x0e1c10
     },
-    // TEMA 2: FUCINA INFERNALE (Basalto scuro ad alto contrasto + luce ambra dorata che preserva i blu/verdi e stacca i telegraphs rossi)
+    // TEMA 2: FUCINA INFERNALE (Basalto bronzo/terracotta luminoso + luce ambra dorata che stacca i telegraphs rossi)
     {
-        dirt: 0x8c5e52, grass: 0xa85c4a, rock: 0x764e46, wall: 0x523028,
-        grassShader: 0x52140a, grassEmissive: 0x240602, grassRoot: 0x350704,
-        canopyShader: 0x441006, canopyEmissive: 0x1c0401, tree: 0x220b08,
-        debris: 0x321612, groundMist: 0x9e3820,
-        ambient: 0x3e1814, dirLight: 0xffa870, fog: 0x150506
+        dirt: 0xb07868, grass: 0xc97258, rock: 0x96665c, wall: 0x72483e,
+        grassShader: 0x7a2414, grassEmissive: 0x2e0903, grassRoot: 0x54150a,
+        canopyShader: 0x6b1e10, canopyEmissive: 0x240702, tree: 0x381812,
+        debris: 0x4d261e, groundMist: 0xb84a2c,
+        ambient: 0x59261e, dirLight: 0xffbe88, fog: 0x1f0a0c
     },
-
+    // TEMA 3: REGNO GLACIALE (Azzurro artico cristallino, turchese vivo e luce celeste nitida)
     {
-        dirt: 0x557fa3, grass: 0x6b9bc0, rock: 0x4f7699, wall: 0x385a78,
-        grassShader: 0x0e5280, grassEmissive: 0x02101d, grassRoot: 0x092946,
-        canopyShader: 0x14567f, canopyEmissive: 0x051b2f, tree: 0x11223a,
-        debris: 0x203e5a, groundMist: 0x488eba,
-        ambient: 0x1b3554, dirLight: 0xbad9f0, fog: 0x081225
+        dirt: 0x78a8cf, grass: 0x8cc2e8, rock: 0x6fa0c7, wall: 0x527ea3,
+        grassShader: 0x186ea8, grassEmissive: 0x061a2e, grassRoot: 0x124973,
+        canopyShader: 0x1d74ad, canopyEmissive: 0x08243d, tree: 0x1e3658,
+        debris: 0x345e82, groundMist: 0x5ca8d6,
+        ambient: 0x2b5078, dirLight: 0xdcf0ff, fog: 0x0c1b36
     }
 ];
 
@@ -5484,27 +5486,27 @@ const SkinSystem = {
 
     THEME_PRESETS: [
         {
-            fog: 0x090414, skyTop: 0x060412, skyHorizon: 0x1a0b36,
-            voidDeep: 0x1e063a, voidGlow: 0x9b4dff, mist: 0x7c3aed,
-            dirt: 0x7b8570, grass: 0x86ad72, rock: 0x5d6b57,
-            foliage: 0x143b0e, canopy: 0x174011,
+            fog: 0x0b0618, skyTop: 0x080616, skyHorizon: 0x221044,
+            voidDeep: 0x220842, voidGlow: 0xa855f7, mist: 0x8b5cf6,
+            dirt: 0x96a188, grass: 0x98cf7e, rock: 0x788a72,
+            foliage: 0x1f5c18, canopy: 0x23611b,
             water: 0x38bdf8, elem: 0x22FF44,
             sprite: 'spriteGreen', suffix: ''
         },
         {
-            fog: 0x12040a, skyTop: 0x0c0206, skyHorizon: 0x340c12,
-            voidDeep: 0x320506, voidGlow: 0xff5a1f, mist: 0xea580c,
-            dirt: 0x8a5d52, grass: 0xa65a48, rock: 0x5c3c36,
-            foliage: 0x52140a, canopy: 0x441006,
-            water: 0xff4500, elem: 0xFF1838,
+            fog: 0x18060c, skyTop: 0x100408, skyHorizon: 0x401218,
+            voidDeep: 0x3a080a, voidGlow: 0xff6b2b, mist: 0xf97316,
+            dirt: 0xa87264, grass: 0xc26e54, rock: 0x7c544c,
+            foliage: 0x7a2414, canopy: 0x6b1e10,
+            water: 0xff5514, elem: 0xFF1838,
             sprite: 'spriteRed', suffix: '_lava'
         },
         {
-            fog: 0x060a1c, skyTop: 0x030816, skyHorizon: 0x0c274d,
-            voidDeep: 0x061b3e, voidGlow: 0x38bdf8, mist: 0x0ea5e9,
-            dirt: 0x5882a6, grass: 0x6f9ec2, rock: 0x466685,
-            foliage: 0x0e5280, canopy: 0x14567f,
-            water: 0x286f9e, elem: 0x00CCFF,
+            fog: 0x081026, skyTop: 0x050c1e, skyHorizon: 0x123466,
+            voidDeep: 0x0a2452, voidGlow: 0x38bdf8, mist: 0x22d3ee,
+            dirt: 0x72a0c6, grass: 0x86bce2, rock: 0x5d82a3,
+            foliage: 0x186ea8, canopy: 0x1d74ad,
+            water: 0x3288bf, elem: 0x00CCFF,
             sprite: 'spriteBlue', suffix: '_ice'
         }
     ],
@@ -9625,10 +9627,10 @@ const PcUltraGraphics = {
                     float blockVar = sin(wp.x * 1.3 + cos(wp.y * 1.1) * 1.5) * 0.5 + 0.5;
                     float baseAO = smoothstep(-4.0, 18.0, vUltraWPos.y);
                     float topCrest = smoothstep(26.0, 48.0, vUltraWPos.y);
-                    diffuseColor.rgb = clamp(vec3(0.46) + (diffuseColor.rgb - vec3(0.46)) * mix(1.0, 1.16, uUltra), 0.0, 1.0);
-                    diffuseColor.rgb *= mix(0.66, 1.08, baseAO) * (0.94 + 0.12 * blockVar + 0.05 * strata);
-                    vec3 rimTint = uBiomeId > 1.5 ? vec3(0.05, 0.11, 0.18) : (uBiomeId > 0.5 ? vec3(0.15, 0.05, 0.02) : vec3(0.06, 0.10, 0.05));
-                    diffuseColor.rgb += rimTint * topCrest * 0.28 * uUltra;
+                    diffuseColor.rgb = clamp(vec3(0.38) + (diffuseColor.rgb - vec3(0.38)) * mix(1.0, 1.14, uUltra) + vec3(0.02) * uUltra, 0.0, 1.0);
+                    diffuseColor.rgb *= mix(0.78, 1.10, baseAO) * (0.95 + 0.11 * blockVar + 0.05 * strata);
+                    vec3 rimTint = uBiomeId > 1.5 ? vec3(0.07, 0.14, 0.22) : (uBiomeId > 0.5 ? vec3(0.18, 0.07, 0.03) : vec3(0.08, 0.14, 0.06));
+                    diffuseColor.rgb += rimTint * topCrest * 0.30 * uUltra;
                 }
                 `
                 : `
@@ -9639,11 +9641,11 @@ const PcUltraGraphics = {
                     float macroWaveA = sin(wp.x * 1.9 + cos(wp.y * 1.6) * 1.4);
                     float macroWaveB = cos(wp.y * 2.3 - sin(wp.x * 1.4) * 1.3);
                     float macro = clamp(0.5 + 0.26 * macroWaveA + 0.24 * macroWaveB, 0.0, 1.0);
-                    float micro = sin(vUltraWPos.x * 0.22) * cos(vUltraWPos.z * 0.22) * 0.04;
-                    vec3 coolShift = uBiomeId > 1.5 ? vec3(0.92, 0.98, 1.05) : (uBiomeId > 0.5 ? vec3(0.93, 0.87, 0.90) : vec3(0.91, 0.99, 0.93));
-                    vec3 warmShift = uBiomeId > 1.5 ? vec3(1.02, 1.05, 1.09) : (uBiomeId > 0.5 ? vec3(1.09, 0.95, 0.89) : vec3(1.05, 1.02, 0.91));
-                    diffuseColor.rgb = clamp(vec3(0.46) + (diffuseColor.rgb - vec3(0.46)) * mix(1.0, 1.16, uUltra), 0.0, 1.0);
-                    diffuseColor.rgb *= mix(coolShift, warmShift, macro) * (0.91 + macro * 0.11 + micro);
+                    float micro = sin(vUltraWPos.x * 0.22) * cos(vUltraWPos.z * 0.22) * 0.035;
+                    vec3 coolShift = uBiomeId > 1.5 ? vec3(0.95, 1.01, 1.07) : (uBiomeId > 0.5 ? vec3(0.97, 0.91, 0.93) : vec3(0.94, 1.02, 0.95));
+                    vec3 warmShift = uBiomeId > 1.5 ? vec3(1.04, 1.07, 1.11) : (uBiomeId > 0.5 ? vec3(1.10, 0.98, 0.92) : vec3(1.06, 1.04, 0.94));
+                    diffuseColor.rgb = clamp(vec3(0.38) + (diffuseColor.rgb - vec3(0.38)) * mix(1.0, 1.14, uUltra) + vec3(0.02) * uUltra, 0.0, 1.0);
+                    diffuseColor.rgb *= mix(coolShift, warmShift, macro) * (0.96 + macro * 0.10 + micro);
                 }
                 `
             );
@@ -9802,12 +9804,12 @@ const PcUltraGraphics = {
                     float linY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                     if (linY > 0.0001) {
                         float percY = sqrt(linY);
-                        float sCurve = -0.050 * sin(min(1.0, percY / 0.88) * 6.2831853) * (1.0 - smoothstep(0.65, 1.0, percY));
+                        float sCurve = 0.028 * sin(min(1.0, percY / 0.92) * 3.14159265) - 0.018 * sin(min(1.0, percY / 0.90) * 6.2831853);
                         float percMapped = max(0.0, percY + sCurve);
                         float targetY = percMapped * percMapped;
-                        if (targetY > 0.84) {
-                            float overY = targetY - 0.84;
-                            targetY = 0.84 + (0.28 * overY) / (0.28 + overY);
+                        if (targetY > 0.86) {
+                            float overY = targetY - 0.86;
+                            targetY = 0.86 + (0.28 * overY) / (0.28 + overY);
                         }
                         col *= (targetY / linY);
                     }
@@ -9815,7 +9817,7 @@ const PcUltraGraphics = {
                     float maxCh = max(col.r, max(col.g, col.b));
                     float minCh = min(col.r, min(col.g, col.b));
                     float satEst = maxCh > 0.0001 ? (maxCh - minCh) / maxCh : 0.0;
-                    float vibAmt = 0.13 * (1.0 - satEst * 0.65) * smoothstep(0.02, 0.12, gradedY) * (1.0 - smoothstep(0.68, 0.96, gradedY));
+                    float vibAmt = 0.16 * (1.0 - satEst * 0.65) * smoothstep(0.02, 0.12, gradedY) * (1.0 - smoothstep(0.68, 0.96, gradedY));
                     col = max(vec3(0.0), vec3(gradedY) + (col - vec3(gradedY)) * (1.0 + vibAmt));
 
                     vec3 shadowTint = uBiomeId > 1.5 ? vec3(0.96, 1.00, 1.04) : (uBiomeId > 0.5 ? vec3(1.04, 0.98, 0.97) : vec3(0.98, 1.02, 0.99));
@@ -11170,8 +11172,8 @@ function applyCharacterShader(material, rimStrength = 0.65) {
             '#include <dithering_fragment>',
             `
             // 1. Gradiente Verticale (Ambient Occlusion ai piedi, luce sulla testa)
-            float hLo = mix(0.55, 0.50, uUltra);
-            float hHi = mix(1.18, 1.18, uUltra);
+            float hLo = mix(0.66, 0.62, uUltra);
+            float hHi = mix(1.22, 1.24, uUltra);
             gl_FragColor.rgb *= mix(hLo, hHi, vCharHeight);
 
             // 2. Stylized Rim Light + micro-contorno morbido sui bordi estremi in PC Ultra / MEGA
@@ -14180,22 +14182,22 @@ const UI = {
             if (this.els.lowHpTunnel && this.els.lowHpCrt) {
                 let t = Math.max(0, Math.min(1, (0.30 - hpRatio) / 0.30));
                 let pulseWave = Math.sin(Game.playTime * 7.85);
-                let beat = Math.pow(Math.max(0, pulseWave), 4) * (0.05 + t * 0.06);
-                let tunnelScale = Math.max(0.62, (1.32 - t * 0.58) - beat);
+                let beat = Math.pow(Math.max(0, pulseWave), 4) * (0.035 + t * 0.045);
+                let tunnelScale = Math.max(0.86, (1.28 - t * 0.34) - beat);
 
                 let offX = 0, offY = 0;
                 if (typeof Game.toScreenPosition === 'function' && Game.camera) {
                     let sp = Game.toScreenPosition(Game.player.x, 14, Game.player.y);
                     if (sp && Number.isFinite(sp.x) && Number.isFinite(sp.y)) {
-                        let maxOffX = Game.width * 0.22;
-                        let maxOffY = Game.height * 0.22;
+                        let maxOffX = Game.width * 0.32;
+                        let maxOffY = Game.height * 0.32;
                         offX = Math.round(MathUtils.clamp(sp.x - Game.width * 0.5, -maxOffX, maxOffX));
                         offY = Math.round(MathUtils.clamp(sp.y - Game.height * 0.5, -maxOffY, maxOffY));
                     }
                 }
 
                 this.els.lowHpTunnel.style.transform = `translate3d(${offX}px, ${offY}px, 0) scale3d(${tunnelScale.toFixed(3)}, ${tunnelScale.toFixed(3)}, 1)`;
-                this.els.lowHpCrt.style.opacity = Math.min(1, 0.45 + t * 0.40 + beat * 1.2).toFixed(2);
+                this.els.lowHpCrt.style.opacity = Math.min(0.72, 0.25 + t * 0.32 + beat * 0.85).toFixed(2);
             }
         }
 
@@ -15212,6 +15214,15 @@ pushDebris(px, pz, radius, force) {
         }
     },
 
+    getCameraPlayerDist() {
+        let mScale = Math.max(0.62, this.getMobileAspectScale());
+        let isLandMobile = (AppSettings.orientation === 'landscape' && this.width > this.height);
+        let distFactor = isLandMobile ? 0.88 : 1.0;
+        let h = isTouchDevice ? 750 : 600;
+        let d = (isTouchDevice ? 500 : 400) * distFactor;
+        return Math.hypot(h, d) * mScale;
+    },
+
     resize() {
         const vp = AppSettings.getViewportSize();
         this.width = vp.width; this.height = vp.height; this.renderer.setSize(this.width, this.height);
@@ -15237,11 +15248,15 @@ pushDebris(px, pz, radius, force) {
         if (this.ambientGpuMat && this.ambientGpuMat.uniforms && this.ambientGpuMat.uniforms.uSizeScale) {
             this.ambientGpuMat.uniforms.uSizeScale.value = 1950.0 * AppSettings.getTargetPixelRatio();
         }
-        if (this.scene && this.scene.fog && !(this.isCorrupted && this.corruptedType === 'darkness')) {
-            let camScale = Math.max(0.62, this.getMobileAspectScale());
-            let camDist = (isTouchDevice ? 1150 : 750) * camScale;
-            this.scene.fog.near = camDist + (this.currentThemeIndex === 2 ? 160 : 180);
-            this.scene.fog.far = camDist + (this.currentThemeIndex === 2 ? 820 : 780);
+        if (this.scene && this.scene.fog && !this.bossLightClear) {
+            let camDist = this.getCameraPlayerDist();
+            if (this.isCorrupted && !this.isBossFloor && this.corruptedType === 'darkness') {
+                this.scene.fog.near = camDist - 35;
+                this.scene.fog.far = camDist + 390;
+            } else {
+                this.scene.fog.near = camDist + (this.currentThemeIndex === 2 ? 220 : 240);
+                this.scene.fog.far = camDist + (this.currentThemeIndex === 2 ? 960 : 920);
+            }
         }
         this.updateShadowConfig();
     },
@@ -15441,18 +15456,19 @@ if (this.floor >= 3 && type !== 'dark_prophet' && Math.random() < (this.floor <=
 
         if (Game.arenaEvolution) {
             if (!Game._colorDarkRed) {
-                Game._colorDarkRed = new THREE.Color(0x3a0010);
-                Game._colorBrightRed = new THREE.Color(0xff1100);
-                Game._colorPitchBlack = new THREE.Color(0x050000);
+                Game._colorDarkRed = new THREE.Color(0x7a3848);
+                Game._colorBrightRed = new THREE.Color(0xff9878);
+                Game._colorPitchBlack = new THREE.Color(0x1a0810);
             }
-            this.ambientLight.intensity += (0.12 - this.ambientLight.intensity) * dt * 1.5;
+            this.ambientLight.intensity += (0.62 - this.ambientLight.intensity) * dt * 1.5;
             this.ambientLight.color.lerp(Game._colorDarkRed, dt * 0.4);
             if (this.dirLight) {
-                this.dirLight.intensity += (0.15 - this.dirLight.intensity) * dt;
+                this.dirLight.intensity += (0.98 - this.dirLight.intensity) * dt;
                 this.dirLight.color.lerp(Game._colorBrightRed, dt * 0.4);
             }
             if (this.rimLight) {
-                this.rimLight.intensity += (0.0 - this.rimLight.intensity) * Math.min(1, dt * 1.5);
+                const targetEnrageRim = !AppSettings.isLow ? (AppSettings.isUltraPC ? 0.22 : 0.14) : 0.0;
+                this.rimLight.intensity += (targetEnrageRim - this.rimLight.intensity) * Math.min(1, dt * 1.5);
             }
             if (this.scene.environment) this.scene.environment = null;
             this.scene.background.lerp(Game._colorPitchBlack, dt * 0.4);
@@ -15474,7 +15490,7 @@ if (this.floor >= 3 && type !== 'dark_prophet' && Math.random() < (this.floor <=
                 this.dirLight.color.lerp(Game._colorDawnLight, dt * 1.4);
             }
             if (this.rimLight) {
-                const targetRim = (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? 0.20 : 0.0;
+                const targetRim = !AppSettings.isLow ? (AppSettings.isUltraPC ? 0.24 : 0.14) : 0.0;
                 this.rimLight.intensity += (targetRim - this.rimLight.intensity) * Math.min(1, dt * 1.4);
             }
             if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && AppSettings.isUltraPC && this.scene && !this.scene.environment) {
@@ -15964,8 +15980,7 @@ loop(timestamp) {
         this.map = new GameMap(CHUNK_SIZE, CHUNK_SIZE); this.map.generate(this.isBossFloor);
 
        let floorColor = 0xffffff; let mutatorText = "";
-        let camScale = Math.max(0.62, this.getMobileAspectScale());
-        let camDist = (isTouchDevice ? 1150 : 750) * camScale;
+        let camDist = this.getCameraPlayerDist();
 
         this.themeTransition = null;
 
@@ -16002,8 +16017,8 @@ loop(timestamp) {
             window.GLOBAL_DEBRIS_MAT.color.setHex(currentTheme.debris);
         }
 
-        let fogNear = camDist + (this.currentThemeIndex === 2 ? 160 : 180);
-        let fogFar = camDist + (this.currentThemeIndex === 2 ? 820 : 780);
+        let fogNear = camDist + (this.currentThemeIndex === 2 ? 220 : 240);
+        let fogFar = camDist + (this.currentThemeIndex === 2 ? 960 : 920);
         if (!this.scene.fog) {
             this.scene.fog = new THREE.Fog(currentTheme.fog, fogNear, fogFar);
         } else {
@@ -16015,8 +16030,8 @@ loop(timestamp) {
         Game.arenaEvolution = false;
         Game.bossLightClear = false;
 
-        let targetDirInt = (this.currentThemeIndex === 2) ? 1.08 : 1.24;
-        let targetAmbInt = (this.currentThemeIndex === 2) ? 0.54 : 0.62;
+        let targetDirInt = (this.currentThemeIndex === 2) ? 1.22 : 1.30;
+        let targetAmbInt = (this.currentThemeIndex === 2) ? 0.72 : 0.76;
         if (this.dirLight) {
             this.dirLight.intensity = targetDirInt;
             this.dirLight.color.setHex(currentTheme.dirLight);
@@ -16057,25 +16072,26 @@ loop(timestamp) {
             vignetteEl.style.opacity = AppSettings.isLow ? '0' : '1';
             if (this.currentThemeIndex === 0) {
 
-                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 68%, rgba(14, 24, 8, 0.22) 88%, rgba(5, 10, 3, 0.48) 100%)';
+                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 74%, rgba(14, 24, 8, 0.16) 90%, rgba(5, 10, 3, 0.34) 100%)';
             } else if (this.currentThemeIndex === 1) {
 
-                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 68%, rgba(38, 10, 8, 0.22) 88%, rgba(16, 4, 4, 0.48) 100%)';
+                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 74%, rgba(38, 10, 8, 0.16) 90%, rgba(16, 4, 4, 0.34) 100%)';
             } else {
 
-                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 68%, rgba(8, 16, 38, 0.24) 88%, rgba(3, 6, 16, 0.50) 100%)';
+                vignetteEl.style.background = 'radial-gradient(circle at center, transparent 74%, rgba(8, 16, 38, 0.18) 90%, rgba(3, 6, 16, 0.36) 100%)';
             }
         }
         if (this.isCorrupted && !this.isBossFloor) {
             this.difficultyMult *= 1.20;
             if (this.corruptedType === 'darkness') {
                 mutatorText = "OSCURITÀ OPPRIMENTE"; floorColor = "#aa00ff";
-                this.scene.fog.color.setHex(0x000000);
+                this.scene.fog.color.setHex(0x05030a);
 
-                this.scene.fog.near = camDist - 150;
-                this.scene.fog.far = camDist + 220;
-                this.scene.background.setHex(0x000000);
-                if (this.dirLight) this.dirLight.intensity = 0.00;
+                this.scene.fog.near = camDist - 35;
+                this.scene.fog.far = camDist + 390;
+                this.scene.background.setHex(0x05030a);
+                if (this.dirLight) this.dirLight.intensity = 0.28;
+                if (this.ambientLight) this.ambientLight.intensity = 0.64;
 
                 if (vignetteEl) vignetteEl.classList.add('vignette-darkness-active');
             }
@@ -16245,10 +16261,10 @@ startGame(diffMult) {
                 skirtShininess: 20, skirtSpec: 0x1a3348,
                 bankShininess: 24, bankSpec: 0x1e3c56,
                 rimShininess: 12, rimSpec: 0x101d29,
-                fogOp: 0.12, dirInt: 1.08, ambInt: 0.54,
+                fogOp: 0.12, dirInt: 1.22, ambInt: 0.72,
                 bedHex: 0x0d4a80, shoreY: -8.38, padY: -8.25,
                 portalHex: 0x00ddff, portalSprite: SharedMat.spriteBlue,
-                vignette: 'radial-gradient(circle at center, transparent 68%, rgba(8, 16, 38, 0.24) 88%, rgba(3, 6, 16, 0.50) 100%)'
+                vignette: 'radial-gradient(circle at center, transparent 74%, rgba(8, 16, 38, 0.18) 90%, rgba(3, 6, 16, 0.36) 100%)'
             };
         } else if (themeIdx === 1) {
             return {
@@ -16257,10 +16273,10 @@ startGame(diffMult) {
                 skirtShininess: 8, skirtSpec: 0x111111,
                 bankShininess: 10, bankSpec: 0x26100c,
                 rimShininess: 8, rimSpec: 0x121212,
-                fogOp: 0.13, dirInt: 1.24, ambInt: 0.62,
+                fogOp: 0.13, dirInt: 1.30, ambInt: 0.76,
                 bedHex: 0x240602, shoreY: -17.35, padY: -17.12,
                 portalHex: 0xff3300, portalSprite: SharedMat.spriteRed,
-                vignette: 'radial-gradient(circle at center, transparent 68%, rgba(38, 10, 8, 0.22) 88%, rgba(16, 4, 4, 0.48) 100%)'
+                vignette: 'radial-gradient(circle at center, transparent 74%, rgba(38, 10, 8, 0.16) 90%, rgba(16, 4, 4, 0.34) 100%)'
             };
         }
         return {
@@ -16269,10 +16285,10 @@ startGame(diffMult) {
             skirtShininess: 8, skirtSpec: 0x111111,
             bankShininess: 12, bankSpec: 0x182218,
             rimShininess: 8, rimSpec: 0x121212,
-            fogOp: 0.15, dirInt: 1.24, ambInt: 0.62,
+            fogOp: 0.15, dirInt: 1.30, ambInt: 0.76,
             bedHex: 0x166aa3, shoreY: -17.26, padY: -17.12,
             portalHex: 0x33ff66, portalSprite: SharedMat.spriteGreen,
-            vignette: 'radial-gradient(circle at center, transparent 68%, rgba(14, 24, 8, 0.22) 88%, rgba(5, 10, 3, 0.48) 100%)'
+            vignette: 'radial-gradient(circle at center, transparent 74%, rgba(14, 24, 8, 0.16) 90%, rgba(5, 10, 3, 0.34) 100%)'
         };
     },
 
@@ -16330,6 +16346,7 @@ startGame(diffMult) {
             fromBgCol: new THREE.Color(), toBgCol: new THREE.Color(),
             fromFogCol: new THREE.Color(), toFogCol: new THREE.Color(),
             fromDirCol: new THREE.Color(), toDirCol: new THREE.Color(),
+            fromRimCol: new THREE.Color(), toRimCol: new THREE.Color(),
             fromAmbCol: new THREE.Color(), toAmbCol: new THREE.Color(),
             fromAmbGround: new THREE.Color(), toAmbGround: new THREE.Color(),
             fromGrassShader: new THREE.Color(), toGrassShader: new THREE.Color(),
@@ -16414,6 +16431,10 @@ startGame(diffMult) {
         }
         tr.toDirCol.setHex(targetTheme.dirLight);
         tr.toDirInt = spec.dirInt;
+        if (this.rimLight) {
+            tr.fromRimCol.copy(this.rimLight.color);
+        }
+        tr.toRimCol.setHex(targetThemeIdx === 2 ? 0x55bbff : (targetThemeIdx === 1 ? 0xff7744 : 0x66cc99));
 
         if (this.ambientLight) {
             tr.fromAmbCol.copy(this.ambientLight.color);
@@ -16668,6 +16689,9 @@ startGame(diffMult) {
             if (this.dirLight) {
                 this.dirLight.color.copy(tr.fromDirCol).lerp(tr.toDirCol, t);
                 this.dirLight.intensity = tr.fromDirInt + (tr.toDirInt - tr.fromDirInt) * t;
+            }
+            if (this.rimLight) {
+                this.rimLight.color.copy(tr.fromRimCol).lerp(tr.toRimCol, t);
             }
             if (this.ambientLight) {
                 this.ambientLight.color.copy(tr.fromAmbCol).lerp(tr.toAmbCol, t);
@@ -17412,7 +17436,7 @@ startGame(diffMult) {
                     if (this.dirLight && !this.arenaEvolution && !this.bossLightClear) {
                         // FIX: Ripristina colore e intensità esatti del tema attuale definiti in setupFloor
                         let currentTheme = MAP_THEMES[this.currentThemeIndex] || MAP_THEMES[0];
-                        this.dirLight.intensity = (this.isCorrupted && this.corruptedType === 'darkness') ? 0.0 : ((this.currentThemeIndex === 2) ? 1.08 : 1.24);
+                        this.dirLight.intensity = (this.isCorrupted && !this.isBossFloor && this.corruptedType === 'darkness') ? 0.28 : ((this.currentThemeIndex === 2) ? 1.22 : 1.30);
                         this.dirLight.color.setHex(currentTheme.dirLight);
                     }
                 }, 180);
@@ -18590,18 +18614,18 @@ const InteractiveGrassSystem = {
                 #include <color_fragment>
                 
                 // Colore punta viva del ciuffo d'erba (colorazione attuale Three.js)
-                vec3 bladeTipCol = diffuseColor.rgb * 1.42; 
-                vec3 dryTipColor = diffuseColor.rgb * vec3(1.16, 1.10, 0.92) * 1.32;
-                vec3 finalTipColor = mix(bladeTipCol, dryTipColor, vColorRandom * 0.35); float maxTipLuma = max(finalTipColor.r, max(finalTipColor.g, finalTipColor.b)); if (maxTipLuma > 0.82) { finalTipColor *= (0.82 + 0.18 * smoothstep(0.82, 1.25, maxTipLuma)) / maxTipLuma; }
+                vec3 bladeTipCol = diffuseColor.rgb * 1.48;
+                vec3 dryTipColor = diffuseColor.rgb * vec3(1.18, 1.12, 0.94) * 1.36;
+                vec3 finalTipColor = mix(bladeTipCol, dryTipColor, vColorRandom * 0.35); float maxTipLuma = max(finalTipColor.r, max(finalTipColor.g, finalTipColor.b)); if (maxTipLuma > 0.90) { finalTipColor *= (0.90 + 0.16 * smoothstep(0.90, 1.35, maxTipLuma)) / maxTipLuma; }
                 
                 // Base del ciuffo: perfettamente calibrata sulla tonalitÃ  della texture del terreno sottostante (piÃ¹ scura)
                 // con micro-occlusione ambientale (AO) alla radice e leggera variazione organica per zero stacco
-                vec3 groundRootCol = uGroundGrassColor * mix(0.45, 0.72, vColorRandom);
+                vec3 groundRootCol = uGroundGrassColor * mix(0.62, 0.88, vColorRandom);
                 
                 // Sfumatura morbida radice-punta:
                 // Ancoraggio solido nei primi centimetri a terra (zero stacco col terreno),
                 // poi transizione fluida verso la punta che conserva l'attuale colorazione viva
-                float hCurve = pow(smoothstep(0.15, 0.85, vHeight), 1.6);
+                float hCurve = pow(smoothstep(0.10, 0.82, vHeight), 1.35);
                 vec3 finalGrassColor = mix(groundRootCol, finalTipColor, hCurve);
                 
                 diffuseColor.rgb = finalGrassColor;
@@ -18932,9 +18956,9 @@ const TreeCanopySystem = {
                 `
                 #include <color_fragment>
                 vec3 baseAlbedo = diffuseColor.rgb;
-                vec3 innerColor = baseAlbedo * 0.44;
-                vec3 outerTipColor = baseAlbedo * 1.24;
-                vec3 warmTipColor = baseAlbedo * vec3(1.08, 1.00, 0.88);
+                vec3 innerColor = baseAlbedo * 0.58;
+                vec3 outerTipColor = baseAlbedo * 1.34;
+                vec3 warmTipColor = baseAlbedo * vec3(1.14, 1.06, 0.94);
                 vec3 finalTip = mix(outerTipColor, warmTipColor, vColorRandom * 0.55);
                 float curve = smoothstep(0.0, 1.0, vHeight * 0.75 + vCanopyShade * 0.25);
                 diffuseColor.rgb = mix(innerColor, finalTip, curve);
@@ -19279,14 +19303,6 @@ class GameMap {
             tempDummy.position.set(bx, 0, bz); tempDummy.rotation.set(0, 0, 0); tempDummy.scale.setScalar(3.0); tempDummy.updateMatrix();
             imRays.setColorAt(idxRay, tempInstColor.setHex(bossRayHex));
             imRays.setMatrixAt(idxRay++, tempDummy.matrix);
-
-            if (!AppSettings.isLow) {
-                tempDummy.position.set(bx, 0, bz);
-                tempDummy.rotation.set(0, 0, 0);
-                tempDummy.scale.setScalar(3.0);
-                tempDummy.updateMatrix();
-
-            }
         }
 
         const maxCrates = isTouchDevice ? 25 : 60;
@@ -21268,7 +21284,7 @@ class GameMap {
                             let sz = 0.98 + ((hash * 3.7) % 1) * 0.10;
                             dummy.scale.set(sx, sy, sz);
                             dummy.rotation.set(0, hash * Math.PI * 2, 0);
-                            let shade = 0.78 + hash * 0.18;
+                            let shade = 0.88 + hash * 0.18;
                             window._wallTint.setRGB(shade, shade, shade);
                             dummy.updateMatrix();
                             wallMesh.setColorAt(wIdx, window._wallTint);
@@ -21351,15 +21367,7 @@ class GameMap {
                         imRays.setColorAt(idxRay, tempInstColor.setHex(obRayHex));
                         imRays.setMatrixAt(idxRay++, dummy.matrix);
 
-                      let currentRayIdx = _preRayIdx;
-
-if (!AppSettings.isLow) {
-    dummy.position.set(px, 0, pz);
-    dummy.rotation.set(0, 0, 0);
-    dummy.scale.setScalar(1.4);
-    dummy.updateMatrix();
-    currentRayIdx = _preRayIdx;
-}
+                        let currentRayIdx = _preRayIdx;
 
 let iconMat = aType === 'blue' ? SharedMat.iconTime : (aType === 'green' ? SharedMat.iconMountain : (aType === 'corrupted' ? SharedMat.iconCorrupted : SharedMat.iconHysteria));
 let iconSprite = new THREE.Sprite(iconMat);
@@ -23235,9 +23243,9 @@ class Player extends Entity {
             this.modelParts.body.material.emissiveIntensity = 0.0;
         }
 
-        if (Game.isCorrupted && Game.corruptedType === 'darkness') {
-            this.light.intensity = Game.ultimateActive ? 6.0 : 4.0;
-            this.light.distance = AppSettings.useMobileLimits ? 500 : 750;
+        if (Game.isCorrupted && !Game.isBossFloor && Game.corruptedType === 'darkness') {
+            this.light.intensity = Game.ultimateActive ? 6.5 : 4.8;
+            this.light.distance = AppSettings.useMobileLimits ? 620 : 850;
         }
 
         if (this.shieldMesh.visible) {
@@ -31250,13 +31258,20 @@ function hideHighScores() { AudioEngine.playClick(); document.getElementById('hi
 
 const Preloader = {
     textures: {},
-    createCanvasNoise(baseColor, spotColor, count = 350, size = 128) {
+    createCanvasNoise(baseColor, spotColor, count = 350, size = 128, highlightColor = 'rgba(255,255,255,0.16)') {
         const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = baseColor; ctx.fillRect(0, 0, size, size);
         for(let i = 0; i < count; i++) {
             ctx.fillStyle = spotColor;
             ctx.fillRect(Math.random() * size, Math.random() * size, Math.random() * 3 + 1, Math.random() * 3 + 1);
+        }
+        if (highlightColor) {
+            const hiCount = Math.floor(count * 0.65);
+            ctx.fillStyle = highlightColor;
+            for(let i = 0; i < hiCount; i++) {
+                ctx.fillRect(Math.random() * size, Math.random() * size, Math.random() * 2.5 + 1, Math.random() * 2.5 + 1);
+            }
         }
         const tex = new THREE.CanvasTexture(canvas);
         tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
@@ -31269,12 +31284,11 @@ const Preloader = {
         const ctx = canvas.getContext('2d');
         let baseColor, darkColor, lightColor;
         if (type === '_lava') {
-            baseColor = '#56100a'; darkColor = 'rgba(14,2,2,0.85)'; lightColor = 'rgba(215,62,18,0.52)';
+            baseColor = '#8a4232'; darkColor = 'rgba(42,14,10,0.42)'; lightColor = 'rgba(235,118,68,0.38)';
         } else if (type === '_ice') {
-            baseColor = '#1c557d'; darkColor = 'rgba(12,30,50,0.55)'; lightColor = 'rgba(70,155,215,0.30)';
+            baseColor = '#4a88b0'; darkColor = 'rgba(22,52,82,0.38)'; lightColor = 'rgba(145,215,250,0.36)';
         } else {
-
-            baseColor = '#3a7d2c'; darkColor = 'rgba(22,55,16,0.42)'; lightColor = 'rgba(78,158,54,0.30)';
+            baseColor = '#4a9438'; darkColor = 'rgba(24,58,18,0.36)'; lightColor = 'rgba(110,192,78,0.34)';
         }
         ctx.fillStyle = baseColor;
         ctx.fillRect(0, 0, size, size);
@@ -31476,7 +31490,7 @@ const Preloader = {
                     tex._clones[i].image = imgSource;
                     tex._clones[i].needsUpdate = true;
                 }
-                if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) {
+                if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && !AppSettings.isLow) {
                     PcUltraGraphics.syncState();
                 }
             };
@@ -31543,17 +31557,17 @@ const Preloader = {
         const variants = ['', '_lava', '_ice'];
         const prefixMap = { '': 'forest', '_lava': 'lava', '_ice': 'ice' };
         const palette = {
-            '': { dirt: '#2e2518', rock: '#4b5563', wall: '#374151' },
-            '_lava': { dirt: '#280605', rock: '#8f1a1a', wall: '#400606' },
-            '_ice': { dirt: '#0f172a', rock: '#1e293b', wall: '#334155' }
+            '': { dirt: '#9e8c7a', rock: '#949ca3', wall: '#828b94' },
+            '_lava': { dirt: '#a68276', rock: '#9e7b72', wall: '#87655d' },
+            '_ice': { dirt: '#8ca6bd', rock: '#849fb8', wall: '#738ea6' }
         };
 
         variants.forEach(v => {
             const p = palette[v];
             const pref = prefixMap[v];
-            this.textures['dirt' + v] = loadTerrainTex(`${pref}_dirt.png`, () => this.createCanvasNoise(p.dirt, 'rgba(0,0,0,0.4)', 350));
+            this.textures['dirt' + v] = loadTerrainTex(`${pref}_dirt.png`, () => this.createCanvasNoise(p.dirt, 'rgba(0,0,0,0.22)', 320));
             this.textures['grass' + v] = loadTerrainTex(`${pref}_grass.png`, () => this.createGrassTexture(v));
-            this.textures['rock' + v] = loadTerrainTex(`${pref}_rock.png`, () => this.createCanvasNoise(p.rock, 'rgba(0,0,0,0.5)', 350));
+            this.textures['rock' + v] = loadTerrainTex(`${pref}_rock.png`, () => this.createCanvasNoise(p.rock, 'rgba(0,0,0,0.26)', 320));
             this.textures['wall' + v] = this.textures['rock' + v].clone();
         });
 // Pre-decodifica bg_piano.png e smoke.png in VRAM per eliminare il flash all'apertura dello Shop su Android WebView
