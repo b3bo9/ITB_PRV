@@ -10563,7 +10563,7 @@ const CelShadingSystem = {
         });
         mat._isGlobalCached = true;
         mat._isToonOutlineMat = true;
-        if (typeof SharedMatSet !== 'undefined') SharedMatSet.add(mat);
+        if (this._matSet) this._matSet.add(mat);
         this._outlineMaterials[key] = mat;
         return mat;
     },
@@ -10735,6 +10735,7 @@ const CelShadingSystem = {
 
 SharedMat.toonOutline = CelShadingSystem.getOutlineMaterial(1.0, 0x0b0a14);
 const SharedMatSet = new Set(Object.values(SharedMat));
+CelShadingSystem._matSet = SharedMatSet;
 
 CelShadingSystem.apply(SharedMat.orcClub, { tag: 'prop_club', shadowFloor: 0.34, rimStrength: 0.35 });
 CelShadingSystem.apply(SharedMat.enemyDark, { tag: 'prop_dark', shadowFloor: 0.36, rimStrength: 0.42 });
