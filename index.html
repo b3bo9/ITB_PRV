@@ -4153,10 +4153,15 @@ const AudioEngine = {
             osc1.connect(gain); osc2.connect(gain); gain.connect(dest);
             osc1.start(t); osc2.start(t); osc1.stop(t + 0.12); osc2.stop(t + 0.12);
         } else if (type === 'crit') {
+            let dest = this.masterCompressor || this.ctx.destination;
             let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
             osc.type = 'triangle'; osc.frequency.setValueAtTime(900 * r, t); osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
             gain.gain.setValueAtTime(0.08, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.15);
-            osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t); osc.stop(t + 0.15);
+            osc.connect(gain); gain.connect(dest); osc.start(t); osc.stop(t + 0.15);
+            let hiOsc = this.ctx.createOscillator(); let hiGain = this.ctx.createGain();
+            hiOsc.type = 'sine'; hiOsc.frequency.setValueAtTime(1650 * r, t); hiOsc.frequency.exponentialRampToValueAtTime(720, t + 0.11);
+            hiGain.gain.setValueAtTime(0.07, t); hiGain.gain.exponentialRampToValueAtTime(0.002, t + 0.11);
+            hiOsc.connect(hiGain); hiGain.connect(dest); hiOsc.start(t); hiOsc.stop(t + 0.11);
             this.playNoise(0.1, 'high', 0.02);
         } else if (type === 'player') {
             let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
@@ -4505,88 +4510,431 @@ playCoin() {
 
         let t = this.ctx.currentTime;
         let dest = this.masterCompressor || this.ctx.destination;
+        let r = 0.92 + Math.random() * 0.16;
 
         if (envType === 'water') {
             if (isMoving) {
-                this.envSoundTimer = MathUtils.randomRange(0.24, 0.34);
+                this.envSoundTimer = MathUtils.randomRange(0.22, 0.32);
 
                 let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
                 let filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass';
-                filter.Q.value = 2.5;
-                filter.frequency.setValueAtTime(420, t);
-                filter.frequency.exponentialRampToValueAtTime(950, t + 0.14);
+                filter.Q.value = 1.8;
+                filter.frequency.setValueAtTime(380, t);
+                filter.frequency.exponentialRampToValueAtTime(1180, t + 0.15);
                 let gain = this.ctx.createGain();
-                gain.gain.setValueAtTime(0.06, t);
-                gain.gain.exponentialRampToValueAtTime(0.005, t + 0.14);
+                gain.gain.setValueAtTime(0.001, t);
+                gain.gain.linearRampToValueAtTime(0.095, t + 0.014);
+                gain.gain.exponentialRampToValueAtTime(0.003, t + 0.15);
                 src.connect(filter); filter.connect(gain); gain.connect(dest);
-                src.start(t); src.stop(t + 0.14);
+                src.start(t); src.stop(t + 0.16);
+
+                let src2 = this.ctx.createBufferSource(); src2.buffer = this.noiseBuffer;
+                let f2 = this.ctx.createBiquadFilter(); f2.type = 'bandpass';
+                f2.Q.value = 2.0;
+                f2.frequency.setValueAtTime(650, t + 0.055);
+                f2.frequency.exponentialRampToValueAtTime(1550, t + 0.155);
+                let g2 = this.ctx.createGain();
+                g2.gain.setValueAtTime(0.001, t + 0.055);
+                g2.gain.linearRampToValueAtTime(0.055, t + 0.07);
+                g2.gain.exponentialRampToValueAtTime(0.002, t + 0.155);
+                src2.connect(f2); f2.connect(g2); g2.connect(dest);
+                src2.start(t + 0.055); src2.stop(t + 0.165);
 
                 let osc = this.ctx.createOscillator(); let oGain = this.ctx.createGain();
                 osc.type = 'sine';
-                let baseFreq = MathUtils.randomRange(300, 440);
-                osc.frequency.setValueAtTime(baseFreq, t);
-                osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.6, t + 0.08);
-                oGain.gain.setValueAtTime(0.035, t);
-                oGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+                osc.frequency.setValueAtTime(260 * r, t);
+                osc.frequency.exponentialRampToValueAtTime(590 * r, t + 0.085);
+                oGain.gain.setValueAtTime(0.048, t);
+                oGain.gain.exponentialRampToValueAtTime(0.001, t + 0.085);
                 osc.connect(oGain); oGain.connect(dest);
-                osc.start(t); osc.stop(t + 0.08);
+                osc.start(t); osc.stop(t + 0.09);
+
+                let osc2 = this.ctx.createOscillator(); let oGain2 = this.ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(420 * r, t + 0.045);
+                osc2.frequency.exponentialRampToValueAtTime(920 * r, t + 0.12);
+                oGain2.gain.setValueAtTime(0.035, t + 0.045);
+                oGain2.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+                osc2.connect(oGain2); oGain2.connect(dest);
+                osc2.start(t + 0.045); osc2.stop(t + 0.125);
             } else {
-                this.envSoundTimer = MathUtils.randomRange(0.7, 1.2);
+                this.envSoundTimer = MathUtils.randomRange(0.60, 1.05);
+
+                let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+                let filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass';
+                filter.Q.value = 2.2;
+                filter.frequency.setValueAtTime(600, t);
+                let gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.001, t);
+                gain.gain.linearRampToValueAtTime(0.018, t + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.20);
+                src.connect(filter); filter.connect(gain); gain.connect(dest);
+                src.start(t); src.stop(t + 0.21);
 
                 let osc = this.ctx.createOscillator(); let oGain = this.ctx.createGain();
                 osc.type = 'sine';
-                osc.frequency.setValueAtTime(280, t);
-                osc.frequency.exponentialRampToValueAtTime(460, t + 0.1);
-                oGain.gain.setValueAtTime(0.015, t);
-                oGain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+                osc.frequency.setValueAtTime(310 * r, t);
+                osc.frequency.exponentialRampToValueAtTime(540 * r, t + 0.10);
+                oGain.gain.setValueAtTime(0.018, t);
+                oGain.gain.exponentialRampToValueAtTime(0.001, t + 0.10);
                 osc.connect(oGain); oGain.connect(dest);
-                osc.start(t); osc.stop(t + 0.1);
+                osc.start(t); osc.stop(t + 0.105);
+
+                let osc2 = this.ctx.createOscillator(); let oGain2 = this.ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(520 * r, t + 0.06);
+                osc2.frequency.exponentialRampToValueAtTime(780 * r, t + 0.14);
+                oGain2.gain.setValueAtTime(0.012, t + 0.06);
+                oGain2.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+                osc2.connect(oGain2); oGain2.connect(dest);
+                osc2.start(t + 0.06); osc2.stop(t + 0.145);
             }
         } else if (envType === 'lava') {
-            this.envSoundTimer = isMoving ? MathUtils.randomRange(0.18, 0.26) : MathUtils.randomRange(0.38, 0.55);
+            this.envSoundTimer = isMoving ? MathUtils.randomRange(0.18, 0.26) : MathUtils.randomRange(0.36, 0.54);
+
+            let rumble = this.ctx.createOscillator();
+            let lp = this.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(240, t);
+            let rGain = this.ctx.createGain();
+            rumble.type = 'sawtooth';
+            rumble.frequency.setValueAtTime(72 * r, t);
+            rumble.frequency.exponentialRampToValueAtTime(26, t + 0.20);
+            rGain.gain.setValueAtTime(isMoving ? 0.11 : 0.06, t);
+            rGain.gain.exponentialRampToValueAtTime(0.003, t + 0.20);
+            rumble.connect(lp); lp.connect(rGain); rGain.connect(dest);
+            rumble.start(t); rumble.stop(t + 0.21);
+
+            let popOsc = this.ctx.createOscillator(); let pGain = this.ctx.createGain();
+            popOsc.type = 'triangle';
+            popOsc.frequency.setValueAtTime(95 * r, t);
+            popOsc.frequency.exponentialRampToValueAtTime(260 * r, t + 0.055);
+            popOsc.frequency.exponentialRampToValueAtTime(55, t + 0.14);
+            pGain.gain.setValueAtTime(0.001, t);
+            pGain.gain.linearRampToValueAtTime(isMoving ? 0.085 : 0.05, t + 0.02);
+            pGain.gain.exponentialRampToValueAtTime(0.002, t + 0.14);
+            popOsc.connect(pGain); pGain.connect(dest);
+            popOsc.start(t); popOsc.stop(t + 0.145);
 
             let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
-            let filter = this.ctx.createBiquadFilter(); filter.type = 'highpass';
-            filter.frequency.setValueAtTime(2000, t);
+            let filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass';
+            filter.Q.value = 1.5;
+            filter.frequency.setValueAtTime(1600, t);
+            filter.frequency.exponentialRampToValueAtTime(3400, t + 0.18);
             let gain = this.ctx.createGain();
-            gain.gain.setValueAtTime(isMoving ? 0.055 : 0.025, t);
-            gain.gain.exponentialRampToValueAtTime(0.003, t + 0.16);
+            gain.gain.setValueAtTime(isMoving ? 0.075 : 0.038, t);
+            gain.gain.exponentialRampToValueAtTime(0.002, t + 0.18);
             src.connect(filter); filter.connect(gain); gain.connect(dest);
-            src.start(t); src.stop(t + 0.16);
-
-            let osc = this.ctx.createOscillator(); let oGain = this.ctx.createGain();
-            osc.type = 'triangle';
-            let lowFreq = MathUtils.randomRange(65, 95);
-            osc.frequency.setValueAtTime(lowFreq, t);
-            osc.frequency.exponentialRampToValueAtTime(28, t + 0.15);
-            oGain.gain.setValueAtTime(isMoving ? 0.08 : 0.04, t);
-            oGain.gain.exponentialRampToValueAtTime(0.005, t + 0.15);
-            osc.connect(oGain); oGain.connect(dest);
-            osc.start(t); osc.stop(t + 0.15);
+            src.start(t); src.stop(t + 0.19);
         } else if (envType === 'ice') {
             if (!isMoving) { this.envSoundTimer = 0.1; return; }
             this.envSoundTimer = MathUtils.randomRange(0.20, 0.30);
 
             let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
             let filter = this.ctx.createBiquadFilter(); filter.type = 'bandpass';
-            filter.Q.value = 3.5;
-            filter.frequency.setValueAtTime(2800, t);
-            filter.frequency.linearRampToValueAtTime(3800, t + 0.1);
+            filter.Q.value = 3.2;
+            filter.frequency.setValueAtTime(3200, t);
+            filter.frequency.linearRampToValueAtTime(4600, t + 0.11);
             let gain = this.ctx.createGain();
-            gain.gain.setValueAtTime(0.04, t);
-            gain.gain.exponentialRampToValueAtTime(0.002, t + 0.1);
+            gain.gain.setValueAtTime(0.048, t);
+            gain.gain.exponentialRampToValueAtTime(0.002, t + 0.11);
             src.connect(filter); filter.connect(gain); gain.connect(dest);
-            src.start(t); src.stop(t + 0.1);
+            src.start(t); src.stop(t + 0.12);
 
             let osc = this.ctx.createOscillator(); let oGain = this.ctx.createGain();
             osc.type = 'sine';
-            let iceFreq = MathUtils.randomRange(1650, 2100);
-            osc.frequency.setValueAtTime(iceFreq, t);
-            osc.frequency.exponentialRampToValueAtTime(iceFreq * 1.25, t + 0.07);
-            oGain.gain.setValueAtTime(0.018, t);
-            oGain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+            let iceFreq1 = MathUtils.randomRange(1850, 2200);
+            osc.frequency.setValueAtTime(iceFreq1, t);
+            osc.frequency.exponentialRampToValueAtTime(2600 * r, t + 0.08);
+            oGain.gain.setValueAtTime(0.020, t);
+            oGain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
             osc.connect(oGain); oGain.connect(dest);
-            osc.start(t); osc.stop(t + 0.07);
+            osc.start(t); osc.stop(t + 0.085);
+
+            let osc2 = this.ctx.createOscillator(); let oGain2 = this.ctx.createGain();
+            osc2.type = 'sine';
+            let iceFreq2 = MathUtils.randomRange(2750, 3150);
+            osc2.frequency.setValueAtTime(iceFreq2, t);
+            osc2.frequency.exponentialRampToValueAtTime(3600 * r, t + 0.065);
+            oGain2.gain.setValueAtTime(0.014, t);
+            oGain2.gain.exponentialRampToValueAtTime(0.001, t + 0.065);
+            osc2.connect(oGain2); oGain2.connect(dest);
+            osc2.start(t); osc2.stop(t + 0.07);
+        }
+    },
+
+    playPitSplash(envType, isDash = false) {
+        if (this.sfxMuted || !this.ctx || this.ctx.state === 'suspended') return;
+        const now = Date.now();
+        if (this._lastPitSplashTime && now - this._lastPitSplashTime < 180) return;
+        this._lastPitSplashTime = now;
+
+        let t = this.ctx.currentTime;
+        let dest = this.masterCompressor || this.ctx.destination;
+
+        if (envType === 'water') {
+            let bodyOsc = this.ctx.createOscillator(); let bodyGain = this.ctx.createGain();
+            bodyOsc.type = 'sine';
+            bodyOsc.frequency.setValueAtTime(195, t);
+            bodyOsc.frequency.exponentialRampToValueAtTime(52, t + 0.18);
+            bodyGain.gain.setValueAtTime(isDash ? 0.22 : 0.14, t);
+            bodyGain.gain.exponentialRampToValueAtTime(0.002, t + 0.18);
+            bodyOsc.connect(bodyGain); bodyGain.connect(dest);
+            bodyOsc.start(t); bodyOsc.stop(t + 0.19);
+
+            if (this.noiseBuffer) {
+                let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+                let bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4;
+                bp.frequency.setValueAtTime(320, t);
+                bp.frequency.exponentialRampToValueAtTime(1650, t + 0.22);
+                let nGain = this.ctx.createGain();
+                nGain.gain.setValueAtTime(0.001, t);
+                nGain.gain.linearRampToValueAtTime(isDash ? 0.20 : 0.13, t + 0.02);
+                nGain.gain.exponentialRampToValueAtTime(0.002, t + 0.22);
+                src.connect(bp); bp.connect(nGain); nGain.connect(dest);
+                src.start(t); src.stop(t + 0.23);
+            }
+
+            const dropFreqs = [360, 520, 740];
+            for (let i = 0; i < dropFreqs.length; i++) {
+                let st = t + i * 0.038;
+                let dOsc = this.ctx.createOscillator(); let dGain = this.ctx.createGain();
+                dOsc.type = 'sine';
+                dOsc.frequency.setValueAtTime(dropFreqs[i], st);
+                dOsc.frequency.exponentialRampToValueAtTime(dropFreqs[i] * 1.75, st + 0.07);
+                dGain.gain.setValueAtTime(isDash ? 0.06 : 0.045, st);
+                dGain.gain.exponentialRampToValueAtTime(0.001, st + 0.07);
+                dOsc.connect(dGain); dGain.connect(dest);
+                dOsc.start(st); dOsc.stop(st + 0.075);
+            }
+        } else if (envType === 'lava') {
+            let impOsc = this.ctx.createOscillator(); let impGain = this.ctx.createGain();
+            impOsc.type = 'sawtooth';
+            impOsc.frequency.setValueAtTime(110, t);
+            impOsc.frequency.exponentialRampToValueAtTime(28, t + 0.24);
+            impGain.gain.setValueAtTime(isDash ? 0.24 : 0.16, t);
+            impGain.gain.exponentialRampToValueAtTime(0.003, t + 0.24);
+            impOsc.connect(impGain); impGain.connect(dest);
+            impOsc.start(t); impOsc.stop(t + 0.25);
+
+            if (this.noiseBuffer) {
+                let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+                let bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.1;
+                bp.frequency.setValueAtTime(280, t);
+                bp.frequency.exponentialRampToValueAtTime(1900, t + 0.26);
+                let nGain = this.ctx.createGain();
+                nGain.gain.setValueAtTime(0.001, t);
+                nGain.gain.linearRampToValueAtTime(isDash ? 0.22 : 0.14, t + 0.025);
+                nGain.gain.exponentialRampToValueAtTime(0.003, t + 0.26);
+                src.connect(bp); bp.connect(nGain); nGain.connect(dest);
+                src.start(t); src.stop(t + 0.27);
+            }
+
+            let popOsc = this.ctx.createOscillator(); let popGain = this.ctx.createGain();
+            popOsc.type = 'triangle';
+            popOsc.frequency.setValueAtTime(130, t);
+            popOsc.frequency.exponentialRampToValueAtTime(310, t + 0.07);
+            popOsc.frequency.exponentialRampToValueAtTime(60, t + 0.18);
+            popGain.gain.setValueAtTime(0.001, t);
+            popGain.gain.linearRampToValueAtTime(isDash ? 0.14 : 0.10, t + 0.02);
+            popGain.gain.exponentialRampToValueAtTime(0.002, t + 0.18);
+            popOsc.connect(popGain); popGain.connect(dest);
+            popOsc.start(t); popOsc.stop(t + 0.19);
+        } else if (envType === 'ice') {
+            let impOsc = this.ctx.createOscillator(); let impGain = this.ctx.createGain();
+            impOsc.type = 'triangle';
+            impOsc.frequency.setValueAtTime(1500, t);
+            impOsc.frequency.exponentialRampToValueAtTime(620, t + 0.08);
+            impGain.gain.setValueAtTime(isDash ? 0.16 : 0.11, t);
+            impGain.gain.exponentialRampToValueAtTime(0.002, t + 0.08);
+            impOsc.connect(impGain); impGain.connect(dest);
+            impOsc.start(t); impOsc.stop(t + 0.085);
+
+            let resOsc = this.ctx.createOscillator(); let resGain = this.ctx.createGain();
+            resOsc.type = 'sine';
+            resOsc.frequency.setValueAtTime(2400, t);
+            resOsc.frequency.exponentialRampToValueAtTime(3200, t + 0.12);
+            resGain.gain.setValueAtTime(isDash ? 0.08 : 0.05, t);
+            resGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+            resOsc.connect(resGain); resGain.connect(dest);
+            resOsc.start(t); resOsc.stop(t + 0.125);
+        }
+    },
+
+    playLavaBurn() {
+        if (this.sfxMuted || !this.ctx || this.ctx.state === 'suspended') return;
+        const now = Date.now();
+        if (this._lastLavaBurnTime && now - this._lastLavaBurnTime < 120) return;
+        this._lastLavaBurnTime = now;
+
+        let t = this.ctx.currentTime;
+        let dest = this.masterCompressor || this.ctx.destination;
+
+        let flare = this.ctx.createOscillator(); let fGain = this.ctx.createGain();
+        flare.type = 'sawtooth';
+        flare.frequency.setValueAtTime(150, t);
+        flare.frequency.exponentialRampToValueAtTime(42, t + 0.22);
+        fGain.gain.setValueAtTime(0.22, t);
+        fGain.gain.exponentialRampToValueAtTime(0.003, t + 0.22);
+        flare.connect(fGain); fGain.connect(dest);
+        flare.start(t); flare.stop(t + 0.23);
+
+        if (this.noiseBuffer) {
+            let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+            let bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.3;
+            bp.frequency.setValueAtTime(900, t);
+            bp.frequency.exponentialRampToValueAtTime(2800, t + 0.24);
+            let nGain = this.ctx.createGain();
+            nGain.gain.setValueAtTime(0.001, t);
+            nGain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+            nGain.gain.exponentialRampToValueAtTime(0.003, t + 0.24);
+            src.connect(bp); bp.connect(nGain); nGain.connect(dest);
+            src.start(t); src.stop(t + 0.25);
+        }
+
+        let alertOsc = this.ctx.createOscillator(); let aGain = this.ctx.createGain();
+        alertOsc.type = 'triangle';
+        alertOsc.frequency.setValueAtTime(580, t);
+        alertOsc.frequency.exponentialRampToValueAtTime(240, t + 0.12);
+        aGain.gain.setValueAtTime(0.12, t);
+        aGain.gain.exponentialRampToValueAtTime(0.002, t + 0.12);
+        alertOsc.connect(aGain); aGain.connect(dest);
+        alertOsc.start(t); alertOsc.stop(t + 0.125);
+    },
+
+    playShieldUp(isSeismic = false) {
+        if (this.sfxMuted || !this.ctx || this.ctx.state === 'suspended') return;
+        let t = this.ctx.currentTime;
+        let dest = this.masterCompressor || this.ctx.destination;
+
+        let osc1 = this.ctx.createOscillator(); let g1 = this.ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(320, t);
+        osc1.frequency.exponentialRampToValueAtTime(960, t + 0.22);
+        g1.gain.setValueAtTime(0.001, t);
+        g1.gain.linearRampToValueAtTime(0.16, t + 0.02);
+        g1.gain.exponentialRampToValueAtTime(0.002, t + 0.22);
+        osc1.connect(g1); g1.connect(dest);
+        osc1.start(t); osc1.stop(t + 0.23);
+
+        let osc2 = this.ctx.createOscillator(); let g2 = this.ctx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(480, t);
+        osc2.frequency.exponentialRampToValueAtTime(1440, t + 0.22);
+        g2.gain.setValueAtTime(0.001, t);
+        g2.gain.linearRampToValueAtTime(0.12, t + 0.025);
+        g2.gain.exponentialRampToValueAtTime(0.002, t + 0.22);
+        osc2.connect(g2); g2.connect(dest);
+        osc2.start(t); osc2.stop(t + 0.23);
+
+        if (this.noiseBuffer) {
+            let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+            let bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 2.2;
+            bp.frequency.setValueAtTime(900, t);
+            bp.frequency.exponentialRampToValueAtTime(3200, t + 0.20);
+            let nGain = this.ctx.createGain();
+            nGain.gain.setValueAtTime(0.08, t);
+            nGain.gain.exponentialRampToValueAtTime(0.002, t + 0.20);
+            src.connect(bp); bp.connect(nGain); nGain.connect(dest);
+            src.start(t); src.stop(t + 0.21);
+        }
+
+        if (isSeismic) {
+            let subOsc = this.ctx.createOscillator(); let subGain = this.ctx.createGain();
+            subOsc.type = 'sine';
+            subOsc.frequency.setValueAtTime(140, t);
+            subOsc.frequency.exponentialRampToValueAtTime(32, t + 0.28);
+            subGain.gain.setValueAtTime(0.28, t);
+            subGain.gain.exponentialRampToValueAtTime(0.003, t + 0.28);
+            subOsc.connect(subGain); subGain.connect(dest);
+            subOsc.start(t); subOsc.stop(t + 0.29);
+        }
+    },
+
+    playOverdrive(essenceType = 'red') {
+        if (this.sfxMuted || !this.ctx || this.ctx.state === 'suspended') return;
+        let t = this.ctx.currentTime;
+        let dest = this.masterCompressor || this.ctx.destination;
+
+        let sub = this.ctx.createOscillator(); let sGain = this.ctx.createGain();
+        sub.type = 'sawtooth';
+        sub.frequency.setValueAtTime(160, t);
+        sub.frequency.exponentialRampToValueAtTime(38, t + 0.36);
+        sGain.gain.setValueAtTime(0.26, t);
+        sGain.gain.exponentialRampToValueAtTime(0.004, t + 0.36);
+        sub.connect(sGain); sGain.connect(dest);
+        sub.start(t); sub.stop(t + 0.37);
+
+        const arpMap = {
+            red: [220, 330, 440, 660],
+            blue: [330, 495, 660, 990],
+            green: [261.6, 392, 523.2, 784]
+        };
+        const notes = arpMap[essenceType] || arpMap.red;
+        for (let i = 0; i < notes.length; i++) {
+            let st = t + i * 0.065;
+            let osc = this.ctx.createOscillator(); let gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(notes[i], st);
+            osc.frequency.exponentialRampToValueAtTime(notes[i] * 1.03, st + 0.22);
+            gain.gain.setValueAtTime(0.001, st);
+            gain.gain.linearRampToValueAtTime(0.13, st + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.002, st + 0.22);
+            osc.connect(gain); gain.connect(dest);
+            osc.start(st); osc.stop(st + 0.23);
+        }
+
+        if (this.noiseBuffer) {
+            let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+            let bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4;
+            bp.frequency.setValueAtTime(400, t);
+            bp.frequency.exponentialRampToValueAtTime(2400, t + 0.42);
+            let nGain = this.ctx.createGain();
+            nGain.gain.setValueAtTime(0.001, t);
+            nGain.gain.linearRampToValueAtTime(0.14, t + 0.05);
+            nGain.gain.exponentialRampToValueAtTime(0.003, t + 0.42);
+            src.connect(bp); bp.connect(nGain); nGain.connect(dest);
+            src.start(t); src.stop(t + 0.43);
+        }
+    },
+
+    playPortalWarp() {
+        if (this.sfxMuted || !this.ctx || this.ctx.state === 'suspended') return;
+        let t = this.ctx.currentTime;
+        let dest = this.masterCompressor || this.ctx.destination;
+
+        let osc1 = this.ctx.createOscillator(); let g1 = this.ctx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(240, t);
+        osc1.frequency.exponentialRampToValueAtTime(980, t + 0.12);
+        osc1.frequency.exponentialRampToValueAtTime(420, t + 0.28);
+        g1.gain.setValueAtTime(0.001, t);
+        g1.gain.linearRampToValueAtTime(0.16, t + 0.03);
+        g1.gain.exponentialRampToValueAtTime(0.002, t + 0.28);
+        osc1.connect(g1); g1.connect(dest);
+        osc1.start(t); osc1.stop(t + 0.29);
+
+        let osc2 = this.ctx.createOscillator(); let g2 = this.ctx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(360, t);
+        osc2.frequency.exponentialRampToValueAtTime(1470, t + 0.12);
+        osc2.frequency.exponentialRampToValueAtTime(630, t + 0.28);
+        g2.gain.setValueAtTime(0.001, t);
+        g2.gain.linearRampToValueAtTime(0.11, t + 0.03);
+        g2.gain.exponentialRampToValueAtTime(0.002, t + 0.28);
+        osc2.connect(g2); g2.connect(dest);
+        osc2.start(t); osc2.stop(t + 0.29);
+
+        if (this.noiseBuffer) {
+            let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+            let bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.6;
+            bp.frequency.setValueAtTime(400, t);
+            bp.frequency.exponentialRampToValueAtTime(2200, t + 0.13);
+            bp.frequency.exponentialRampToValueAtTime(500, t + 0.28);
+            let nGain = this.ctx.createGain();
+            nGain.gain.setValueAtTime(0.001, t);
+            nGain.gain.linearRampToValueAtTime(0.15, t + 0.04);
+            nGain.gain.exponentialRampToValueAtTime(0.002, t + 0.28);
+            src.connect(bp); bp.connect(nGain); nGain.connect(dest);
+            src.start(t); src.stop(t + 0.29);
         }
     },
 
@@ -4684,10 +5032,17 @@ playCoin() {
             osc.type = 'sine'; osc.frequency.setValueAtTime(300 * r, t); osc.frequency.exponentialRampToValueAtTime(800 * r, t + 0.2);
             gain.gain.setValueAtTime(baseVol * 1.5, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.2); osc.start(t); osc.stop(t + 0.2);
         } else if (type === 'flame') {
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(80 * r, t); osc.frequency.exponentialRampToValueAtTime(30, t + 0.1);
-            gain.gain.setValueAtTime(0.03, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1); osc.start(t); osc.stop(t + 0.1);
-            let osc2 = this.ctx.createOscillator(); osc2.type = 'square'; osc2.frequency.setValueAtTime(40 * r, t); osc2.connect(gain); osc2.start(t); osc2.stop(t + 0.1);
-            this.playNoise(0.1, 'full', 0.02);
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(95 * r, t); osc.frequency.exponentialRampToValueAtTime(34, t + 0.12);
+            gain.gain.setValueAtTime(0.065, t); gain.gain.exponentialRampToValueAtTime(0.004, t + 0.12); osc.start(t); osc.stop(t + 0.12);
+            let osc2 = this.ctx.createOscillator(); osc2.type = 'square'; osc2.frequency.setValueAtTime(48 * r, t); osc2.frequency.exponentialRampToValueAtTime(24, t + 0.12); osc2.connect(gain); osc2.start(t); osc2.stop(t + 0.12);
+            if (this.noiseBuffer) {
+                let fSrc = this.ctx.createBufferSource(); fSrc.buffer = this.noiseBuffer;
+                let fBp = this.ctx.createBiquadFilter(); fBp.type = 'bandpass'; fBp.Q.value = 1.4;
+                fBp.frequency.setValueAtTime(350, t); fBp.frequency.exponentialRampToValueAtTime(1100, t + 0.12);
+                let fGain = this.ctx.createGain(); fGain.gain.setValueAtTime(0.06, t); fGain.gain.exponentialRampToValueAtTime(0.003, t + 0.12);
+                fSrc.connect(fBp); fBp.connect(fGain); fGain.connect(this.masterCompressor || this.ctx.destination);
+                fSrc.start(t); fSrc.stop(t + 0.13);
+            }
         } else {
             osc.type = 'triangle'; osc.frequency.setValueAtTime(1200 * r, t); osc.frequency.exponentialRampToValueAtTime(100, t + 0.1);
             gain.gain.setValueAtTime(baseVol, t); gain.gain.exponentialRampToValueAtTime(0.01, t + 0.1); osc.start(t); osc.stop(t + 0.1);
@@ -4738,8 +5093,23 @@ playCoin() {
 
     playDescendSound() { this._playTone('sine', 150, 20, 1.5, 0.4, 0.01); },
     playDash() {
-        this._playTone('sine', 500, 50, 0.15, 0.3, 0.01);
-        if (this.ctx && this.ctx.state !== 'suspended' && !this.sfxMuted) this.playNoise(0.15, 'high');
+        if (this.sfxMuted || !this.ctx || this.ctx.state === 'suspended') return;
+        let t = this.ctx.currentTime;
+        let dest = this.masterCompressor || this.ctx.destination;
+        this._playTone('sine', 420, 65, 0.16, 0.24, 0.005, true, 0.01, t);
+        if (this.noiseBuffer) {
+            let src = this.ctx.createBufferSource(); src.buffer = this.noiseBuffer;
+            let bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.6;
+            bp.frequency.setValueAtTime(380, t);
+            bp.frequency.exponentialRampToValueAtTime(1850, t + 0.06);
+            bp.frequency.exponentialRampToValueAtTime(420, t + 0.16);
+            let gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0.001, t);
+            gain.gain.linearRampToValueAtTime(0.24, t + 0.025);
+            gain.gain.exponentialRampToValueAtTime(0.003, t + 0.16);
+            src.connect(bp); bp.connect(gain); gain.connect(dest);
+            src.start(t); src.stop(t + 0.17);
+        }
     },
     playShieldDown() { this._playTone('sawtooth', 520, 95, 0.22, 0.18, 0.005, true, 0.01); },
 
@@ -16287,10 +16657,10 @@ startGame(diffMult) {
             rockShininess: 14, rockSpec: 0x182010,
             rockEm: 0x030602, dirtEm: 0x030302, grassEm: 0x040902, wallEm: 0x020401,
             skirtShininess: 8, skirtSpec: 0x111111,
-            bankShininess: 12, bankSpec: 0x182218,
+            bankShininess: 18, bankSpec: 0x162b26,
             rimShininess: 8, rimSpec: 0x121212,
             fogOp: 0.15, dirInt: 1.16, ambInt: 0.68,
-            bedHex: 0x166aa3, shoreY: -17.26, padY: -17.12,
+            bedHex: 0x09282e, shoreY: -17.26, padY: -17.12,
             portalHex: 0x33ff66, portalSprite: SharedMat.spriteGreen,
             vignette: 'radial-gradient(circle at center, transparent 68%, rgba(14, 24, 8, 0.22) 88%, rgba(5, 10, 3, 0.48) 100%)'
         };
@@ -17397,8 +17767,7 @@ startGame(diffMult) {
                     for (let k = 0; k < pCount; k++) {
                         this.getParticle().spawn(dest.x, 30, dest.y, pt.particleMat, 'spark');
                     }
-                    AudioEngine.playPerfectDodge();
-                    AudioEngine.playCollect();
+                    AudioEngine.playPortalWarp();
                     Haptics.vibrate([20, 30, 40]);
                     let colStr = '#' + pt.colorHex.toString(16).padStart(6, '0');
                     this.getFloatingText().spawn(dest.x, dest.y + 25, "VARCO ARCANO!", colStr, 28, true);
@@ -17505,42 +17874,81 @@ startGame(diffMult) {
         if (!AppSettings.isLow && this.map && Game.frameCount % (AppSettings.useMobileLimits ? (AppSettings.isUltra ? 4 : 6) : 3) === 0 && this.player && !this.player.dead) {
             let px = Math.floor(this.player.x / TILE_SIZE);
             let py = Math.floor(this.player.y / TILE_SIZE);
+            let samples = AppSettings.useMobileLimits ? 4 : 7;
 
-            for (let ox = -2; ox <= 2; ox++) {
-                for (let oy = -2; oy <= 2; oy++) {
-                    let cx = px + ox;
-                    let cy = py + oy;
+            for (let s = 0; s < samples; s++) {
+                let cx = px + Math.floor(MathUtils.randomRange(-9, 10));
+                let cy = py + Math.floor(MathUtils.randomRange(-9, 10));
+                if (cx < 0 || cx >= this.map.width || cy < 0 || cy >= this.map.height) continue;
+                if (this.map.grid[cx][cy] !== 5) continue;
 
-                    if (cx >= 0 && cx < this.map.width && cy >= 0 && cy < this.map.height) {
+                let spawnX = (cx * TILE_SIZE) + MathUtils.randomRange(8, 56);
+                let spawnZ = (cy * TILE_SIZE) + MathUtils.randomRange(8, 56);
+                let p = Game.getParticle();
 
-                        if (this.map.grid[cx][cy] === 5 && Math.random() < 0.20) {
-                            let spawnX = (cx * TILE_SIZE) + MathUtils.randomRange(8, 56);
-                            let spawnZ = (cy * TILE_SIZE) + MathUtils.randomRange(8, 56);
-                            let p = Game.getParticle();
-
-                            if (Game.currentThemeIndex === 1) {
-
-                                let isSmoke = Math.random() > 0.4;
-                                p.spawn(spawnX, -10, spawnZ, isSmoke ? SharedMat.spriteDust : SharedMat.spriteRed, isSmoke ? 'dust' : 'spark');
-                                p.vy = MathUtils.randomRange(25, 90);
-                                p.baseSize = isSmoke ? MathUtils.randomRange(25, 45) : MathUtils.randomRange(8, 14);
-                                if (!isSmoke) p.life = MathUtils.randomRange(0.4, 0.8);
-                            } else if (Game.currentThemeIndex === 0) {
-
-                                p.spawn(spawnX, -10, spawnZ, Math.random() > 0.5 ? SharedMat.spriteBlue : SharedMat.spriteGreen, 'ambient');
-                                p.vy = MathUtils.randomRange(15, 35);
-                                p.vx = MathUtils.randomRange(-10, 10);
-                                p.baseSize = MathUtils.randomRange(5, 10);
-                                p.life = MathUtils.randomRange(1.5, 3.0);
-                            } else {
-
-                                p.spawn(spawnX, -10, spawnZ, SharedMat.spriteWhite, 'ambient');
-                                p.vy = MathUtils.randomRange(5, 20);
-                                p.vx = MathUtils.randomRange(-5, 5);
-                                p.baseSize = MathUtils.randomRange(8, 16);
-                            }
+                if (Game.currentThemeIndex === 1) {
+                    let rType = Math.random();
+                    if (rType < 0.34) {
+                        p.spawn(spawnX, -17.0, spawnZ, Math.random() < 0.55 ? SharedMat.spriteYellow : SharedMat.spriteRed, 'nova');
+                        p.baseSize = MathUtils.randomRange(76, 98);
+                        p.life = MathUtils.randomRange(0.26, 0.44);
+                        p.maxLife = p.life;
+                        if (!AppSettings.useMobileLimits && Math.random() < 0.6) {
+                            let sp = Game.getParticle();
+                            sp.spawn(spawnX, 2.5, spawnZ, SharedMat.spriteYellow, 'spark');
+                            sp.vx = MathUtils.randomRange(-45, 45);
+                            sp.vz = MathUtils.randomRange(-45, 45);
+                            sp.vy = MathUtils.randomRange(100, 210);
+                            sp.baseSize = MathUtils.randomRange(6, 11);
+                            sp.life = MathUtils.randomRange(0.32, 0.62);
+                            sp.maxLife = sp.life;
                         }
+                    } else if (rType < 0.64) {
+                        p.spawn(spawnX, 2.5, spawnZ, SharedMat.spriteRed, 'flame');
+                        p.vx = MathUtils.randomRange(-22, 22);
+                        p.vz = MathUtils.randomRange(-22, 22);
+                        p.vy = MathUtils.randomRange(42, 96);
+                        p.baseSize = MathUtils.randomRange(15, 25);
+                        p.life = MathUtils.randomRange(0.24, 0.44);
+                        p.maxLife = p.life;
+                    } else if (rType < 0.84) {
+                        p.spawn(spawnX, -15.5, spawnZ, Math.random() < 0.45 ? SharedMat.spriteYellow : SharedMat.spriteRed, 'ambient');
+                        p.vx = MathUtils.randomRange(-18, 18);
+                        p.vz = MathUtils.randomRange(-18, 18);
+                        p.vy = MathUtils.randomRange(45, 95);
+                        p.baseSize = MathUtils.randomRange(6, 12);
+                        p.life = MathUtils.randomRange(0.55, 1.05);
+                        p.maxLife = p.life;
+                    } else {
+                        p.spawn(spawnX, -10.0, spawnZ, SharedMat.spriteDust, 'dust');
+                        p.vy = MathUtils.randomRange(28, 82);
+                        p.baseSize = MathUtils.randomRange(24, 44);
+                        p.life = MathUtils.randomRange(0.45, 0.80);
+                        p.maxLife = p.life;
                     }
+                } else if (Game.currentThemeIndex === 0) {
+                    if (Math.random() < 0.52) {
+                        p.spawn(spawnX, -17.1, spawnZ, Math.random() < 0.65 ? SharedMat.spriteWhite : SharedMat.spriteGreen, 'nova');
+                        p.baseSize = MathUtils.randomRange(76, 104);
+                        p.life = MathUtils.randomRange(0.32, 0.52);
+                        p.maxLife = p.life;
+                    } else {
+                        p.spawn(spawnX, -15.5, spawnZ, Math.random() > 0.45 ? SharedMat.spriteGreen : SharedMat.spriteWhite, 'ambient');
+                        p.vy = MathUtils.randomRange(16, 36);
+                        p.vx = MathUtils.randomRange(-12, 12);
+                        p.vz = MathUtils.randomRange(-12, 12);
+                        p.baseSize = MathUtils.randomRange(5, 9);
+                        p.life = MathUtils.randomRange(1.4, 2.6);
+                        p.maxLife = p.life;
+                    }
+                } else {
+                    p.spawn(spawnX, -10.0, spawnZ, SharedMat.spriteWhite, 'ambient');
+                    p.vy = MathUtils.randomRange(6, 22);
+                    p.vx = MathUtils.randomRange(-7, 7);
+                    p.vz = MathUtils.randomRange(-7, 7);
+                    p.baseSize = MathUtils.randomRange(8, 16);
+                    p.life = MathUtils.randomRange(1.2, 2.4);
+                    p.maxLife = p.life;
                 }
             }
         }
@@ -19455,7 +19863,7 @@ class GameMap {
                 const themeIdx = tIdx;
                 let pitColor, pitEmissive, pitOpacity, pitRoughness, pitMetalness;
                 if (themeIdx === 0) {
-                    pitColor = 0xffffff; pitEmissive = 0x1478b8; pitOpacity = 0.94; pitRoughness = 0.56; pitMetalness = 0.02;
+                    pitColor = 0xffffff; pitEmissive = 0x0b4a52; pitOpacity = 0.92; pitRoughness = 0.24; pitMetalness = 0.06;
                 } else if (themeIdx === 1) {
                     pitColor = 0xffffff; pitEmissive = 0xff5512; pitOpacity = 0.99; pitRoughness = 0.96; pitMetalness = 0.0;
                 } else {
@@ -19465,27 +19873,28 @@ class GameMap {
             const PitMatClass = useMobPit ? THREE.MeshPhongMaterial : THREE.MeshStandardMaterial;
             const pitMatParams = {
                 color: pitColor, emissive: pitEmissive,
-                emissiveIntensity: themeIdx === 1 ? 1.24 : (themeIdx === 0 ? 0.36 : 0.66),
+                emissiveIntensity: themeIdx === 1 ? 1.32 : (themeIdx === 0 ? 0.34 : 0.66),
                 map: liquidTex, emissiveMap: liquidTex,
                 transparent: true, opacity: pitOpacity,
                 depthWrite: false
             };
             if (useMobPit) {
-                pitMatParams.shininess = themeIdx === 1 ? 4 : (themeIdx === 0 ? 24 : 36);
-                pitMatParams.specular = new THREE.Color(themeIdx === 1 ? 0x090200 : (themeIdx === 0 ? 0x186ea8 : 0x1e4c70));
+                pitMatParams.shininess = themeIdx === 1 ? 4 : (themeIdx === 0 ? 48 : 36);
+                pitMatParams.specular = new THREE.Color(themeIdx === 1 ? 0x090200 : (themeIdx === 0 ? 0x1c5c64 : 0x1e4c70));
             } else {
-                pitMatParams.roughness = themeIdx === 0 ? 0.58 : pitRoughness;
-                pitMatParams.metalness = themeIdx === 0 ? 0.02 : pitMetalness;
-                pitMatParams.envMapIntensity = themeIdx === 1 ? 0.02 : (themeIdx === 0 ? 0.20 : 0.45);
+                pitMatParams.roughness = pitRoughness;
+                pitMatParams.metalness = pitMetalness;
+                pitMatParams.envMapIntensity = themeIdx === 1 ? 0.04 : (themeIdx === 0 ? 0.36 : 0.45);
             }
             const cachedPitMat = new PitMatClass(pitMatParams);
 
-            cachedPitMat.customProgramCacheKey = () => 'pit_liquid_v21_' + themeIdx + (useMobPit ? '_m' : '_d');
+            cachedPitMat.customProgramCacheKey = () => 'pit_liquid_v22_' + themeIdx + (useMobPit ? '_m' : '_d');
             cachedPitMat.onBeforeCompile = (shader) => {
                 shader.uniforms.uTime = InteractiveGrassSystem.uniforms.uTime;
                 shader.uniforms.uPlayerPit = InteractiveGrassSystem.uniforms.uPlayerPit;
                 shader.uniforms.uPlayerPitDir = InteractiveGrassSystem.uniforms.uPlayerPitDir;
                 shader.uniforms.uBloomActive = InteractiveGrassSystem.uniforms.uBloomActive;
+                shader.uniforms.uCamPos = InteractiveGrassSystem.uniforms.uCamPos;
                 const hasMapDecode = THREE.ShaderChunk && THREE.ShaderChunk.map_fragment && THREE.ShaderChunk.map_fragment.includes('mapTexelToLinear');
                 const sampleWaterTex = (uvVar) => hasMapDecode ? `mapTexelToLinear(texture2D(map, ${uvVar}))` : `texture2D(map, ${uvVar})`;
 
@@ -19501,13 +19910,15 @@ class GameMap {
                     vec4 wpPit = modelMatrix * vec4(transformed, 1.0);
                     vPitWPos = wpPit.xz;
                     ${themeIdx === 0 ? `
-                    float wSw1 = sin(wpPit.x * 0.068 + wpPit.z * 0.042 + uTime * 2.45);
-                    float wSw2 = cos(wpPit.z * 0.074 - wpPit.x * 0.038 - uTime * 2.05);
-                    transformed.y += (wSw1 * 0.58 + wSw2 * 0.42) * 0.95;
+                    float wSw1 = sin(wpPit.x * 0.078 + wpPit.z * 0.048 + uTime * 2.55);
+                    float wSw2 = cos(wpPit.z * 0.084 - wpPit.x * 0.044 - uTime * 2.15);
+                    float wSw3 = sin((wpPit.x - wpPit.z) * 0.115 + uTime * 3.10);
+                    transformed.y += (wSw1 * 0.48 + wSw2 * 0.36 + wSw3 * 0.16) * 1.45;
                     ` : (themeIdx === 1 ? `
-                    float lv1 = sin(wpPit.x * 0.036 + uTime * 0.72 + cos(wpPit.z * 0.032 - uTime * 0.55) * 1.1);
-                    float lv2 = cos(wpPit.z * 0.044 - uTime * 0.64 + sin(wpPit.x * 0.040 + uTime * 0.48) * 1.1);
-                    transformed.y += (lv1 * 0.55 + lv2 * 0.45) * 0.85;
+                    float lv1 = sin(wpPit.x * 0.042 + uTime * 1.05 + cos(wpPit.z * 0.038 - uTime * 0.85) * 1.3);
+                    float lv2 = cos(wpPit.z * 0.050 - uTime * 0.92 + sin(wpPit.x * 0.046 + uTime * 0.78) * 1.3);
+                    float lv3 = sin(wpPit.x * 0.088 + wpPit.z * 0.072 - uTime * 1.65);
+                    transformed.y += (lv1 * 0.48 + lv2 * 0.38 + lv3 * 0.14) * 1.35;
                     ` : `
                     transformed.y += sin(wpPit.x * 0.058 + uTime * 2.0) * cos(wpPit.z * 0.058 - uTime * 1.6) * 0.36;
                     `)}
@@ -19518,12 +19929,18 @@ class GameMap {
                     uniform float uBloomActive;
                     uniform vec4 uPlayerPit;
                     uniform vec4 uPlayerPitDir;
+                    uniform vec3 uCamPos;
                     varying vec2 vPitWPos;
                 ` + shader.fragmentShader.replace(
                     '#include <emissivemap_fragment>',
                     `
                     #include <emissivemap_fragment>
                     float texLum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
+                    vec3 camOffPit = vec3(uCamPos.x - vPitWPos.x, max(45.0, uCamPos.y + 18.0), uCamPos.z - vPitWPos.y);
+                    vec3 viewDirPit = normalize(camOffPit);
+                    vec2 viewDirXZ = viewDirPit.xz;
+                    vec3 waterHighlightCol = vec3(0.0);
+                    vec3 lavaHighlightCol = vec3(0.0);
 
                     // --- COORDINATE RADIALI ISOTROPICHE ---
                     vec2 relPos = vPitWPos - uPlayerPit.xy;
@@ -19543,23 +19960,26 @@ class GameMap {
                     }
 
                     ${themeIdx === 0 ? `
-                        float ph1 = vPitWPos.x * 0.072 + vPitWPos.y * 0.048 + uTime * 2.15 + sin(vPitWPos.y * 0.034 - uTime * 1.10) * 0.90;
-                        float ph2 = vPitWPos.y * 0.080 - vPitWPos.x * 0.044 - uTime * 1.80 + cos(vPitWPos.x * 0.036 + uTime * 1.00) * 0.82;
-                        float ph3 = (vPitWPos.x - vPitWPos.y) * 0.095 + uTime * 2.55;
+                        float ph1 = vPitWPos.x * 0.086 + vPitWPos.y * 0.054 + uTime * 2.45 + sin(vPitWPos.y * 0.042 - uTime * 1.25) * 0.95;
+                        float ph2 = vPitWPos.y * 0.094 - vPitWPos.x * 0.050 - uTime * 2.05 + cos(vPitWPos.x * 0.044 + uTime * 1.15) * 0.88;
+                        float ph3 = (vPitWPos.x - vPitWPos.y) * 0.125 + uTime * 2.95;
 
-                        float sw1 = sin(ph1 + 0.36 * sin(ph1));
-                        float sw2 = sin(ph2 + 0.32 * sin(ph2));
-                        float sw3 = cos(ph3 + 0.28 * cos(ph3));
-                        float swellHeight = sw1 * 0.45 + sw2 * 0.37 + sw3 * 0.18;
+                        float sw1 = sin(ph1 + 0.52 * sin(ph1));
+                        float sw2 = sin(ph2 + 0.46 * sin(ph2));
+                        float sw3 = cos(ph3 + 0.36 * cos(ph3));
+                        float swellHeight = sw1 * 0.46 + sw2 * 0.36 + sw3 * 0.18;
                         float swellNorm = clamp(0.5 + 0.5 * swellHeight, 0.0, 1.0);
 
-                        float dSwX = cos(ph1) * 0.072 * 0.45 - cos(ph2) * 0.044 * 0.37 - sin(ph3) * 0.095 * 0.18;
-                        float dSwY = cos(ph1) * 0.048 * 0.45 + cos(ph2) * 0.080 * 0.37 + sin(ph3) * 0.095 * 0.18;
+                        float tr1 = 1.0 + 0.52 * cos(ph1);
+                        float tr2 = 1.0 + 0.46 * cos(ph2);
+                        float tr3 = 1.0 - 0.36 * sin(ph3);
+                        float dSwX = cos(ph1) * tr1 * 0.086 * 0.46 - cos(ph2) * tr2 * 0.050 * 0.36 - sin(ph3) * tr3 * 0.125 * 0.18;
+                        float dSwY = cos(ph1) * tr1 * 0.054 * 0.46 + cos(ph2) * tr2 * 0.094 * 0.36 + sin(ph3) * tr3 * 0.125 * 0.18;
 
                     #ifdef USE_MAP
-                        vec2 wWarp = vec2(sw1, sw2) * 0.042 + pitRippleGrad * 0.024;
-                        vec2 uvWaterA = vPitWPos / 155.0 + vec2(uTime * 0.048, uTime * 0.072) + wWarp;
-                        vec2 uvWaterB = vPitWPos / 115.0 + vec2(-uTime * 0.038, uTime * 0.056) - wWarp * 0.85;
+                        vec2 wWarp = vec2(sw1, sw2) * 0.058 + pitRippleGrad * 0.036;
+                        vec2 uvWaterA = vPitWPos / 128.0 + vec2(uTime * 0.062, uTime * 0.088) + wWarp;
+                        vec2 uvWaterB = vPitWPos / 88.0 + vec2(-uTime * 0.048, uTime * 0.068) - wWarp * 0.88;
                         vec3 wA = ${sampleWaterTex('uvWaterA')}.rgb;
                         vec3 wB = ${sampleWaterTex('uvWaterB')}.rgb;
                     #else
@@ -19567,94 +19987,109 @@ class GameMap {
                         vec3 wB = diffuseColor.rgb;
                     #endif
 
-                        vec3 rawTex = mix(wA, wB, 0.50);
-                        // Solleva la luminanza lineare della texture con curva gamma morbida per evitare zone nere o troppo contrastate
-                        float lA = pow(clamp(dot(wA, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), 0.65);
-                        float lB = pow(clamp(dot(wB, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), 0.65);
-                        float pA = smoothstep(0.05, 0.88, lA);
-                        float pB = smoothstep(0.05, 0.88, lB);
+                        float lA = pow(clamp(dot(wA, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), 0.72);
+                        float lB = pow(clamp(dot(wB, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), 0.72);
+                        float pA = smoothstep(0.08, 0.86, lA);
+                        float pB = smoothstep(0.08, 0.86, lB);
                         float texWave = pA * 0.54 + pB * 0.46;
-                        float texDiff = (pA - pB) * 0.65;
+                        float texDiff = (pA - pB) * 0.72;
 
-                        float waveH = clamp(swellNorm * 0.54 + texWave * 0.46 + texDiff * 0.16, 0.0, 1.0);
-                        float waveCrest = smoothstep(0.46, 0.86, waveH) * (0.50 + 0.50 * smoothstep(0.18, 0.78, pA * pB * 1.8));
-                        float foamRidge = pow(smoothstep(0.62, 0.93, waveH + pA * pB * 0.32), 1.45);
+                        float waveH = clamp(swellNorm * 0.56 + texWave * 0.44 + texDiff * 0.18, 0.0, 1.0);
+                        float waveTrough = 1.0 - smoothstep(0.06, 0.46, waveH);
+                        float waveCrest = smoothstep(0.52, 0.84, waveH) * (0.55 + 0.45 * smoothstep(0.16, 0.74, pA * pB * 1.9));
+                        float slopeLit = clamp(0.48 + (dSwX * 11.5 + dSwY * 10.0) + texDiff * 0.65, 0.0, 1.0);
+                        float waveRibbons = smoothstep(0.60, 0.90, waveH * 0.68 + slopeLit * 0.36);
+                        float foamRidge = pow(smoothstep(0.68, 0.94, waveH + pA * pB * 0.28), 1.65);
 
-                        float slopeLit = clamp(0.52 + (dSwX * 8.5 + dSwY * 7.5) + texDiff * 0.55, 0.0, 1.0);
-                        float sunGlint = pow(clamp(slopeLit * waveH, 0.0, 1.0), 2.5);
+                        vec3 wNorm = normalize(vec3(-(dSwX * 14.0 + texDiff * 0.45), 1.0, -(dSwY * 14.0 - texDiff * 0.35)));
+                        vec3 sunDirW = normalize(vec3(0.48, 0.76, 0.44));
+                        vec3 halfVecW = normalize(sunDirW + viewDirPit);
+                        float specGlint = pow(max(dot(wNorm, halfVecW), 0.0), 42.0) * (0.45 + 0.55 * waveH);
+                        float fresnelW = pow(clamp(1.0 - max(dot(wNorm, viewDirPit), 0.0), 0.0, 1.0), 3.0);
 
-                        // Caustiche dolci e bioluminescenza fiabesca azzurro-celeste
-                        vec2 caustPos = vPitWPos + vec2(sw1, sw2) * 11.0 + pitRippleGrad * 14.0;
-                        float c1 = sin(caustPos.x * 0.068 + uTime * 1.95 + sin(caustPos.y * 0.054 - uTime * 1.40) * 1.25);
-                        float c2 = cos(caustPos.y * 0.072 - uTime * 1.65 + cos(caustPos.x * 0.060 + uTime * 1.20) * 1.25);
-                        float causticMain = pow(clamp(0.5 + 0.5 * c1 * c2, 0.0, 1.0), 2.1);
-                        float c3 = sin((caustPos.x + caustPos.y) * 0.090 - uTime * 2.25);
-                        float causticSharp = pow(clamp(0.5 + 0.5 * c1 * c3, 0.0, 1.0), 3.0);
-                        float fairyShimmer = 0.5 + 0.5 * sin(vPitWPos.x * 0.032 - vPitWPos.y * 0.028 + uTime * 1.45);
+                        // Rete di caustiche subacquee e ombre morbide delle chiome
+                        vec2 caustPos = vPitWPos + vec2(sw1, sw2) * 14.0 + pitRippleGrad * 18.0;
+                        float c1 = sin(caustPos.x * 0.074 + uTime * 2.15 + sin(caustPos.y * 0.058 - uTime * 1.50) * 1.35);
+                        float c2 = cos(caustPos.y * 0.078 - uTime * 1.85 + cos(caustPos.x * 0.064 + uTime * 1.30) * 1.35);
+                        float causticNet = pow(clamp(1.0 - abs(c1 * c2), 0.0, 1.0), 4.2);
+                        float c3 = sin((caustPos.x + caustPos.y) * 0.105 - uTime * 2.55);
+                        float causticSharp = pow(clamp(0.5 + 0.5 * c1 * c3, 0.0, 1.0), 3.6);
+                        float canopyDapple = 0.78 + 0.22 * sin(vPitWPos.x * 0.024 + uTime * 0.45) * cos(vPitWPos.y * 0.022 - uTime * 0.38);
 
-                        // Palette Sorgente Azzurra: azzurro cristallino e vivace calibrato in spazio lineare per Ultra/MEGA
+                        // Palette naturale di laghetto silvano: verde-petrolio profondo, giada boschiva e creste turchese-argento
                         float bBal0 = clamp(uBloomActive, 0.0, 1.0);
-                        vec3 deepAbyssCol  = mix(vec3(0.014, 0.190, 0.540), vec3(0.012, 0.180, 0.515), bBal0);
-                        vec3 midLagoonCol  = mix(vec3(0.028, 0.325, 0.760), vec3(0.025, 0.310, 0.730), bBal0);
-                        vec3 brightAquaCol = mix(vec3(0.052, 0.460, 0.900), vec3(0.048, 0.440, 0.870), bBal0);
-                        vec3 fairyGlowCol  = mix(vec3(0.088, 0.570, 0.960), vec3(0.080, 0.545, 0.935), bBal0);
-                        vec3 crestFoamCol  = mix(vec3(0.185, 0.690, 0.985), vec3(0.165, 0.655, 0.960), bBal0);
+                        vec3 deepForestCol  = mix(vec3(0.012, 0.078, 0.088), vec3(0.010, 0.072, 0.082), bBal0);
+                        vec3 midPondCol     = mix(vec3(0.032, 0.175, 0.170), vec3(0.028, 0.160, 0.156), bBal0);
+                        vec3 sunlitJadeCol  = mix(vec3(0.068, 0.310, 0.275), vec3(0.058, 0.278, 0.248), bBal0);
+                        vec3 crestAquaCol   = mix(vec3(0.145, 0.455, 0.415), vec3(0.125, 0.405, 0.372), bBal0);
+                        vec3 foamSilverCol  = mix(vec3(0.360, 0.640, 0.590), vec3(0.285, 0.535, 0.495), bBal0);
 
-                        vec3 waterCol = mix(deepAbyssCol, midLagoonCol, smoothstep(0.06, 0.54, waveH));
-                        waterCol = mix(waterCol, brightAquaCol, smoothstep(0.36, 0.84, waveH * (0.62 + 0.38 * slopeLit)));
+                        vec3 waterCol = mix(deepForestCol, midPondCol, smoothstep(0.08, 0.52, waveH));
+                        waterCol = mix(waterCol, sunlitJadeCol, smoothstep(0.38, 0.84, waveH * (0.52 + 0.48 * slopeLit)));
 
-                        // Dettaglio texture virato in azzurro cielo senza sbiancare il fondale
-                        float rawBright = clamp(mix(lA, lB, 0.5), 0.20, 0.94);
-                        vec3 azureTex = vec3(0.014, 0.215, 0.560) + vec3(0.036, 0.270, 0.390) * rawBright;
-                        waterCol = mix(waterCol, azureTex, 0.26);
+                        vec3 pondTexTint = vec3(0.014, 0.088, 0.092) + vec3(0.080, 0.265, 0.240) * clamp(mix(lA, lB, 0.5), 0.12, 0.92);
+                        waterCol = mix(waterCol, pondTexTint, 0.28);
 
-                        // Modulazione tridimensionale morbida e caustiche azzurre calibrate su Ultra/MEGA
-                        waterCol *= mix(0.88, 1.12, slopeLit);
-                        waterCol = mix(waterCol, fairyGlowCol, causticMain * mix(0.30, 0.24, bBal0) * (0.85 + 0.15 * fairyShimmer));
-                        waterCol += vec3(0.038, 0.260, 0.460) * (causticSharp * mix(0.24, 0.18, bBal0));
-                        waterCol = mix(waterCol, fairyGlowCol, waveCrest * mix(0.34, 0.26, bBal0));
-                        waterCol = mix(waterCol, crestFoamCol, clamp(foamRidge * 0.38 + sunGlint * 0.24, 0.0, mix(0.46, 0.36, bBal0)));
+                        waterCol *= mix(0.68, 1.24, slopeLit) * canopyDapple;
+                        waterCol *= (1.0 - waveTrough * 0.34);
+                        waterCol = mix(waterCol, crestAquaCol, clamp(waveCrest * 0.42 + waveRibbons * 0.32, 0.0, mix(0.68, 0.56, bBal0)));
+                        waterCol += vec3(0.038, 0.175, 0.155) * (causticNet * mix(0.38, 0.26, bBal0) + causticSharp * mix(0.26, 0.18, bBal0));
+                        waterCol = mix(waterCol, foamSilverCol, clamp(foamRidge * 0.44 + waveRibbons * 0.14, 0.0, mix(0.52, 0.40, bBal0)));
+                        waterCol = mix(waterCol, vec3(0.140, 0.360, 0.345), fresnelW * 0.28);
 
                         diffuseColor.rgb = waterCol;
                         totalEmissiveRadiance = mix(
-                            vec3(0.012, 0.145, 0.420),
-                            vec3(0.038, 0.300, 0.640),
-                            clamp(waveH * 0.45 + causticMain * 0.45 + fairyShimmer * 0.20, 0.0, 1.0)
-                        ) * mix(0.42, 0.28, bBal0) + vec3(0.034, 0.230, 0.440) * (foamRidge * 0.20 + causticSharp * 0.15) * mix(1.0, 0.62, bBal0);
+                            vec3(0.008, 0.055, 0.062),
+                            vec3(0.036, 0.175, 0.160),
+                            clamp(waveH * 0.48 + causticNet * 0.38 + waveRibbons * 0.24, 0.0, 1.0)
+                        ) * mix(0.36, 0.22, bBal0);
 
-                        if (uPlayerPit.w > 0.01 && pDist < 68.0) {
-                            float maxR = mix(40.0, 64.0, moveInt);
-                            float rEnv = smoothstep(5.5, 11.5, pDist) * (1.0 - smoothstep(18.0, maxR, pDist));
-
-                            float wFreq = 0.46;
-                            float wSpd = mix(3.4, 6.4, moveInt);
+                        float rippleHi = 0.0;
+                        if (uPlayerPit.w > 0.01 && pDist < 76.0) {
+                            float maxR = mix(42.0, 68.0, moveInt);
+                            float rEnv = smoothstep(5.0, 11.5, pDist) * (1.0 - smoothstep(18.0, maxR, pDist));
+                            float wFreq = 0.48;
+                            float wSpd = mix(3.6, 6.8, moveInt);
                             float wSine = sin(rDist * wFreq - uTime * wSpd);
 
-                            float delicateRings = pow(smoothstep(0.42, 0.98, wSine), 2.0) * rEnv * (0.38 + 0.62 * moveInt);
-                            float ringTrough = smoothstep(0.35, 0.90, -wSine) * rEnv * 0.10 * uPlayerPit.w;
-                            float meniscus = exp(-pow(rDist - 10.2, 2.0) * 0.18) * 0.44;
+                            float delicateRings = pow(smoothstep(0.42, 0.98, wSine), 2.0) * rEnv * (0.40 + 0.60 * moveInt);
+                            float ringTrough = smoothstep(0.35, 0.90, -wSine) * rEnv * 0.16 * uPlayerPit.w;
+                            float meniscus = exp(-pow(rDist - 10.2, 2.0) * 0.18) * 0.48;
 
-                            float rippleStrength = clamp(delicateRings * 0.58 + meniscus * 0.42, 0.0, 0.65) * uPlayerPit.w;
+                            // Scia a V dietro il giocatore lungo la direzione uPlayerPitDir.xy
+                            vec2 fwdDir = normalize(uPlayerPitDir.xy + vec2(0.0001, 0.0));
+                            vec2 sideDir = vec2(-fwdDir.y, fwdDir.x);
+                            float dashBoost = smoothstep(0.4, 1.8, uPlayerPitDir.z);
+                            float wakeBack = max(0.0, -dot(relPos, fwdDir));
+                            float wakeSide = abs(dot(relPos, sideDir));
+                            float wakeEdge = 5.5 + wakeBack * 0.44;
+                            float vWakeEnv = smoothstep(3.0, 12.0, wakeBack) * (1.0 - smoothstep(26.0, mix(46.0, 66.0, dashBoost), wakeBack));
+                            float vWake = exp(-abs(wakeSide - wakeEdge) * 0.34)
+                                        * (0.55 + 0.45 * sin(wakeBack * 0.52 - uPlayerPitDir.w * 0.65 - uTime * 2.5))
+                                        * vWakeEnv * clamp(moveInt + dashBoost * 0.5, 0.0, 1.0);
 
+                            float rippleStrength = clamp(delicateRings * 0.55 + meniscus * 0.40 + vWake * 0.72, 0.0, 0.85) * uPlayerPit.w;
                             diffuseColor.rgb *= (1.0 - ringTrough);
-                            vec3 subtleRippleCol = mix(vec3(0.068, 0.500, 0.930), vec3(0.195, 0.710, 0.985), delicateRings);
-                            diffuseColor.rgb = mix(diffuseColor.rgb, subtleRippleCol, rippleStrength * 0.70);
-                            totalEmissiveRadiance += vec3(0.036, 0.230, 0.440) * rippleStrength * mix(1.0, 0.62, bBal0);
+                            vec3 wakeCol = mix(vec3(0.145, 0.440, 0.400), vec3(0.520, 0.780, 0.740), clamp(delicateRings * 0.6 + vWake * 0.7, 0.0, 1.0));
+                            diffuseColor.rgb = mix(diffuseColor.rgb, wakeCol, rippleStrength * 0.72);
+                            rippleHi = rippleStrength * 0.24;
                         }
+                        waterHighlightCol = vec3(0.48, 0.78, 0.74) * (specGlint * mix(0.68, 0.46, bBal0) + foamRidge * mix(0.18, 0.11, bBal0) + waveRibbons * mix(0.14, 0.08, bBal0) + rippleHi);
                         vec3 waterBaseCol = diffuseColor.rgb;
                     ` : (themeIdx === 1 ? `
-                        float lavaSw1 = sin(vPitWPos.x * 0.036 + uTime * 0.68 + sin(vPitWPos.y * 0.040 - uTime * 0.52) * 1.2);
-                        float lavaSw2 = cos(vPitWPos.y * 0.038 - uTime * 0.60 + cos(vPitWPos.x * 0.034 + uTime * 0.48) * 1.2);
+                        float lavaSw1 = sin(vPitWPos.x * 0.044 + uTime * 1.18 + sin(vPitWPos.y * 0.048 - uTime * 0.92) * 1.35);
+                        float lavaSw2 = cos(vPitWPos.y * 0.046 - uTime * 1.05 + cos(vPitWPos.x * 0.042 + uTime * 0.84) * 1.35);
                         float flow = 0.5 + 0.5 * lavaSw1 * lavaSw2;
+                        float surge = 0.5 + 0.5 * sin(vPitWPos.x * 0.022 - uTime * 1.65 + cos(vPitWPos.y * 0.026 + uTime * 1.30) * 1.20);
                         float lGradX = 0.0;
                         float lGradZ = 0.0;
 
                     #ifdef USE_MAP
-                        vec2 lWarp = vec2(lavaSw1, lavaSw2) * 0.016 + pitRippleGrad * 0.018;
-                        vec2 uvLavaMain = vPitWPos / 145.0 + vec2(uTime * 0.014, uTime * 0.009) + lWarp;
-                        vec2 uvLavaSub  = vPitWPos / 195.0 + vec2(-uTime * 0.008, uTime * 0.012) - lWarp * 0.5;
-                        vec2 uvLavaDx   = uvLavaMain + vec2(0.012, 0.0);
-                        vec2 uvLavaDz   = uvLavaMain + vec2(0.0, 0.012);
+                        vec2 lWarp = vec2(lavaSw1, lavaSw2) * 0.036 + pitRippleGrad * 0.026;
+                        vec2 uvLavaMain = vPitWPos / 125.0 + vec2(uTime * 0.036, uTime * 0.024) + lWarp;
+                        vec2 uvLavaSub  = vPitWPos / 165.0 + vec2(-uTime * 0.026, uTime * 0.032) - lWarp * 0.65 - viewDirXZ * 0.028;
+                        vec2 uvLavaDx   = uvLavaMain + vec2(0.011, 0.0);
+                        vec2 uvLavaDz   = uvLavaMain + vec2(0.0, 0.011);
                         vec3 lMain = ${sampleWaterTex('uvLavaMain')}.rgb;
                         vec3 lSub  = ${sampleWaterTex('uvLavaSub')}.rgb;
                         vec3 lDx   = ${sampleWaterTex('uvLavaDx')}.rgb;
@@ -19663,54 +20098,88 @@ class GameMap {
                         float lumSub  = dot(lSub, vec3(0.299, 0.587, 0.114));
                         lGradX = dot(lDx, vec3(0.299, 0.587, 0.114)) - lumMain;
                         lGradZ = dot(lDz, vec3(0.299, 0.587, 0.114)) - lumMain;
-                        vec3 lavaTexCol = mix(lMain, lSub, 0.22);
-                        texLum = lumMain * 0.80 + lumSub * 0.20;
+                        vec3 lavaTexCol = mix(lMain, lSub, 0.34);
+                        texLum = lumMain * 0.72 + lumSub * 0.28;
                     #else
                         vec3 lavaTexCol = diffuseColor.rgb;
                     #endif
 
-                        float crustField = sin(vPitWPos.x * 0.044 + lavaSw2 * 1.35) * cos(vPitWPos.y * 0.046 - lavaSw1 * 1.25);
+                        vec2 plateShift = vPitWPos + vec2(uTime * 4.5, -uTime * 3.2) + vec2(lavaSw2, lavaSw1) * 14.0;
+                        float crustField = sin(plateShift.x * 0.048 + sin(plateShift.y * 0.042 + uTime * 0.65) * 1.25)
+                                         * cos(plateShift.y * 0.050 - cos(plateShift.x * 0.044 - uTime * 0.55) * 1.25);
                         float crustCell = 0.5 + 0.5 * crustField;
-                        float emberCell = 0.5 + 0.5 * sin(vPitWPos.x * 0.095 - uTime * 0.42) * cos(vPitWPos.y * 0.092 + uTime * 0.36);
-                        float texRelief = smoothstep(0.08, 0.62, texLum);
-                        float magmaHeat = clamp(texRelief * 0.82 + crustCell * 0.26 - 0.06, 0.0, 1.0);
-                        float moltenMask = smoothstep(0.22, 0.66, magmaHeat);
-                        float fissureRim = smoothstep(0.08, 0.26, magmaHeat) * (1.0 - smoothstep(0.28, 0.56, magmaHeat));
-                        float veinHot = smoothstep(0.42, 0.82, magmaHeat) * (0.82 + 0.28 * emberCell) * (0.84 + 0.30 * flow);
+                        float innerCrack = pow(clamp(1.0 - abs(sin(plateShift.x * 0.095 - plateShift.y * 0.082 + lavaSw1 * 1.4)), 0.0, 1.0), 7.5);
+                        float emberCell = 0.5 + 0.5 * sin(vPitWPos.x * 0.105 - uTime * 1.15) * cos(vPitWPos.y * 0.102 + uTime * 0.95);
+                        float texRelief = smoothstep(0.06, 0.60, texLum);
+                        float magmaHeat = clamp(texRelief * 0.72 + crustCell * 0.32 + surge * 0.16 + innerCrack * 0.42 - 0.14, 0.0, 1.0);
+                        float moltenMask = smoothstep(0.28, 0.62, magmaHeat);
+                        float fissureRim = smoothstep(0.14, 0.30, magmaHeat) * (1.0 - smoothstep(0.32, 0.58, magmaHeat));
+                        float undercutGlow = smoothstep(0.24, 0.44, magmaHeat) * (1.0 - moltenMask);
+                        float veinHot = smoothstep(0.46, 0.86, magmaHeat) * (0.76 + 0.30 * emberCell) * (0.74 + 0.38 * flow + 0.25 * surge);
                         float bBalLava = clamp(uBloomActive, 0.0, 1.0);
 
-                        // Rilievo 3D delle placche di basalto scuro opaco e fessure incandescenti incise
-                        float bevelSlope = clamp((lGradX * 0.72 + lGradZ * 0.84) * 3.4 + (0.5 - crustCell) * 0.28, -0.35, 0.42);
-                        float crustShade = clamp(0.76 + bevelSlope, 0.34, 1.28);
-                        vec3 crustDark = mix(vec3(0.028, 0.008, 0.006), vec3(0.085, 0.022, 0.012), emberCell * 0.55 + texRelief * 0.45);
-                        vec3 crustCol = mix(crustDark, lavaTexCol * 0.32, 0.42) * crustShade;
-                        crustCol += vec3(0.62, 0.14, 0.01) * fissureRim * 0.45;
+                        // Bolle di magma procedurali che si gonfiano e scoppiano sulla superficie incandescente
+                        vec2 bubCoord = (vPitWPos + vec2(uTime * 3.8, -uTime * 2.9) + vec2(lavaSw1, lavaSw2) * 8.0) / 36.0;
+                        vec2 bCell = floor(bubCoord);
+                        vec2 bFrac = fract(bubCoord) - 0.5;
+                        float bSeed = fract(sin(dot(bCell, vec2(127.1, 311.7))) * 43758.5453);
+                        vec2 bOff = vec2(fract(bSeed * 17.3) - 0.5, fract(bSeed * 31.7) - 0.5) * 0.42;
+                        float bPhase = fract(uTime * (0.55 + 0.45 * bSeed) + bSeed * 6.2831);
+                        float bRadius = mix(0.06, 0.30, pow(bPhase, 0.65)) * step(0.38, bSeed);
+                        float bDist = length(bFrac - bOff);
+                        float bFade = smoothstep(0.0, 0.18, bPhase) * (1.0 - smoothstep(0.76, 1.0, bPhase));
+                        float bDome = (1.0 - smoothstep(max(0.01, bRadius - 0.11), max(0.02, bRadius), bDist)) * step(0.02, bRadius) * bFade * (0.45 + 0.55 * moltenMask);
+                        float bRim = (1.0 - smoothstep(0.0, 0.06, abs(bDist - bRadius))) * smoothstep(0.45, 0.92, bPhase) * (1.0 - smoothstep(0.92, 1.0, bPhase)) * step(0.38, bSeed);
+                        float bubbleHot = clamp(bDome * 0.85 + bRim * 1.15, 0.0, 1.0);
 
-                        vec3 magmaBase = mix(lavaTexCol * 1.15, vec3(0.86, 0.20, 0.015), 0.30);
-                        vec3 hotCore = mix(vec3(0.95, 0.26, 0.02), vec3(1.00, 0.72, 0.16), clamp(veinHot, 0.0, 1.0));
-                        vec3 magmaCol = mix(magmaBase, hotCore, 0.28 + 0.46 * clamp(veinHot, 0.0, 1.0));
-                        magmaCol += vec3(0.18, 0.06, 0.00) * (1.0 - moltenMask) * emberCell * 0.25;
+                        // Rilievo netto tra crosta basaltica fredda scura e canali lavici con gradiente termico vivo
+                        float bevelSlope = clamp((lGradX * 0.78 + lGradZ * 0.92) * 4.2 + (0.5 - crustCell) * 0.36, -0.45, 0.48);
+                        float crustShade = clamp(0.72 + bevelSlope, 0.26, 1.32);
+                        vec3 crustDark = mix(vec3(0.016, 0.005, 0.005), vec3(0.062, 0.016, 0.010), emberCell * 0.50 + texRelief * 0.35);
+                        vec3 crustCol = mix(crustDark, lavaTexCol * 0.20, 0.34) * crustShade;
+                        crustCol += vec3(0.78, 0.14, 0.01) * (fissureRim * 0.65 + undercutGlow * 0.55 + innerCrack * 0.45);
+
+                        vec3 deepRuby   = vec3(0.58, 0.05, 0.005);
+                        vec3 magmaOrng  = vec3(1.00, 0.34, 0.018);
+                        vec3 moltenGold = vec3(1.00, 0.78, 0.140);
+                        vec3 whiteHot   = vec3(1.00, 0.95, 0.620);
+                        float coreHeat = clamp(veinHot * 0.88 + bubbleHot * 0.65 + innerCrack * 0.32, 0.0, 1.0);
+                        vec3 magmaCol = mix(deepRuby, magmaOrng, smoothstep(0.10, 0.48, coreHeat));
+                        magmaCol = mix(magmaCol, moltenGold, smoothstep(0.42, 0.78, coreHeat));
+                        magmaCol = mix(magmaCol, whiteHot, smoothstep(0.74, 0.98, coreHeat) * 0.75);
+                        magmaCol = mix(magmaCol, lavaTexCol * vec3(1.22, 0.88, 0.42), 0.24);
 
                         vec3 lavaFinal = mix(crustCol, magmaCol, moltenMask);
-                        diffuseColor.rgb = lavaFinal * mix(0.86, 0.76, bBalLava);
+                        diffuseColor.rgb = lavaFinal * mix(0.88, 0.76, bBalLava);
                         diffuseColor.a = 0.99;
-                        totalEmissiveRadiance = mix(vec3(0.006, 0.001, 0.001), magmaCol * mix(0.84, 0.58, bBalLava), moltenMask)
-                            + vec3(0.58, 0.14, 0.01) * fissureRim * mix(0.52, 0.36, bBalLava);
+                        totalEmissiveRadiance = mix(vec3(0.004, 0.001, 0.001), magmaCol * mix(0.96, 0.64, bBalLava), moltenMask)
+                            + vec3(0.72, 0.16, 0.01) * (fissureRim * 0.55 + undercutGlow * 0.42 + innerCrack * 0.35) * mix(1.0, 0.65, bBalLava)
+                            + moltenGold * (bubbleHot * 0.52) * mix(1.0, 0.60, bBalLava);
+                        lavaHighlightCol = (whiteHot * pow(smoothstep(0.68, 0.98, coreHeat), 1.6) * 0.34 + moltenGold * bubbleHot * 0.28) * mix(1.0, 0.72, bBalLava);
 
-                        if (uPlayerPit.w > 0.01 && pDist < 68.0) {
-                            float coreGlow = exp(-pDist * pDist * 0.0055) * (0.75 + 0.25 * sin(uTime * 3.4));
-                            float collarRadius = 11.5 + (flow - 0.5) * 3.0;
-                            float meniscusRing = exp(-abs(rDist - collarRadius) * 0.35) * (0.55 + 0.45 * moveInt);
+                        if (uPlayerPit.w > 0.01 && pDist < 74.0) {
+                            float coreGlow = exp(-pDist * pDist * 0.0052) * (0.76 + 0.24 * sin(uTime * 4.2));
+                            float collarRadius = 11.5 + (flow - 0.5) * 3.2;
+                            float meniscusRing = exp(-abs(rDist - collarRadius) * 0.34) * (0.55 + 0.45 * moveInt);
 
-                            float lavaPhase = rDist * 0.32 - uTime * mix(3.2, 5.4, moveInt) + flow * 2.0;
+                            float lavaPhase = rDist * 0.34 - uTime * mix(3.8, 6.2, moveInt) + flow * 2.2;
                             float lavaWave = pow(smoothstep(0.40, 0.96, sin(lavaPhase)), 2.0);
-                            float lavaRings = lavaWave * smoothstep(7.0, 14.0, pDist) * exp(-pDist * 0.055) * (0.40 + 0.60 * moveInt);
+                            float lavaRings = lavaWave * smoothstep(7.0, 14.0, pDist) * exp(-pDist * 0.052) * (0.42 + 0.58 * moveInt);
 
-                            float moltenHeat = clamp(coreGlow * 0.65 + meniscusRing * 0.55 + lavaRings * 0.55, 0.0, 0.85) * uPlayerPit.w;
-                            vec3 stepMagmaCol = mix(vec3(0.90, 0.20, 0.01), vec3(1.0, 0.82, 0.28), smoothstep(0.25, 0.85, moltenHeat));
+                            vec2 fwdDirL = normalize(uPlayerPitDir.xy + vec2(0.0001, 0.0));
+                            vec2 sideDirL = vec2(-fwdDirL.y, fwdDirL.x);
+                            float dashBoostL = smoothstep(0.4, 1.8, uPlayerPitDir.z);
+                            float wakeBackL = max(0.0, -dot(relPos, fwdDirL));
+                            float wakeSideL = abs(dot(relPos, sideDirL));
+                            float wakeEnvL = smoothstep(3.0, 11.0, wakeBackL) * (1.0 - smoothstep(24.0, mix(42.0, 62.0, dashBoostL), wakeBackL));
+                            float lavaWake = exp(-wakeSideL * 0.14) * wakeEnvL * (0.65 + 0.35 * sin(wakeBackL * 0.42 - uPlayerPitDir.w * 0.5)) * clamp(moveInt + dashBoostL * 0.5, 0.0, 1.0);
 
-                            diffuseColor.rgb = mix(diffuseColor.rgb, stepMagmaCol, moltenHeat * 0.72);
-                            totalEmissiveRadiance += stepMagmaCol * (moltenHeat * mix(0.95, 0.70, bBalLava));
+                            float moltenHeat = clamp(coreGlow * 0.65 + meniscusRing * 0.58 + lavaRings * 0.55 + lavaWake * 0.75, 0.0, 0.95) * uPlayerPit.w;
+                            vec3 stepMagmaCol = mix(vec3(0.95, 0.24, 0.01), vec3(1.0, 0.88, 0.38), smoothstep(0.25, 0.85, moltenHeat));
+
+                            diffuseColor.rgb = mix(diffuseColor.rgb, stepMagmaCol, moltenHeat * 0.76);
+                            totalEmissiveRadiance += stepMagmaCol * (moltenHeat * mix(1.05, 0.74, bBalLava));
+                            lavaHighlightCol += vec3(1.0, 0.86, 0.34) * (moltenHeat * 0.22);
                         }
                     ` : `
                         vec2 dirFlow = vec2(0.5547, -0.8320);
@@ -19762,35 +20231,34 @@ class GameMap {
                     '#include <dithering_fragment>',
                     `
                     ${themeIdx !== 1 ? `
-                        // Mantiene l'acqua azzurra e nitida anche sotto Bloom / PostPass su Ultra PC e MEGA
+                        // Mantiene l'acqua nitida e preserva creste, caustiche e riflessi sotto Bloom / PostPass
                         float baseLum = max(0.03, dot(waterBaseCol, vec3(0.299, 0.587, 0.114)));
                         float litLum = dot(gl_FragColor.rgb, vec3(0.299, 0.587, 0.114));
                         float bLim = clamp(uBloomActive, 0.0, 1.0);
-                        float lumGain = clamp(litLum / baseLum, 0.88, ${themeIdx === 0 ? 'mix(1.10, 1.00, bLim)' : 'mix(1.14, 1.05, bLim)'});
-                        gl_FragColor.rgb = waterBaseCol * lumGain;
+                        float lumGain = clamp(litLum / baseLum, 0.84, ${themeIdx === 0 ? 'mix(1.16, 1.04, bLim)' : 'mix(1.14, 1.05, bLim)'});
+                        gl_FragColor.rgb = waterBaseCol * lumGain + waterHighlightCol;
 
-                        float capLim = ${themeIdx === 0 ? 'mix(0.88, 0.84, bLim)' : 'mix(0.86, 0.75, bLim)'};
+                        float capLim = ${themeIdx === 0 ? 'mix(0.94, 0.86, bLim)' : 'mix(0.86, 0.75, bLim)'};
                         float maxC = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b));
                         if (maxC > capLim) {
-                            float waterSubHead = ${themeIdx === 0 ? 'mix(0.24, 0.10, bLim)' : 'mix(0.28, 0.09, bLim)'};
+                            float waterSubHead = ${themeIdx === 0 ? 'mix(0.28, 0.12, bLim)' : 'mix(0.28, 0.09, bLim)'};
                             float overSub = maxC - capLim;
                             float compressed = capLim + (waterSubHead * overSub) / (waterSubHead + overSub);
                             gl_FragColor.rgb *= (compressed / maxC);
                         }
                     ` : `
-                        // Compressione morbida delle alte luci sulla lava: mantiene nitida la texture lava_water.png sotto Bloom e PointLight
-                        vec3 lavaLit = gl_FragColor.rgb;
+                        // Compressione morbida delle alte luci sulla lava: preserva il contrasto tra crosta nera e nucleo incandescente
+                        vec3 lavaLit = gl_FragColor.rgb + lavaHighlightCol;
                         ${themeIdx === 1 ? `
-                        // Preserva profondità tra crosta basaltica opaca e fessure laviche evitando patina grigia piatta
                         float lavaLuma = dot(lavaLit, vec3(0.299, 0.587, 0.114));
                         float crustSuppress = 1.0 - smoothstep(0.06, 0.28, lavaLuma);
                         lavaLit = mix(lavaLit, lavaLit * vec3(0.72, 0.58, 0.54), crustSuppress * 0.65);
                         ` : ''}
                         float bLava = clamp(uBloomActive, 0.0, 1.0);
-                        float lavaCap = mix(0.94, 0.84, bLava);
+                        float lavaCap = mix(1.08, 0.92, bLava);
                         float maxLavaC = max(lavaLit.r, max(lavaLit.g, lavaLit.b));
                         if (maxLavaC > lavaCap) {
-                            float headLava = mix(0.32, 0.14, bLava);
+                            float headLava = mix(0.40, 0.18, bLava);
                             float overLava = maxLavaC - lavaCap;
                             float compLava = lavaCap + (headLava * overLava) / (headLava + overLava);
                             gl_FragColor.rgb = lavaLit * (compLava / maxLavaC);
@@ -19851,7 +20319,7 @@ class GameMap {
         }
 
         if (pitAreaGeo) {
-            const bedHex = (themeIdx === 0) ? 0x146aa3 : ((themeIdx === 1) ? 0x240602 : 0x0d4a80);
+            const bedHex = (themeIdx === 0) ? 0x09282e : ((themeIdx === 1) ? 0x240602 : 0x0d4a80);
             const pitBedMat = new THREE.MeshBasicMaterial({ color: bedHex });
             const meshPitBed = new THREE.Mesh(pitAreaGeo, pitBedMat);
             meshPitBed.position.set(0, -24.2, 0);
@@ -20135,9 +20603,9 @@ class GameMap {
                     wall: new THREE.Color(th.wall),
                     deep: (t === 1)
                         ? { r: 1.50, g: 0.40, b: 0.08 }
-                        : ((t === 0) ? { r: 0.20, g: 0.64, b: 0.90 } : { r: 0.12, g: 0.48, b: 0.80 }),
-                    shoreD0: (t === 2) ? 3.5 : (t === 0 ? 5.6 : 6.6),
-                    shoreD1: (t === 2) ? 19.5 : (t === 0 ? 38.0 : 21.5)
+                        : ((t === 0) ? { r: 0.09, g: 0.34, b: 0.36 } : { r: 0.12, g: 0.48, b: 0.80 }),
+                    shoreD0: (t === 2) ? 3.5 : (t === 0 ? 4.2 : 6.6),
+                    shoreD1: (t === 2) ? 19.5 : (t === 0 ? 26.0 : 21.5)
                 };
             });
             const activePal = pitPalettes[themeIdx];
@@ -20658,7 +21126,7 @@ class GameMap {
                         polygonOffsetUnits: -1
                     });
 
-                    cachedShoreMat.customProgramCacheKey = () => 'pit_shore_v12_' + themeIdx;
+                    cachedShoreMat.customProgramCacheKey = () => 'pit_shore_v13_' + themeIdx;
                     cachedShoreMat.onBeforeCompile = (shader) => {
                         shader.uniforms.uTime = InteractiveGrassSystem.uniforms.uTime;
                         shader.uniforms.uBloomActive = InteractiveGrassSystem.uniforms.uBloomActive;
@@ -20686,31 +21154,37 @@ class GameMap {
                             float wob = sin(uArc * 2.0 + uTime * 1.15) * 0.032 + cos(uArc * 5.0 - uTime * 0.85) * 0.018;
                             float d = clamp(sDist + wob, 0.0, 1.0);
                             ${themeIdx === 0 ? `
-                                float haloFade = pow(1.0 - smoothstep(0.02, 1.0, sDist), 1.50);
-                                float fairyBreath = 0.90 + 0.10 * sin(uArc * 3.0 - uTime * 1.35) * cos(uArc * 5.0 + uTime * 0.95);
-                                float haloBody = haloFade * fairyBreath;
+                                float haloFade = pow(1.0 - smoothstep(0.02, 1.0, sDist), 1.45);
+                                float edgeWet = (1.0 - smoothstep(0.08, 0.34, d)) * (0.86 + 0.14 * sin(uArc * 3.0 - uTime * 1.4));
+                                float shoreLap = sin(d * 28.0 - uTime * 2.35 + sin(uArc * 4.0 + uTime * 0.8) * 0.85);
+                                float shoreBands = smoothstep(0.46, 0.94, shoreLap) * smoothstep(0.02, 0.12, d) * (1.0 - smoothstep(0.42, 0.96, sDist));
+                                float microFoam = smoothstep(0.76, 0.98, shoreLap) * smoothstep(0.62, 0.94, 0.5 + 0.5 * sin(uArc * 19.0 + d * 12.0 - uTime * 2.1));
 
-                                float rimGlow = smoothstep(0.01, 0.085, d) * (1.0 - smoothstep(0.085, 0.26, d));
-                                float ripWave = sin(d * 24.0 - uTime * 1.75 + sin(uArc * 4.0) * 0.70);
-                                float ripples = smoothstep(0.58, 0.95, ripWave) * smoothstep(0.06, 0.18, d) * (1.0 - smoothstep(0.45, 0.94, sDist));
-
-                                // Raccordo sponda foresta azzurra: aureola azzurra luminosa senza alone chiaro sotto Bloom
+                                // Raccordo sponda boschiva: verde-petrolio naturale con tre onde di risacca e schiuma sottile
                                 float sb0 = clamp(uBloomActive, 0.0, 1.0);
-                                vec3 innerAqua = mix(vec3(0.055, 0.380, 0.850), vec3(0.048, 0.350, 0.810), sb0);
-                                vec3 midCyan   = mix(vec3(0.025, 0.250, 0.700), vec3(0.022, 0.230, 0.660), sb0);
-                                vec3 outerBlue = mix(vec3(0.008, 0.130, 0.480), vec3(0.007, 0.120, 0.450), sb0);
-                                vec3 haloCol = mix(outerBlue, midCyan, smoothstep(0.15, 0.60, haloFade));
-                                haloCol = mix(haloCol, innerAqua, smoothstep(0.54, 0.95, haloFade));
-                                haloCol = mix(haloCol, mix(vec3(0.14, 0.56, 0.94), vec3(0.11, 0.49, 0.89), sb0), clamp(rimGlow * 0.60 + ripples * 0.44, 0.0, 0.72));
+                                vec3 outerBankCol = mix(vec3(0.010, 0.068, 0.072), vec3(0.008, 0.060, 0.064), sb0);
+                                vec3 shallowJade  = mix(vec3(0.032, 0.175, 0.165), vec3(0.028, 0.155, 0.148), sb0);
+                                vec3 rimMint      = mix(vec3(0.115, 0.375, 0.335), vec3(0.095, 0.320, 0.288), sb0);
+                                vec3 foamSpec     = mix(vec3(0.320, 0.560, 0.500), vec3(0.245, 0.450, 0.405), sb0);
 
-                                float haloAlpha = clamp(haloBody * 0.34 + rimGlow * 0.24 + ripples * 0.16, 0.0, mix(0.48, 0.40, sb0)) * (1.0 - smoothstep(0.80, 1.0, sDist));
+                                vec3 haloCol = mix(outerBankCol, shallowJade, smoothstep(0.16, 0.68, haloFade));
+                                haloCol = mix(haloCol, rimMint, clamp(edgeWet * 0.48 + shoreBands * 0.54, 0.0, 0.78));
+                                haloCol = mix(haloCol, foamSpec, clamp(microFoam * 0.65, 0.0, 0.65));
+
+                                float haloAlpha = clamp(haloFade * 0.36 + edgeWet * 0.18 + shoreBands * 0.24 + microFoam * 0.18, 0.0, mix(0.56, 0.44, sb0)) * (1.0 - smoothstep(0.78, 1.0, sDist));
                                 diffuseColor = vec4(haloCol, haloAlpha);
                             ` : (themeIdx === 1 ? `
-                                float pulse = 0.84 + 0.16 * sin(uTime * 2.6 + uArc * 2.0);
-                                float hotRim = (1.0 - smoothstep(0.05, 0.30, d)) * pulse;
-                                float emberGlow = (1.0 - smoothstep(0.10, 0.72, d));
-                                vec3 glowCol = mix(vec3(0.78, 0.12, 0.01), vec3(1.0, 0.84, 0.30), smoothstep(0.22, 0.84, hotRim));
-                                float glowAlpha = clamp(hotRim * 0.44 + emberGlow * 0.16, 0.0, 0.48) * deepFade;
+                                float slagNoise = clamp(sin(uArc * 5.0 + 0.8) * 0.07 + cos(uArc * 11.0 - uTime * 0.25) * 0.04 + sin(uArc * 17.0) * 0.03, -0.05, 0.10);
+                                float slagCrust = 1.0 - smoothstep(0.08 + slagNoise, 0.36 + slagNoise, d);
+                                float pulse = 0.78 + 0.22 * sin(uTime * 3.1 + uArc * 3.0);
+                                float hotRim = (1.0 - smoothstep(0.06, 0.34, d)) * pulse;
+                                float lapCrest = smoothstep(0.42, 0.92, sin(d * 20.0 - uTime * 2.1 + sin(uArc * 5.0) * 0.9)) * smoothstep(0.08, 0.26, d) * (1.0 - smoothstep(0.50, 0.95, sDist));
+                                float emberGlow = 1.0 - smoothstep(0.12, 0.78, d);
+                                float sb1 = clamp(uBloomActive, 0.0, 1.0);
+                                vec3 slagCol = mix(vec3(0.024, 0.006, 0.005), vec3(0.14, 0.03, 0.01), pulse * 0.5);
+                                vec3 hotLavaShore = mix(vec3(0.84, 0.14, 0.01), vec3(1.0, 0.84, 0.26), smoothstep(0.24, 0.86, clamp(hotRim * 0.78 + lapCrest * 0.55, 0.0, 1.0)));
+                                vec3 glowCol = mix(hotLavaShore, slagCol, slagCrust * 0.52);
+                                float glowAlpha = clamp(hotRim * 0.46 + lapCrest * 0.24 + emberGlow * 0.16 + slagCrust * 0.18, 0.0, mix(0.58, 0.46, sb1)) * deepFade;
                                 diffuseColor = vec4(glowCol, glowAlpha);
                             ` : `
                                 float frostNoise = sin(uArc * 3.0) * 0.08 + cos(uArc * 7.0 + 1.2) * 0.05 + sin(uArc * 11.0) * 0.04;
@@ -22906,6 +23380,7 @@ class Player extends Entity {
 
     triggerOverdrive() {
         this.overdrive = true; Game.hitStop = 0.2; Game.addTrauma(1.0);
+        AudioEngine.playOverdrive(this.essence);
         let odBase = 5.0 + (SkinSystem.selectedId === 'dark_mage' ? 2.0 : 0.0);
         this.essenceTimer = odBase * this.modifiers.essenceDurationMult;
         if (typeof UI !== 'undefined' && UI.triggerPulseClass && UI.els.essenceHud) {
@@ -23314,6 +23789,7 @@ class Player extends Entity {
     update(dt) {
 
         if (this.dead) {
+            this._wasInPit = false;
             if (InteractiveGrassSystem.uniforms.uPlayerPit) {
                 InteractiveGrassSystem.uniforms.uPlayerPit.value.w *= 0.92;
             }
@@ -23599,7 +24075,7 @@ class Player extends Entity {
                 this.updateAppearance();
                 this.shieldMesh.material.opacity = 0.6;
                 this.autoShieldActive = true;
-                AudioEngine.playCollect();
+                AudioEngine.playShieldUp(!!this.modifiers.seismicShield);
                 if (this.modifiers.seismicShield) {
                     Game.getHazard().spawn(this.x, this.y, 250, 0.4, this.stats.maxDmg * 0.2, 0xffffff, 'seismic_nova_ring');
                 }
@@ -23984,6 +24460,42 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         let isShooting = Game.mouse.leftDown || Game.inputs.right.active;
         if (this.overdrive && this.essence === 'red' && isShooting && !this.isDashing) this.flamethrower(dt);
 
+        if (inPit && !this._wasInPit) {
+            let entryEnv = Game.currentThemeIndex === 0 ? 'water' : (Game.currentThemeIndex === 1 ? 'lava' : 'ice');
+            AudioEngine.playPitSplash(entryEnv, this.isDashing);
+            if (!AppSettings.isLow) {
+                if (!isIce) {
+                    let ringMat = Game.currentThemeIndex === 0 ? SharedMat.spriteWhite : SharedMat.spriteYellow;
+                    let ring = Game.getParticle();
+                    ring.spawn(this.x, -17.0, this.y, ringMat, 'nova');
+                    ring.baseSize = this.isDashing ? 96 : 82;
+                    ring.life = 0.36;
+                    ring.maxLife = 0.36;
+
+                    let dropCount = this.isDashing ? 8 : 5;
+                    let dropMat = Game.currentThemeIndex === 0 ? SharedMat.spriteWhite : SharedMat.spriteRed;
+                    for (let spI = 0; spI < dropCount; spI++) {
+                        let sp = Game.getParticle();
+                        sp.spawn(this.x + MathUtils.randomRange(-6, 6), 2.5, this.y + MathUtils.randomRange(-6, 6), dropMat, 'spark');
+                        sp.vy = MathUtils.randomRange(90, 185);
+                        sp.baseSize = MathUtils.randomRange(6, 11);
+                        sp.life = MathUtils.randomRange(0.24, 0.42);
+                        sp.maxLife = sp.life;
+                    }
+                } else {
+                    for (let spI = 0; spI < 4; spI++) {
+                        let sp = Game.getParticle();
+                        sp.spawn(this.x + MathUtils.randomRange(-6, 6), 2.5, this.y + MathUtils.randomRange(-6, 6), SharedMat.spriteWhite, 'trail');
+                        sp.vy = MathUtils.randomRange(45, 85);
+                        sp.baseSize = MathUtils.randomRange(6, 10);
+                        sp.life = MathUtils.randomRange(0.18, 0.28);
+                        sp.maxLife = sp.life;
+                    }
+                }
+            }
+        }
+        this._wasInPit = inPit;
+
         if (!this.isDashing) {
             let dx = 0, dy = 0;
             if (Game.keys['w']) dy -= 1; if (Game.keys['s']) dy += 1; if (Game.keys['a']) dx -= 1; if (Game.keys['d']) dx += 1;
@@ -24153,7 +24665,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
                 if (this.lavaTimer >= 1.0) {
                     this.takeDamage(this.stats.maxHp * 0.10, 'hazard', false, false);
                     this.lavaTimer = 0;
-                    AudioEngine.playShoot('flame');
+                    AudioEngine.playLavaBurn();
                     for (let i = 0; i < 6; i++) {
                         let p = Game.getParticle();
                         p.spawn(this.x + MathUtils.randomRange(-6, 6), 4, this.y + MathUtils.randomRange(-6, 6), SharedMat.spriteRed, 'flame');
@@ -24262,6 +24774,21 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             if (this.modifiers.fireTrail && Game.frameCount % 5 === 0) Game.getHazard().spawn(this.x, this.y, 24 * massScale, 2.0, this.stats.maxDmg * 0.8, 0xffaa00, 'fire');
             this.move(Math.cos(this.dashAngle), Math.sin(this.dashAngle), dt * 4.0);
             this.updatePitRipplesUniform(dt, true, Math.cos(this.dashAngle), Math.sin(this.dashAngle), inPit, isIce);
+            if (inPit) {
+                let dashEnv = Game.currentThemeIndex === 0 ? 'water' : (Game.currentThemeIndex === 1 ? 'lava' : 'ice');
+                AudioEngine.playEnvironmentSound(dashEnv, true, dt * 1.6);
+                if (!AppSettings.isLow && Game.frameCount % (AppSettings.useMobileLimits ? 4 : 2) === 0) {
+                    let wake = Game.getParticle();
+                    let wMat = isIce ? SharedMat.spriteWhite : (Game.currentThemeIndex === 0 ? SharedMat.spriteWhite : SharedMat.spriteRed);
+                    wake.spawn(this.x - Math.cos(this.dashAngle) * 10, 2.5, this.y - Math.sin(this.dashAngle) * 10, wMat, isIce ? 'trail' : 'spark');
+                    wake.vx = -Math.cos(this.dashAngle) * 70 + MathUtils.randomRange(-40, 40);
+                    wake.vz = -Math.sin(this.dashAngle) * 70 + MathUtils.randomRange(-40, 40);
+                    wake.vy = MathUtils.randomRange(65, 130);
+                    wake.baseSize = MathUtils.randomRange(7, 12);
+                    wake.life = 0.24;
+                    wake.maxLife = 0.24;
+                }
+            }
 
             if (this.dashTimer <= 0) {
                 this.isDashing = false;
@@ -25414,7 +25941,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             if (typeof UI !== 'undefined' && UI.triggerPulseClass && UI.els.btnShield) {
                 UI.triggerPulseClass(UI.els.btnShield, 'anim-hud-pop');
             }
-            AudioEngine.playCollect();
+            AudioEngine.playShieldUp(!!this.modifiers.seismicShield);
         }
     }
 }
@@ -31413,9 +31940,9 @@ const Preloader = {
 
                     const foam = Math.pow(Math.max(0.0, waveSum * 0.5 + 0.5), 4.0);
 
-                    const r = Math.min(255, Math.floor(24 + (waveSum * 0.5 + 0.5) * 48 + caust * 145 + foam * 185));
-                    const g = Math.min(255, Math.floor(108 + (waveSum * 0.5 + 0.5) * 124 + caust * 195 + foam * 235));
-                    const b = Math.min(255, Math.floor(165 + (waveSum * 0.5 + 0.5) * 90 + caust * 120 + foam * 240));
+                    const r = Math.min(255, Math.floor(14 + (waveSum * 0.5 + 0.5) * 34 + caust * 72 + foam * 102));
+                    const g = Math.min(255, Math.floor(85 + (waveSum * 0.5 + 0.5) * 64 + caust * 58 + foam * 54));
+                    const b = Math.min(255, Math.floor(98 + (waveSum * 0.5 + 0.5) * 56 + caust * 50 + foam * 50));
 
                     const idx = (y * 256 + x) * 4;
                     d[idx] = r; d[idx + 1] = g; d[idx + 2] = b; d[idx + 3] = 255;
