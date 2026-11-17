@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "build": "mkdir -p dist && npx --yes html-minifier-terser index.html -o dist/index.html --collapse-whitespace --remove-comments --minify-js true --minify-css true && find . -maxdepth 1 ! -name '.' ! -name 'dist' ! -name 'package.json' ! -name '.git' ! -name 'README.md' -exec cp -r {} dist/ +"
+  }
+}
