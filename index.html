@@ -1034,15 +1034,15 @@ body.colorblind-mode .stack-dot.active.green {
         }
 
         @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
-            body:not(.mobile-landscape) #hud #btn-dash {
+            body:not(.mobile-landscape):not(.pc-desktop) #hud #btn-dash {
                 bottom: 32px !important;
                 right: 176px !important;
             }
-            body:not(.mobile-landscape) #hud #btn-shield {
+            body:not(.mobile-landscape):not(.pc-desktop) #hud #btn-shield {
                 bottom: 32px !important;
                 right: 104px !important;
             }
-            body:not(.mobile-landscape) #hud #btn-ult {
+            body:not(.mobile-landscape):not(.pc-desktop) #hud #btn-ult {
                 bottom: 32px !important;
                 right: 32px !important;
             }
@@ -1113,6 +1113,52 @@ body.colorblind-mode .stack-dot.active.green {
         body.mobile-landscape #hud #btn-ult i,
         body.force-rotate-landscape #hud #btn-ult i {
             font-size: 1.28rem !important;
+        }
+
+        body:not(.is-touch) #hud #btn-dash {
+            bottom: calc(32px * var(--pc-hud-scale, 1)) !important;
+            right: calc(184px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            top: auto !important;
+            width: calc(58px * var(--pc-hud-scale, 1)) !important;
+            height: calc(58px * var(--pc-hud-scale, 1)) !important;
+            margin: 0 !important;
+        }
+        body:not(.is-touch) #hud #btn-shield {
+            bottom: calc(32px * var(--pc-hud-scale, 1)) !important;
+            right: calc(108px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            top: auto !important;
+            width: calc(58px * var(--pc-hud-scale, 1)) !important;
+            height: calc(58px * var(--pc-hud-scale, 1)) !important;
+            margin: 0 !important;
+        }
+        body:not(.is-touch) #hud #btn-ult {
+            bottom: calc(32px * var(--pc-hud-scale, 1)) !important;
+            right: calc(32px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            top: auto !important;
+            width: calc(58px * var(--pc-hud-scale, 1)) !important;
+            height: calc(58px * var(--pc-hud-scale, 1)) !important;
+            margin: 0 !important;
+        }
+        body:not(.is-touch) #hud #btn-dash i,
+        body:not(.is-touch) #hud #btn-shield i,
+        body:not(.is-touch) #hud #btn-ult i {
+            font-size: calc(1.5rem * var(--pc-hud-scale, 1)) !important;
+        }
+        body:not(.is-touch) #hud #btn-dash > span,
+        body:not(.is-touch) #hud #btn-shield > span,
+        body:not(.is-touch) #hud #btn-ult > span {
+            font-size: calc(10px * var(--pc-hud-scale, 1)) !important;
+            top: calc(-22px * var(--pc-hud-scale, 1)) !important;
+        }
+        body:not(.is-touch) .gp-focus {
+            outline: 2.5px solid #38bdf8 !important;
+            outline-offset: 2px !important;
+            box-shadow: 0 0 18px rgba(56, 189, 248, 0.85), 0 0 6px #ffffff !important;
+            filter: brightness(1.15) !important;
+            z-index: 30 !important;
         }
 
         body.mobile-landscape #hud > div:nth-child(1),
@@ -1514,111 +1560,7 @@ body.colorblind-mode .stack-dot.active.green {
             transform: none !important;
         }
 
-        /* PC & Schermi Widescreen: Focus scena 3D a sinistra, blocco Titolo + Pannello comandi bilanciato a destra */
-        @media (min-width: 760px) and (min-aspect-ratio: 112/100) {
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu > div.z-10 {
-                flex-direction: row !important;
-                justify-content: flex-end !important;
-                align-items: center !important;
-                padding: clamp(18px, 3.6vh, 46px) clamp(24px, 4.5vw, 72px) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-scrim-side {
-                display: block !important;
-                width: 58% !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-scrim-top,
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-scrim-bottom {
-                opacity: 0.25 !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-ui-col {
-                width: min(560px, 46vw) !important;
-                height: 100% !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: center !important;
-                align-items: center !important;
-                gap: clamp(16px, 3vh, 34px) !important;
-                margin: 0 !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-center-spacer {
-                display: none !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-title-wrap {
-                padding-top: 0 !important;
-                flex: 0 0 auto !important;
-                min-height: 0 !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: center !important;
-                align-items: center !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .title-3d-text span.mc-word-sub {
-                font-size: clamp(2.2rem, min(4.3vw, 6.2vh), 4.1rem) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .title-3d-text h1.mc-block-word {
-                font-size: clamp(3.6rem, min(7.2vw, 10.6vh), 6.6rem) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-actions-card {
-                width: 100% !important;
-                max-width: min(480px, 100%) !important;
-                flex: 0 0 auto !important;
-                padding: clamp(12px, 2vh, 20px) !important;
-                gap: clamp(10px, 1.8vh, 18px) !important;
-                margin-bottom: 0 !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu #btn-menu-skins {
-                padding: clamp(10px, 1.5vh, 16px) clamp(12px, 1.4vw, 18px) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu #btn-menu-crystals {
-                padding: clamp(10px, 1.5vh, 16px) clamp(14px, 1.5vw, 20px) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu #menu-skin-frame {
-                width: clamp(44px, 5.8vh, 58px) !important;
-                height: clamp(44px, 5.8vh, 58px) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu #menu-skin-name {
-                font-size: clamp(0.85rem, 1.5vh, 1.1rem) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu #menu-crystals-count {
-                font-size: clamp(0.95rem, 1.7vh, 1.3rem) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .anim-play-pulse {
-                padding-top: clamp(16px, 2.6vh, 26px) !important;
-                padding-bottom: clamp(16px, 2.6vh, 26px) !important;
-                font-size: clamp(1.65rem, min(2.7vw, 3.4vh), 2.5rem) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu #btn-main-play-icon {
-                font-size: clamp(1.25rem, 2.4vh, 1.9rem) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .menu-sec-row {
-                gap: clamp(10px, 1.2vw, 14px) !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .menu-sec-btn {
-                height: clamp(48px, 6.6vh, 64px) !important;
-                font-size: clamp(0.75rem, 1.35vh, 0.96rem) !important;
-                gap: 0.45rem !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .menu-sec-btn i {
-                font-size: clamp(0.92rem, 1.65vh, 1.2rem) !important;
-            }
-        }
-        @media (min-width: 760px) and (min-aspect-ratio: 112/100) and (max-height: 620px) {
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-ui-col {
-                gap: 10px !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #menu-actions-card {
-                padding: 10px 12px !important;
-                gap: 8px !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .anim-play-pulse {
-                padding-top: 12px !important;
-                padding-bottom: 12px !important;
-                font-size: 1.45rem !important;
-            }
-            body:not(.mobile-landscape):not(.force-rotate-landscape):not(.mobile-portrait):not(.force-rotate-portrait) #mainMenu .menu-sec-btn {
-                height: 44px !important;
-            }
-        }
+        /* PC & Schermi Widescreen: gestiti dal blocco unificato body.pc-desktop a fine foglio di stile */
 
         body.mobile-landscape #optionsModal,
         body.force-rotate-landscape #optionsModal,
@@ -2840,6 +2782,854 @@ body.colorblind-mode .stack-dot.active.green {
             min-height: 38px !important;
             padding: 6px 10px !important;
         }
+
+        /* =========================================================================
+           PC DESKTOP & SCHERMI AD ALTA RISOLUZIONE (1080p / 2K / 4K)
+           Scala proporzionalmente HUD e Menù ispirandosi alla versione smartphone
+           ========================================================================= */
+
+        /* 1. Schermata Iniziale */
+        html body.pc-desktop #loadingText {
+            font-size: clamp(1.75rem, 2.8vh, 4.2rem) !important;
+        }
+        html body.pc-desktop #startText {
+            font-size: clamp(2.4rem, 4.2vh, 6.2rem) !important;
+        }
+
+        /* 2. HUD In-Game (scalato dinamicamente tramite --pc-hud-scale) */
+        html body.pc-desktop #hud > div:nth-child(1) {
+            top: calc(18px * var(--pc-hud-scale, 1)) !important;
+            right: calc(20px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            margin: 0 !important;
+            transform: scale(var(--pc-hud-scale, 1)) !important;
+            transform-origin: top right !important;
+        }
+        html body.pc-desktop #hud > div:nth-child(2) {
+            top: calc(18px * var(--pc-hud-scale, 1)) !important;
+            left: calc(20px * var(--pc-hud-scale, 1)) !important;
+            right: auto !important;
+            margin: 0 !important;
+            transform: scale(var(--pc-hud-scale, 1)) !important;
+            transform-origin: top left !important;
+        }
+        html body.pc-desktop #hud > div:nth-child(3) {
+            top: calc(74px * var(--pc-hud-scale, 1)) !important;
+            right: calc(20px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            margin: 0 !important;
+            transform: scale(var(--pc-hud-scale, 1)) !important;
+            transform-origin: top right !important;
+        }
+        html body.pc-desktop #hud #btn-dash {
+            bottom: calc(32px * var(--pc-hud-scale, 1)) !important;
+            right: calc(184px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            top: auto !important;
+            width: calc(58px * var(--pc-hud-scale, 1)) !important;
+            height: calc(58px * var(--pc-hud-scale, 1)) !important;
+            margin: 0 !important;
+        }
+        html body.pc-desktop #hud #btn-shield {
+            bottom: calc(32px * var(--pc-hud-scale, 1)) !important;
+            right: calc(108px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            top: auto !important;
+            width: calc(58px * var(--pc-hud-scale, 1)) !important;
+            height: calc(58px * var(--pc-hud-scale, 1)) !important;
+            margin: 0 !important;
+        }
+        html body.pc-desktop #hud #btn-ult {
+            bottom: calc(32px * var(--pc-hud-scale, 1)) !important;
+            right: calc(32px * var(--pc-hud-scale, 1)) !important;
+            left: auto !important;
+            top: auto !important;
+            width: calc(58px * var(--pc-hud-scale, 1)) !important;
+            height: calc(58px * var(--pc-hud-scale, 1)) !important;
+            margin: 0 !important;
+        }
+        html body.pc-desktop #hud #btn-dash i,
+        html body.pc-desktop #hud #btn-shield i,
+        html body.pc-desktop #hud #btn-ult i {
+            font-size: calc(1.5rem * var(--pc-hud-scale, 1)) !important;
+        }
+        html body.pc-desktop #hud #btn-dash > span,
+        html body.pc-desktop #hud #btn-shield > span,
+        html body.pc-desktop #hud #btn-ult > span {
+            font-size: calc(10px * var(--pc-hud-scale, 1)) !important;
+            top: calc(-22px * var(--pc-hud-scale, 1)) !important;
+        }
+        html body.pc-desktop #hud #announcer-text {
+            font-size: clamp(3.2rem, 6.2vh, 9.5rem) !important;
+        }
+
+        /* 3. Main Menu (Layout bilanciato widescreen + supporto finestra stretta) */
+        html body.pc-desktop #mainMenu #menu-actions-card {
+            width: 100% !important;
+            max-width: clamp(440px, min(33vw, 56vh), 1040px) !important;
+            padding: clamp(14px, 2.2vh, 40px) !important;
+            gap: clamp(12px, 1.8vh, 32px) !important;
+            border-radius: clamp(16px, 2vh, 34px) !important;
+            border: 1.5px solid rgba(56, 189, 248, 0.34) !important;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(5, 9, 22, 0.94) 55%, rgba(2, 4, 12, 0.97) 100%) !important;
+            box-shadow: 0 18px 48px rgba(0, 0, 0, 0.78), 0 0 28px rgba(34, 211, 238, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        }
+        html body.pc-desktop #mainMenu #btn-menu-skins {
+            min-height: clamp(56px, 7.6vh, 134px) !important;
+            padding: clamp(10px, 1.5vh, 28px) clamp(14px, 1.5vw, 34px) !important;
+            border-radius: clamp(12px, 1.5vh, 24px) !important;
+        }
+        html body.pc-desktop #mainMenu #btn-menu-skins > div:first-child > div:last-child > div span:last-child {
+            font-size: clamp(9px, 1.05vh, 19px) !important;
+        }
+        html body.pc-desktop #mainMenu #btn-menu-crystals {
+            min-width: clamp(86px, 7.2vw, 196px) !important;
+            min-height: clamp(56px, 7.6vh, 134px) !important;
+            padding: clamp(10px, 1.5vh, 28px) clamp(14px, 1.5vw, 34px) !important;
+            border-radius: clamp(12px, 1.5vh, 24px) !important;
+        }
+        html body.pc-desktop #mainMenu #btn-menu-crystals i {
+            font-size: clamp(1.05rem, 1.8vh, 2.4rem) !important;
+        }
+        html body.pc-desktop #mainMenu #menu-skin-frame {
+            width: clamp(46px, 6.2vh, 108px) !important;
+            height: clamp(46px, 6.2vh, 108px) !important;
+            border-radius: clamp(9px, 1.2vh, 20px) !important;
+        }
+        html body.pc-desktop #mainMenu #menu-skin-svg {
+            width: 84% !important;
+            height: 84% !important;
+        }
+        html body.pc-desktop #mainMenu #menu-skin-name {
+            font-size: clamp(0.88rem, 1.55vh, 1.95rem) !important;
+        }
+        html body.pc-desktop #mainMenu #menu-crystals-count {
+            font-size: clamp(1rem, 1.8vh, 2.3rem) !important;
+        }
+        html body.pc-desktop #mainMenu .anim-play-pulse {
+            padding-top: clamp(16px, 2.6vh, 46px) !important;
+            padding-bottom: clamp(16px, 2.6vh, 46px) !important;
+            font-size: clamp(1.65rem, min(2.7vw, 3.6vh), 4.3rem) !important;
+            border-radius: clamp(12px, 1.6vh, 28px) !important;
+        }
+        html body.pc-desktop #mainMenu #btn-main-play-icon {
+            font-size: clamp(1.3rem, 2.5vh, 3.2rem) !important;
+        }
+        html body.pc-desktop #mainMenu .menu-sec-row {
+            gap: clamp(10px, 1.2vw, 24px) !important;
+        }
+        html body.pc-desktop #mainMenu .menu-sec-btn {
+            height: clamp(58px, 8.2vh, 136px) !important;
+            flex-direction: column !important;
+            gap: clamp(4px, 0.7vh, 12px) !important;
+            padding: clamp(6px, 1vh, 18px) 8px !important;
+            font-size: clamp(0.74rem, 1.3vh, 1.55rem) !important;
+            letter-spacing: 0.06em !important;
+            line-height: 1.05 !important;
+            border-radius: clamp(11px, 1.4vh, 22px) !important;
+        }
+        html body.pc-desktop #mainMenu .menu-sec-btn i {
+            font-size: clamp(1.05rem, 2vh, 2.35rem) !important;
+        }
+        html body.pc-desktop #mainMenu #menu-actions-card > div:last-child p {
+            font-size: clamp(10px, 1.15vh, 20px) !important;
+        }
+
+        @media (min-width: 760px) and (min-aspect-ratio: 112/100) {
+            html body.pc-desktop #mainMenu > div.z-10 {
+                flex-direction: row !important;
+                justify-content: flex-end !important;
+                align-items: center !important;
+                padding: clamp(20px, 3.8vh, 72px) clamp(28px, 4.8vw, 120px) !important;
+            }
+            html body.pc-desktop #menu-scrim-side {
+                display: block !important;
+                width: 56% !important;
+            }
+            html body.pc-desktop #menu-scrim-top,
+            html body.pc-desktop #menu-scrim-bottom {
+                opacity: 0.25 !important;
+            }
+            html body.pc-desktop #menu-ui-col {
+                width: clamp(440px, 38vw, 1120px) !important;
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                gap: clamp(16px, 3.2vh, 56px) !important;
+                margin: 0 !important;
+            }
+            html body.pc-desktop #menu-center-spacer {
+                display: none !important;
+            }
+            html body.pc-desktop #menu-title-wrap {
+                padding-top: 0 !important;
+                flex: 0 0 auto !important;
+                min-height: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+            }
+            html body.pc-desktop #mainMenu .title-3d-text span.mc-word-sub {
+                font-size: clamp(2.4rem, min(4.2vw, 6.4vh), 7.2rem) !important;
+            }
+            html body.pc-desktop #mainMenu .title-3d-text h1.mc-block-word {
+                font-size: clamp(3.9rem, min(7vw, 10.8vh), 11.8rem) !important;
+                margin-top: clamp(4px, 0.7vh, 18px) !important;
+            }
+            html body.pc-desktop #mainMenu #menu-actions-card {
+                flex: 0 0 auto !important;
+                margin-bottom: 0 !important;
+            }
+        }
+        @media (min-width: 760px) and (min-aspect-ratio: 112/100) and (max-height: 660px) {
+            html body.pc-desktop #menu-ui-col {
+                gap: 12px !important;
+            }
+            html body.pc-desktop #mainMenu #menu-actions-card {
+                padding: 12px !important;
+                gap: 9px !important;
+            }
+            html body.pc-desktop #mainMenu .anim-play-pulse {
+                padding-top: 12px !important;
+                padding-bottom: 12px !important;
+                font-size: 1.45rem !important;
+            }
+            html body.pc-desktop #mainMenu .menu-sec-btn {
+                height: 48px !important;
+            }
+        }
+
+        /* 4. Negozio / Forgia dell'Ascesa (#floorScreen) — 5 Totem verticali stile smartphone */
+        html body.pc-desktop #floorScreen:not(.hidden) {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        html body.pc-desktop #shop-main-wrap {
+            width: 100% !important;
+            max-width: clamp(680px, min(58vw, 96vh), 1680px) !important;
+            height: 100% !important;
+            max-height: min(94vh, 1780px) !important;
+            padding: clamp(16px, 2.5vh, 48px) clamp(18px, 2.4vw, 56px) !important;
+            gap: clamp(10px, 1.6vh, 30px) !important;
+            margin: auto !important;
+            box-sizing: border-box !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(1) {
+            padding: clamp(10px, 1.6vh, 28px) clamp(16px, 2vw, 40px) !important;
+            border-radius: clamp(12px, 1.5vh, 24px) !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(1) > div:first-child span:last-child {
+            font-size: clamp(10px, 1.15vh, 20px) !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(1) h1 {
+            font-size: clamp(1.35rem, 2.5vh, 3.4rem) !important;
+            margin-top: clamp(2px, 0.4vh, 8px) !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(1) > div:last-child {
+            padding: clamp(6px, 1vh, 18px) clamp(14px, 1.5vw, 32px) !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(1) > div:last-child i {
+            font-size: clamp(1.25rem, 2.3vh, 3rem) !important;
+        }
+        html body.pc-desktop #shop-main-wrap #shop-coins {
+            font-size: clamp(1.5rem, 2.8vh, 3.7rem) !important;
+        }
+        html body.pc-desktop #shop-inspector {
+            min-height: clamp(72px, 9.5vh, 175px) !important;
+            padding: clamp(10px, 1.5vh, 28px) clamp(14px, 1.8vw, 36px) !important;
+            gap: clamp(12px, 1.4vw, 30px) !important;
+            margin: 0 !important;
+            border-radius: clamp(12px, 1.5vh, 24px) !important;
+        }
+        html body.pc-desktop #shop-insp-icon-wrap {
+            width: clamp(46px, 6vh, 108px) !important;
+            height: clamp(46px, 6vh, 108px) !important;
+        }
+        html body.pc-desktop #shop-insp-icon {
+            font-size: clamp(1.15rem, 2.1vh, 2.7rem) !important;
+        }
+        html body.pc-desktop #shop-insp-title {
+            font-size: clamp(0.85rem, 1.55vh, 1.95rem) !important;
+        }
+        html body.pc-desktop #shop-insp-badge {
+            font-size: clamp(9px, 1.05vh, 18px) !important;
+            padding: clamp(2px, 0.35vh, 8px) clamp(8px, 0.9vw, 20px) !important;
+        }
+        html body.pc-desktop #shop-insp-desc {
+            font-size: clamp(0.75rem, 1.35vh, 1.6rem) !important;
+            margin-top: clamp(3px, 0.5vh, 10px) !important;
+        }
+        html body.pc-desktop #shop-tree-container {
+            display: grid !important;
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+            gap: clamp(10px, 1.2vw, 30px) !important;
+            flex: 1 1 0% !important;
+            min-height: clamp(260px, 42vh, 840px) !important;
+            max-height: none !important;
+            margin: 0 !important;
+        }
+        html body.pc-desktop #floorScreen .totem-pillar {
+            padding: clamp(10px, 1.4vh, 26px) clamp(8px, 0.9vw, 22px) !important;
+            border-radius: clamp(14px, 1.6vh, 28px) !important;
+            gap: clamp(6px, 0.9vh, 16px) !important;
+        }
+        html body.pc-desktop #floorScreen .totem-top-node {
+            margin-bottom: clamp(-20px, -1.2vh, -8px) !important;
+        }
+        html body.pc-desktop #floorScreen .totem-top-node .mastery-orb {
+            width: clamp(44px, 5.4vh, 96px) !important;
+            height: clamp(44px, 5.4vh, 96px) !important;
+        }
+        html body.pc-desktop #floorScreen .totem-top-node .mastery-orb i {
+            font-size: clamp(1.05rem, 1.95vh, 2.4rem) !important;
+        }
+        html body.pc-desktop #floorScreen .totem-mid-node .mastery-orb {
+            width: clamp(38px, 4.8vh, 84px) !important;
+            height: clamp(38px, 4.8vh, 84px) !important;
+        }
+        html body.pc-desktop #floorScreen .totem-mid-node .mastery-orb i {
+            font-size: clamp(0.92rem, 1.7vh, 2.05rem) !important;
+        }
+        html body.pc-desktop #floorScreen [id^="over-"] {
+            font-size: clamp(9px, 1.05vh, 18px) !important;
+            padding: 1px 7px !important;
+        }
+        html body.pc-desktop #floorScreen .pillar-chamber {
+            width: 100% !important;
+            flex: 1 1 0% !important;
+            margin: clamp(4px, 0.6vh, 14px) 0 !important;
+        }
+        html body.pc-desktop #floorScreen .totem-label {
+            gap: clamp(5px, 0.6vw, 12px) !important;
+            margin: clamp(2px, 0.4vh, 8px) 0 !important;
+        }
+        html body.pc-desktop #floorScreen .totem-label i {
+            font-size: clamp(0.85rem, 1.5vh, 1.8rem) !important;
+        }
+        html body.pc-desktop #floorScreen .totem-label span {
+            font-size: clamp(0.72rem, 1.3vh, 1.55rem) !important;
+        }
+        html body.pc-desktop #floorScreen .pillar-buy-btn {
+            min-height: clamp(42px, 5.4vh, 92px) !important;
+            padding: clamp(8px, 1.2vh, 22px) clamp(8px, 0.8vw, 18px) !important;
+            gap: clamp(6px, 0.6vw, 14px) !important;
+            border-radius: clamp(10px, 1.2vh, 20px) !important;
+        }
+        html body.pc-desktop #floorScreen .pillar-buy-btn i {
+            font-size: clamp(0.9rem, 1.6vh, 1.95rem) !important;
+        }
+        html body.pc-desktop #floorScreen .pillar-buy-btn span {
+            font-size: clamp(0.95rem, 1.85vh, 2.15rem) !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(4) {
+            gap: clamp(8px, 1.2vh, 22px) !important;
+            margin-top: 0 !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(4) > div.grid {
+            gap: clamp(10px, 1.2vw, 26px) !important;
+        }
+        html body.pc-desktop #shop-main-wrap > div:nth-child(4) > div.grid button {
+            min-height: clamp(48px, 6vh, 102px) !important;
+            font-size: clamp(0.8rem, 1.45vh, 1.7rem) !important;
+            border-radius: clamp(11px, 1.3vh, 22px) !important;
+        }
+        html body.pc-desktop #btn-next-floor {
+            min-height: clamp(60px, 7.6vh, 134px) !important;
+            font-size: clamp(1.1rem, 2.1vh, 2.5rem) !important;
+            padding: clamp(12px, 1.6vh, 30px) 28px !important;
+            border-radius: clamp(12px, 1.4vh, 24px) !important;
+        }
+        html body.pc-desktop #btn-next-floor > span {
+            font-size: clamp(0.68rem, 1.15vh, 1.35rem) !important;
+        }
+
+        /* 5. Selezione Reliquia (#relicScreen) */
+        html body.pc-desktop #relicScreen:not(.hidden) {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        html body.pc-desktop #relic-main-wrap {
+            width: 100% !important;
+            max-width: clamp(760px, min(66vw, 112vh), 1900px) !important;
+            height: 100% !important;
+            max-height: min(94vh, 1780px) !important;
+            padding: clamp(16px, 2.5vh, 46px) clamp(18px, 2.4vw, 56px) !important;
+            gap: clamp(10px, 1.6vh, 30px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            margin: auto !important;
+            box-sizing: border-box !important;
+        }
+        html body.pc-desktop #relic-main-wrap > div:first-child {
+            padding: clamp(10px, 1.6vh, 28px) clamp(16px, 2vw, 40px) !important;
+            border-radius: clamp(12px, 1.5vh, 24px) !important;
+        }
+        html body.pc-desktop #relic-main-wrap > div:first-child > div:first-child > div:first-child {
+            width: clamp(36px, 4.6vh, 80px) !important;
+            height: clamp(36px, 4.6vh, 80px) !important;
+        }
+        html body.pc-desktop #relic-main-wrap > div:first-child > div:first-child > div:first-child i {
+            font-size: clamp(1rem, 1.85vh, 2.15rem) !important;
+        }
+        html body.pc-desktop #relic-main-wrap > div:first-child h2 {
+            font-size: clamp(1.15rem, 2.2vh, 2.85rem) !important;
+        }
+        html body.pc-desktop #relic-screen-subtitle {
+            font-size: clamp(0.68rem, 1.15vh, 1.35rem) !important;
+        }
+        html body.pc-desktop #relic-main-wrap > div:first-child > button {
+            padding: clamp(8px, 1.1vh, 20px) clamp(12px, 1.4vw, 30px) !important;
+            font-size: clamp(0.72rem, 1.3vh, 1.5rem) !important;
+        }
+        html body.pc-desktop #relicCardsContainer {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: clamp(12px, 1.6vw, 38px) !important;
+            flex: 1 1 0% !important;
+            min-height: clamp(240px, 42vh, 800px) !important;
+            max-height: none !important;
+            margin: 0 !important;
+        }
+        html body.pc-desktop #relicCardsContainer .relic-card {
+            padding: clamp(12px, 1.8vh, 34px) clamp(12px, 1.4vw, 30px) !important;
+            gap: clamp(6px, 0.9vh, 16px) !important;
+            border-radius: clamp(14px, 1.6vh, 28px) !important;
+            justify-content: space-between !important;
+        }
+        html body.pc-desktop #relicCardsContainer .relic-rarity-badge {
+            font-size: clamp(9px, 1.05vh, 18px) !important;
+            padding: clamp(2px, 0.35vh, 7px) clamp(10px, 1.1vw, 22px) !important;
+        }
+        html body.pc-desktop #relicCardsContainer .relic-icon-frame {
+            width: clamp(92px, min(11vw, 16.5vh), 240px) !important;
+            height: clamp(92px, min(11vw, 16.5vh), 240px) !important;
+            margin: clamp(2px, 0.5vh, 12px) 0 !important;
+            border-radius: clamp(14px, 1.8vh, 30px) !important;
+            border-width: 2.5px !important;
+        }
+        html body.pc-desktop #relicCardsContainer .relic-icon-frame i {
+            font-size: clamp(2.4rem, 5vh, 6.2rem) !important;
+        }
+        html body.pc-desktop #relicCardsContainer .relic-card-title {
+            font-size: clamp(0.88rem, 1.6vh, 1.9rem) !important;
+            min-height: 2.5em !important;
+        }
+        html body.pc-desktop #relicCardsContainer .relic-desc-box {
+            padding: clamp(8px, 1.2vh, 22px) clamp(10px, 1.2vw, 24px) !important;
+            margin: clamp(2px, 0.4vh, 10px) 0 !important;
+            min-height: clamp(80px, 11vh, 210px) !important;
+            border-radius: clamp(10px, 1.2vh, 20px) !important;
+            overflow-y: auto !important;
+        }
+        html body.pc-desktop #relicCardsContainer .relic-desc-box p {
+            font-size: clamp(0.78rem, 1.4vh, 1.62rem) !important;
+            line-height: 1.38 !important;
+        }
+        html body.pc-desktop #relicCardsContainer [id^="relic-pick-pill-"] {
+            padding: clamp(6px, 1vh, 16px) 10px !important;
+            font-size: clamp(0.68rem, 1.2vh, 1.4rem) !important;
+            border-radius: clamp(9px, 1vh, 18px) !important;
+        }
+        html body.pc-desktop #reforgeSection {
+            min-height: clamp(128px, 17vh, 290px) !important;
+            padding: clamp(12px, 1.8vh, 30px) clamp(16px, 2vw, 38px) !important;
+            gap: clamp(8px, 1.1vh, 20px) !important;
+            margin: 0 !important;
+            border-radius: clamp(12px, 1.5vh, 24px) !important;
+        }
+        html body.pc-desktop #reforgeSection > div:first-child > span:first-child {
+            font-size: clamp(0.75rem, 1.3vh, 1.55rem) !important;
+        }
+        html body.pc-desktop #reforge-status-badge {
+            font-size: clamp(9px, 1.05vh, 18px) !important;
+        }
+        html body.pc-desktop #btn-select-reforge {
+            width: clamp(62px, 8vh, 136px) !important;
+            height: clamp(62px, 8vh, 136px) !important;
+        }
+        html body.pc-desktop #btn-select-reforge i {
+            font-size: clamp(1.6rem, 3vh, 3.6rem) !important;
+        }
+        html body.pc-desktop #reforge-desc-title {
+            font-size: clamp(0.85rem, 1.5vh, 1.8rem) !important;
+        }
+        html body.pc-desktop #reforge-desc-text {
+            font-size: clamp(0.74rem, 1.3vh, 1.55rem) !important;
+        }
+        html body.pc-desktop #btn-do-reforge {
+            padding: clamp(10px, 1.4vh, 24px) clamp(16px, 1.8vw, 38px) !important;
+            font-size: clamp(0.75rem, 1.35vh, 1.55rem) !important;
+        }
+        html body.pc-desktop #btn-proceed-relic {
+            min-height: clamp(56px, 7vh, 120px) !important;
+            padding: clamp(12px, 1.6vh, 28px) 28px !important;
+            font-size: clamp(0.9rem, 1.65vh, 1.9rem) !important;
+            border-radius: clamp(12px, 1.4vh, 24px) !important;
+        }
+
+        /* 6. Inventario (#collectedRelicsModal) */
+        html body.pc-desktop #collectedRelicsModal {
+            padding: clamp(16px, 2.5vh, 48px) clamp(18px, 2.4vw, 56px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .modal-enter {
+            max-width: clamp(900px, min(76vw, 128vh), 2100px) !important;
+            width: 100% !important;
+            height: min(92vh, 1720px) !important;
+            max-height: min(92vh, 1720px) !important;
+            padding: clamp(16px, 2.4vh, 44px) !important;
+            gap: clamp(10px, 1.6vh, 30px) !important;
+            border-radius: clamp(16px, 2vh, 34px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inv-header {
+            padding: clamp(10px, 1.5vh, 26px) clamp(14px, 1.8vw, 36px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inv-header > div:first-child > div span:last-child {
+            font-size: clamp(9px, 1.05vh, 18px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inv-header h2 {
+            font-size: clamp(1.3rem, 2.4vh, 3.1rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inventoryPeakBadge,
+        html body.pc-desktop #collectedRelicsModal #inventoryRelicCount {
+            font-size: clamp(0.74rem, 1.3vh, 1.52rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inv-header button {
+            width: clamp(38px, 4.8vh, 76px) !important;
+            height: clamp(38px, 4.8vh, 76px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #relic-detail-box {
+            min-height: clamp(72px, 9.2vh, 168px) !important;
+            padding: clamp(10px, 1.5vh, 26px) clamp(14px, 1.8vw, 34px) !important;
+            gap: clamp(12px, 1.5vw, 30px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inv-insp-icon-wrap {
+            width: clamp(50px, 6.6vh, 114px) !important;
+            height: clamp(50px, 6.6vh, 114px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #relic-detail-name {
+            font-size: clamp(0.85rem, 1.55vh, 1.88rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #relic-detail-badge {
+            font-size: clamp(9px, 1.05vh, 18px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #relic-detail-desc {
+            font-size: clamp(0.76rem, 1.35vh, 1.62rem) !important;
+        }
+        @media (min-width: 760px) {
+            html body.pc-desktop #collectedRelicsModal #inventoryScrollBody {
+                grid-template-columns: 1.08fr 0.92fr !important;
+                gap: clamp(12px, 1.6vw, 36px) !important;
+            }
+        }
+        html body.pc-desktop #collectedRelicsModal #inv-stats-section,
+        html body.pc-desktop #collectedRelicsModal #inv-relics-section {
+            padding: clamp(12px, 1.8vh, 32px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inv-stats-section > div:first-child > span:first-child,
+        html body.pc-desktop #collectedRelicsModal #inv-relics-section > div:first-child > span:first-child {
+            font-size: clamp(0.76rem, 1.35vh, 1.62rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inventoryPlayerSummary,
+        html body.pc-desktop #collectedRelicsModal #inventoryRelicSubBadge {
+            font-size: clamp(9px, 1.1vh, 19px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #inventoryMasteryPanel {
+            grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+            gap: clamp(8px, 0.9vw, 22px) !important;
+            min-height: clamp(220px, 34vh, 640px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .inv-stat-pillar {
+            padding: clamp(8px, 1.2vh, 22px) clamp(6px, 0.7vw, 18px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .inv-pillar-top .inv-mastery-orb {
+            width: clamp(38px, 4.8vh, 84px) !important;
+            height: clamp(38px, 4.8vh, 84px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .inv-pillar-top .inv-mastery-orb i {
+            font-size: clamp(0.95rem, 1.7vh, 2.05rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .inv-pillar-mid .inv-mastery-orb {
+            width: clamp(34px, 4.3vh, 74px) !important;
+            height: clamp(34px, 4.3vh, 74px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .inv-pillar-mid .inv-mastery-orb i {
+            font-size: clamp(0.85rem, 1.5vh, 1.8rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .inv-pillar-meta span {
+            font-size: clamp(0.66rem, 1.15vh, 1.38rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal .inv-pillar-val {
+            font-size: clamp(0.72rem, 1.3vh, 1.55rem) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #collectedRelicsGrid {
+            grid-template-columns: repeat(auto-fill, minmax(clamp(68px, 5.4vw, 148px), 1fr)) !important;
+            gap: clamp(8px, 0.9vw, 20px) !important;
+        }
+        html body.pc-desktop #collectedRelicsModal #btn-close-inventory {
+            min-height: clamp(48px, 6vh, 102px) !important;
+            font-size: clamp(0.85rem, 1.5vh, 1.75rem) !important;
+        }
+
+        /* 7. Schermata di Morte (#deathScreen) */
+        html body.pc-desktop #death-ui-wrap {
+            padding: clamp(16px, 2.8vh, 56px) clamp(20px, 3vw, 64px) !important;
+        }
+        html body.pc-desktop #death-header-panel {
+            max-width: clamp(500px, min(44vw, 76vh), 1180px) !important;
+        }
+        html body.pc-desktop #deathTitle {
+            font-size: clamp(3.2rem, 6.2vh, 8.8rem) !important;
+        }
+        html body.pc-desktop #deathSubtitle {
+            font-size: clamp(0.76rem, 1.35vh, 1.62rem) !important;
+            padding: clamp(4px, 0.65vh, 12px) clamp(14px, 1.6vw, 32px) !important;
+        }
+        html body.pc-desktop #deathKillerBadge {
+            font-size: clamp(0.76rem, 1.35vh, 1.58rem) !important;
+            padding: clamp(5px, 0.7vh, 14px) clamp(12px, 1.4vw, 28px) !important;
+        }
+        html body.pc-desktop #deathTipBox {
+            max-width: clamp(460px, min(40vw, 70vh), 1080px) !important;
+            padding: clamp(8px, 1.2vh, 22px) clamp(12px, 1.4vw, 30px) !important;
+            gap: clamp(10px, 1.1vw, 22px) !important;
+        }
+        html body.pc-desktop #deathTipBox .death-tip-icon {
+            width: clamp(32px, 4.2vh, 74px) !important;
+            height: clamp(32px, 4.2vh, 74px) !important;
+        }
+        html body.pc-desktop #deathTipLabel {
+            font-size: clamp(9px, 1.05vh, 18px) !important;
+        }
+        html body.pc-desktop #deathTipText {
+            font-size: clamp(0.76rem, 1.35vh, 1.62rem) !important;
+        }
+        html body.pc-desktop #deathQuote {
+            font-size: clamp(0.76rem, 1.3vh, 1.55rem) !important;
+            max-width: clamp(420px, min(38vw, 66vh), 1020px) !important;
+        }
+        html body.pc-desktop #deathMatchStats {
+            max-width: clamp(420px, min(36vw, 62vh), 980px) !important;
+            font-size: clamp(0.7rem, 1.2vh, 1.42rem) !important;
+            padding: clamp(6px, 0.9vh, 18px) !important;
+        }
+        html body.pc-desktop #deathMatchStats > div > span:first-child {
+            font-size: clamp(8.5px, 0.95vh, 17px) !important;
+        }
+        html body.pc-desktop #death-action-console {
+            max-width: clamp(420px, min(36vw, 62vh), 980px) !important;
+            padding: clamp(14px, 2vh, 36px) !important;
+            gap: clamp(10px, 1.4vh, 24px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #score-save-container p {
+            font-size: clamp(9.5px, 1.1vh, 18px) !important;
+        }
+        html body.pc-desktop #playerName,
+        html body.pc-desktop #btn-save-score {
+            font-size: clamp(0.78rem, 1.35vh, 1.6rem) !important;
+            padding-top: clamp(8px, 1.1vh, 18px) !important;
+            padding-bottom: clamp(8px, 1.1vh, 18px) !important;
+        }
+        html body.pc-desktop #death-action-console #btn-restart,
+        html body.pc-desktop #death-action-console #btn-respawn {
+            min-height: clamp(50px, 6.4vh, 110px) !important;
+            font-size: clamp(0.95rem, 1.75vh, 2.05rem) !important;
+        }
+        html body.pc-desktop #death-action-console > div.grid button {
+            min-height: clamp(44px, 5.6vh, 94px) !important;
+            font-size: clamp(0.8rem, 1.45vh, 1.68rem) !important;
+        }
+
+        /* 8. Modali (Opzioni, Skin, Manuale, Classifica, Pausa, Reset, Forgia Cosmica) */
+        html body.pc-desktop #optionsModal .modal-enter h2,
+        html body.pc-desktop #skinModal .modal-enter h2,
+        html body.pc-desktop #infoModal .modal-enter h2,
+        html body.pc-desktop #highScoreScreen .modal-enter h2,
+        html body.pc-desktop #pauseModal .modal-enter h2,
+        html body.pc-desktop #confirmResetModal .modal-enter h2,
+        html body.pc-desktop #reforgeSelectModal .modal-enter h2 {
+            font-size: clamp(1.2rem, 2.3vh, 3rem) !important;
+        }
+
+        html body.pc-desktop #optionsModal .modal-enter {
+            max-width: clamp(460px, min(36vw, 62vh), 980px) !important;
+            max-height: min(90vh, 1520px) !important;
+            padding: clamp(16px, 2.4vh, 42px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #optionsModal .space-y-2\.5 {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: clamp(8px, 1.15vh, 22px) !important;
+            overflow-y: auto !important;
+            min-height: 0 !important;
+        }
+        html body.pc-desktop #optionsModal .space-y-2\.5 > button {
+            margin-top: 0 !important;
+            padding: clamp(11px, 1.5vh, 26px) clamp(14px, 1.5vw, 34px) !important;
+            font-size: clamp(0.78rem, 1.38vh, 1.62rem) !important;
+        }
+        html body.pc-desktop #optionsModal .modal-enter > button:last-child {
+            min-height: clamp(48px, 6vh, 100px) !important;
+            font-size: clamp(0.85rem, 1.5vh, 1.75rem) !important;
+            margin-top: clamp(12px, 1.8vh, 30px) !important;
+        }
+
+        html body.pc-desktop #skinModal .modal-enter {
+            max-width: clamp(540px, min(44vw, 76vh), 1200px) !important;
+            max-height: min(88vh, 1520px) !important;
+            padding: clamp(16px, 2.4vh, 42px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #skinListContainer {
+            gap: clamp(8px, 1.15vh, 22px) !important;
+        }
+        html body.pc-desktop #skinListContainer > div {
+            padding: clamp(10px, 1.4vh, 24px) clamp(12px, 1.4vw, 28px) !important;
+        }
+        html body.pc-desktop #skinListContainer > div > div:first-child > div:first-child {
+            width: clamp(50px, 6.2vh, 108px) !important;
+            height: clamp(50px, 6.2vh, 108px) !important;
+        }
+        html body.pc-desktop #skinListContainer > div > div:first-child > div:first-child svg {
+            width: 82% !important;
+            height: 82% !important;
+        }
+        html body.pc-desktop #skinListContainer > div > div:first-child > div:last-child > span:first-child {
+            font-size: clamp(0.84rem, 1.48vh, 1.75rem) !important;
+        }
+        html body.pc-desktop #skinListContainer > div > div:first-child > div:last-child > div {
+            font-size: clamp(0.64rem, 1.1vh, 1.3rem) !important;
+        }
+        html body.pc-desktop #skinListContainer > div > div:first-child > div:last-child > span:last-child {
+            font-size: clamp(0.7rem, 1.22vh, 1.45rem) !important;
+        }
+        html body.pc-desktop #skinListContainer > div > :last-child {
+            font-size: clamp(0.68rem, 1.2vh, 1.4rem) !important;
+            padding: clamp(6px, 0.9vh, 16px) clamp(11px, 1.1vw, 24px) !important;
+        }
+        html body.pc-desktop #skinModal #skin-crystals-count {
+            font-size: clamp(1.1rem, 2vh, 2.5rem) !important;
+        }
+        html body.pc-desktop #skinModal .modal-enter > button:last-child {
+            min-height: clamp(48px, 6vh, 100px) !important;
+            font-size: clamp(0.85rem, 1.5vh, 1.75rem) !important;
+        }
+
+        html body.pc-desktop #infoModal .modal-enter {
+            max-width: clamp(580px, min(48vw, 82vh), 1300px) !important;
+            max-height: min(90vh, 1540px) !important;
+            padding: clamp(16px, 2.4vh, 42px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #info-cards-grid {
+            gap: clamp(10px, 1.4vh, 26px) !important;
+            font-size: clamp(0.76rem, 1.35vh, 1.62rem) !important;
+        }
+        html body.pc-desktop #info-cards-grid > div {
+            padding: clamp(10px, 1.5vh, 28px) !important;
+        }
+        html body.pc-desktop #info-cards-grid h3 {
+            font-size: clamp(0.8rem, 1.42vh, 1.7rem) !important;
+        }
+        html body.pc-desktop #info-cards-grid > div > div:first-child {
+            width: clamp(38px, 4.8vh, 84px) !important;
+            height: clamp(38px, 4.8vh, 84px) !important;
+        }
+        html body.pc-desktop #infoModal .modal-enter > button:last-child {
+            min-height: clamp(48px, 6vh, 100px) !important;
+            font-size: clamp(0.85rem, 1.5vh, 1.75rem) !important;
+        }
+
+        html body.pc-desktop #highScoreScreen .modal-enter {
+            max-width: clamp(520px, min(42vw, 74vh), 1160px) !important;
+            max-height: min(88vh, 1520px) !important;
+            padding: clamp(16px, 2.4vh, 42px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #highScoresList > div {
+            padding: clamp(10px, 1.4vh, 24px) clamp(12px, 1.4vw, 30px) !important;
+        }
+        html body.pc-desktop #highScoresList > div > div:first-child > span:first-child {
+            font-size: clamp(1rem, 1.85vh, 2.2rem) !important;
+        }
+        html body.pc-desktop #highScoresList > div > div:first-child > div:nth-child(2) {
+            width: clamp(42px, 5.2vh, 92px) !important;
+            height: clamp(42px, 5.2vh, 92px) !important;
+        }
+        html body.pc-desktop #highScoresList > div > div:first-child > div:nth-child(2) svg {
+            width: 82% !important;
+            height: 82% !important;
+        }
+        html body.pc-desktop #highScoresList > div > div:first-child > div:nth-child(3) > span:first-child {
+            font-size: clamp(0.8rem, 1.42vh, 1.7rem) !important;
+        }
+        html body.pc-desktop #highScoresList > div > div:last-child {
+            font-size: clamp(0.72rem, 1.28vh, 1.52rem) !important;
+        }
+        html body.pc-desktop #highScoreScreen .modal-enter > button:last-child {
+            min-height: clamp(48px, 6vh, 100px) !important;
+            font-size: clamp(0.85rem, 1.5vh, 1.75rem) !important;
+        }
+
+        html body.pc-desktop #pauseModal .modal-enter {
+            max-width: clamp(420px, min(34vw, 58vh), 920px) !important;
+            padding: clamp(18px, 2.6vh, 46px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #pauseModal #pause-btn-grid {
+            gap: clamp(10px, 1.4vh, 24px) !important;
+        }
+        html body.pc-desktop #pauseModal #pause-btn-grid > button:first-child {
+            min-height: clamp(50px, 6.4vh, 110px) !important;
+            font-size: clamp(0.88rem, 1.55vh, 1.85rem) !important;
+        }
+        html body.pc-desktop #pauseModal #pause-btn-grid > button:not(:first-child) {
+            min-height: clamp(46px, 5.8vh, 98px) !important;
+            font-size: clamp(0.78rem, 1.38vh, 1.62rem) !important;
+        }
+
+        html body.pc-desktop #confirmResetModal .modal-enter {
+            max-width: clamp(420px, min(34vw, 58vh), 920px) !important;
+            padding: clamp(18px, 2.6vh, 44px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #confirmResetModal p {
+            font-size: clamp(0.82rem, 1.45vh, 1.72rem) !important;
+        }
+        html body.pc-desktop #confirmResetModal button {
+            min-height: clamp(46px, 5.8vh, 98px) !important;
+            font-size: clamp(0.8rem, 1.4vh, 1.65rem) !important;
+        }
+
+        html body.pc-desktop #reforgeSelectModal .modal-enter {
+            max-width: clamp(480px, min(40vw, 70vh), 1100px) !important;
+            max-height: min(88vh, 1520px) !important;
+            padding: clamp(16px, 2.4vh, 42px) !important;
+            border-radius: clamp(16px, 2vh, 32px) !important;
+        }
+        html body.pc-desktop #reforgeSelectGrid {
+            grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+            gap: clamp(8px, 1vw, 20px) !important;
+        }
+        html body.pc-desktop #reforgeSelectGrid > div {
+            width: clamp(52px, 6.2vh, 110px) !important;
+            height: clamp(52px, 6.2vh, 110px) !important;
+        }
+        html body.pc-desktop #reforge-modal-name {
+            font-size: clamp(0.84rem, 1.5vh, 1.75rem) !important;
+        }
+        html body.pc-desktop #reforge-modal-desc {
+            font-size: clamp(0.76rem, 1.35vh, 1.6rem) !important;
+        }
+        html body.pc-desktop #reforgeSelectModal .modal-enter > div:last-child button {
+            min-height: clamp(48px, 6vh, 100px) !important;
+            font-size: clamp(0.82rem, 1.45vh, 1.68rem) !important;
+        }
     </style>
 </head>
 <body class="text-white selection:bg-red-900">
@@ -3551,7 +4341,7 @@ const AppSettings = {
     colorblind: false,
     screenShake: true,
     damageNumbers: true,
-    orientation: 'portrait',
+    orientation: isTouchDevice ? 'portrait' : 'landscape',
     get isLow() { return this.mode === 0; },
     get isUltra() { return this.mode >= 2; },
     get isBalanced() { return this.mode === 1; },
@@ -3603,7 +4393,8 @@ const AppSettings = {
             localStorage.setItem(this._storageKey, JSON.stringify({
                 mode: this.mode, fpsCap: this.fpsCap, colorblind: this.colorblind,
                 screenShake: this.screenShake, damageNumbers: this.damageNumbers,
-                orientation: this.orientation
+                orientation: isTouchDevice ? this.orientation : 'landscape',
+                haptics: (typeof Haptics !== 'undefined' ? Haptics.enabled : true)
             }));
         } catch (e) {}
     },
@@ -3623,16 +4414,19 @@ const AppSettings = {
         return { width: w, height: h };
     },
     toggleOrientation() {
+        if (!isTouchDevice) return;
         this.orientation = (this.orientation === 'landscape') ? 'portrait' : 'landscape';
         this.save();
         this.applyOrientation(true);
     },
     applyOrientation(fromUserClick = false) {
         if (!document.body) return;
-        const isLand = (this.orientation === 'landscape');
+        if (!isTouchDevice) this.orientation = 'landscape';
+        const isLand = !isTouchDevice || (this.orientation === 'landscape');
         document.body.classList.toggle('is-touch', isTouchDevice);
-        document.body.classList.toggle('mobile-landscape', isLand);
-        document.body.classList.toggle('mobile-portrait', !isLand);
+        document.body.classList.toggle('pc-desktop', !isTouchDevice);
+        document.body.classList.toggle('mobile-landscape', isTouchDevice && isLand);
+        document.body.classList.toggle('mobile-portrait', isTouchDevice && !isLand);
 
         if (fromUserClick && isTouchDevice && screen.orientation && typeof screen.orientation.lock === 'function') {
             screen.orientation.lock(isLand ? 'landscape' : 'portrait').catch(() => {});
@@ -3642,12 +4436,17 @@ const AppSettings = {
         const rawH = window.innerHeight || 1;
         // Se lo smartphone ha la rotazione bloccata o il browser non ruota la finestra,
         // ruota il viewport via CSS a costo zero così la modalità scelta funziona istantaneamente
-        const needForceLand = isLand && (rawW < rawH);
-        const needForcePort = !isLand && isTouchDevice && (rawW > rawH);
+        const needForceLand = isTouchDevice && isLand && (rawW < rawH);
+        const needForcePort = isTouchDevice && !isLand && (rawW > rawH);
         document.body.classList.toggle('force-rotate-landscape', needForceLand);
         document.body.classList.toggle('force-rotate-portrait', needForcePort);
 
         const vp = this.getViewportSize();
+        const pcScale = !isTouchDevice
+            ? Math.max(1.0, Math.min(2.25, Math.min(vp.width / 1600, vp.height / 900)))
+            : 1.0;
+        this.pcUiScale = pcScale;
+        document.documentElement.style.setProperty('--pc-hud-scale', pcScale.toFixed(3));
         document.documentElement.style.setProperty('--app-w', vp.width + 'px');
         document.documentElement.style.setProperty('--app-h', vp.height + 'px');
         document.documentElement.style.setProperty('--raw-vw', rawW + 'px');
@@ -3689,8 +4488,11 @@ const AppSettings = {
                 if (data.fpsCap === 30 || data.fpsCap === 60) this.fpsCap = data.fpsCap;
                 if (typeof data.screenShake === 'boolean') this.screenShake = data.screenShake;
                 if (typeof data.damageNumbers === 'boolean') this.damageNumbers = data.damageNumbers;
-                if (data.orientation === 'landscape' || data.orientation === 'portrait') {
+                if (typeof data.haptics === 'boolean' && typeof Haptics !== 'undefined') Haptics.enabled = data.haptics;
+                if (isTouchDevice && (data.orientation === 'landscape' || data.orientation === 'portrait')) {
                     this.orientation = data.orientation;
+                } else if (!isTouchDevice) {
+                    this.orientation = 'landscape';
                 }
                 if (typeof data.colorblind === 'boolean' && data.colorblind !== this.colorblind) {
                     this.colorblind = data.colorblind;
@@ -3936,18 +4738,883 @@ const AppSettings = {
 
 const Haptics = {
     enabled: true,
-    vibrate(pattern) {
-        if (this.enabled && isTouchDevice && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+    _seqTimers: [],
+    _lastObeliskMs: 0,
+    _lastAtkMs: 0,
+    _priorityUntil: 0,
+    _clearSeq() {
+        while (this._seqTimers.length > 0) {
+            clearTimeout(this._seqTimers.pop());
+        }
+    },
+    _playDualRumble(durationMs, strongMag = 0.5, weakMag = 0.5) {
+        if (!this.enabled || isTouchDevice) return;
+        if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') return;
+        let pads;
+        try { pads = navigator.getGamepads(); } catch (e) { return; }
+        if (!pads) return;
+        const dur = Math.max(10, Math.min(2000, Math.round(durationMs || 40)));
+        const strong = Math.max(0, Math.min(1, strongMag || 0));
+        const weak = Math.max(0, Math.min(1, weakMag || 0));
+        for (let i = 0; i < pads.length; i++) {
+            const gp = pads[i];
+            if (!gp || !gp.connected) continue;
             try {
-                navigator.vibrate(pattern);
-            } catch(e) {}
+                if (gp.vibrationActuator && typeof gp.vibrationActuator.playEffect === 'function') {
+                    gp.vibrationActuator.playEffect('dual-rumble', {
+                        startDelay: 0,
+                        duration: dur,
+                        weakMagnitude: weak,
+                        strongMagnitude: strong
+                    }).catch(() => {});
+                } else if (gp.hapticActuators && gp.hapticActuators.length > 0 && typeof gp.hapticActuators[0].pulse === 'function') {
+                    gp.hapticActuators[0].pulse(Math.min(1, strong * 0.65 + weak * 0.35), dur).catch(() => {});
+                }
+            } catch (e) {}
+        }
+    },
+    rumble(durationMs, strongMag = 0.5, weakMag = 0.5, isPriority = false) {
+        if (!this.enabled) return;
+        if (isTouchDevice) {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                try { navigator.vibrate(Math.max(10, Math.round(durationMs || 20))); } catch (e) {}
+            }
+            return;
+        }
+        const now = performance.now();
+        if (!isPriority && now < this._priorityUntil) return;
+        if (isPriority) {
+            this._clearSeq();
+            this._priorityUntil = now + (durationMs || 40);
+        }
+        this._playDualRumble(durationMs, strongMag, weakMag);
+    },
+    pulseSequence(steps, isPriority = true) {
+        if (!this.enabled || !Array.isArray(steps) || steps.length === 0) return;
+        if (isTouchDevice) {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                const pat = [];
+                for (let i = 0; i < steps.length; i++) {
+                    pat.push(Math.max(10, Math.round(steps[i].d || 30)));
+                    if (i < steps.length - 1) pat.push(Math.max(10, Math.round(steps[i].gap || 25)));
+                }
+                try { navigator.vibrate(pat); } catch (e) {}
+            }
+            return;
+        }
+        const now = performance.now();
+        if (!isPriority && now < this._priorityUntil) return;
+        this._clearSeq();
+        let totalDur = 0;
+        for (let i = 0; i < steps.length; i++) {
+            totalDur += (steps[i].d || 40) + (i < steps.length - 1 ? (steps[i].gap || 20) : 0);
+        }
+        if (isPriority) this._priorityUntil = now + totalDur;
+        let offset = 0;
+        for (let i = 0; i < steps.length; i++) {
+            const st = steps[i];
+            if (offset === 0) {
+                this._playDualRumble(st.d, st.s, st.w);
+            } else {
+                const tid = setTimeout(() => this._playDualRumble(st.d, st.s, st.w), offset);
+                this._seqTimers.push(tid);
+            }
+            offset += (st.d || 40) + (st.gap || 20);
+        }
+    },
+    vibrate(pattern) {
+        if (!this.enabled) return;
+        if (isTouchDevice) {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+                try { navigator.vibrate(pattern); } catch (e) {}
+            }
+            return;
+        }
+        if (typeof pattern === 'number') {
+            this.rumble(pattern, 0.35, 0.55, false);
+        } else if (Array.isArray(pattern) && pattern.length > 0) {
+            const steps = [];
+            for (let i = 0; i < pattern.length; i += 2) {
+                const d = Number(pattern[i]) || 30;
+                const gap = Number(pattern[i + 1]) || 20;
+                const power = d >= 65 ? 0.85 : (d >= 40 ? 0.60 : 0.40);
+                steps.push({ d, s: power, w: Math.min(1, power + 0.15), gap });
+            }
+            this.pulseSequence(steps, false);
+        }
+    },
+    onMenuMove() { this.rumble(16, 0.0, 0.16, false); },
+    onMenuConfirm() { this.rumble(32, 0.15, 0.35, false); },
+    onMenuBack() { this.rumble(25, 0.12, 0.24, false); },
+    onDash(perfectDodge) {
+        if (perfectDodge) {
+            this.pulseSequence([{ d: 45, s: 0.45, w: 0.85, gap: 20 }, { d: 80, s: 0.65, w: 1.0 }], false);
+        } else {
+            this.rumble(45, 0.22, 0.50, false);
+        }
+    },
+    onShieldUp(isSeismic) {
+        this.rumble(isSeismic ? 135 : 70, isSeismic ? 0.75 : 0.35, 0.72, false);
+    },
+    onShieldBlock() { this.rumble(55, 0.40, 0.70, false); },
+    onOverdrive() {
+        this.pulseSequence([
+            { d: 65, s: 0.45, w: 0.75, gap: 25 },
+            { d: 85, s: 0.80, w: 0.95, gap: 25 },
+            { d: 230, s: 1.0, w: 1.0 }
+        ], true);
+    },
+    onElementalCombo() {
+        this.pulseSequence([
+            { d: 75, s: 0.65, w: 0.85, gap: 20 },
+            { d: 155, s: 0.85, w: 0.95 }
+        ], true);
+    },
+    onUltimate() {
+        this.pulseSequence([
+            { d: 85, s: 0.85, w: 1.0, gap: 30 },
+            { d: 110, s: 0.95, w: 1.0, gap: 30 },
+            { d: 320, s: 1.0, w: 1.0 }
+        ], true);
+    },
+    onObeliskDrain(aura) {
+        const now = performance.now();
+        if (now - this._lastObeliskMs < 105 || now < this._priorityUntil) return;
+        this._lastObeliskMs = now;
+        const origR = (aura && aura.originalRadiusSq) ? Math.sqrt(aura.originalRadiusSq) : 180;
+        const curR = (aura && aura.radius !== undefined) ? aura.radius : origR;
+        const prog = origR > 45 ? Math.max(0, Math.min(1, (origR - curR) / (origR - 45))) : 0.5;
+        this.rumble(105, 0.14 + prog * 0.34, 0.26 + prog * 0.46, false);
+    },
+    onObeliskComplete() {
+        this.pulseSequence([
+            { d: 135, s: 1.0, w: 1.0, gap: 35 },
+            { d: 250, s: 0.90, w: 0.75 }
+        ], true);
+    },
+    onPlayerHit(isFatal) {
+        if (isFatal) {
+            this.pulseSequence([
+                { d: 180, s: 1.0, w: 1.0, gap: 40 },
+                { d: 140, s: 0.90, w: 0.90, gap: 40 },
+                { d: 360, s: 1.0, w: 0.75 }
+            ], true);
+        } else {
+            this.pulseSequence([
+                { d: 120, s: 0.95, w: 1.0, gap: 30 },
+                { d: 95, s: 0.70, w: 0.85 }
+            ], true);
+        }
+    },
+    onAttack(kind) {
+        if (!this.enabled) return;
+        const now = performance.now();
+        if (now < this._priorityUntil) return;
+        if (kind === 'crit') {
+            if (now - this._lastAtkMs < 55) return;
+            this._lastAtkMs = now;
+            this.rumble(35, 0.25, 0.45, false);
+        } else if (kind === 'laser') {
+            this._lastAtkMs = now;
+            this.rumble(75, 0.50, 0.75, false);
+        } else if (kind === 'flamethrower') {
+            if (now - this._lastAtkMs < 85) return;
+            this._lastAtkMs = now;
+            this.rumble(55, 0.18, 0.35, false);
+        } else if (kind === 'nova') {
+            this._lastAtkMs = now;
+            this.rumble(160, 0.80, 0.90, false);
         }
     },
     toggle() {
         this.enabled = !this.enabled;
-
-        if (this.enabled) this.vibrate(15);
+        if (typeof AppSettings !== 'undefined' && AppSettings.save) AppSettings.save();
+        if (this.enabled) this.rumble(55, 0.40, 0.70, false);
+        else this._clearSeq();
         AudioEngine.playClick();
+    }
+};
+
+const GamepadSystem = {
+    connected: false,
+    usingGamepad: false,
+    aimActive: false,
+    aimX: 0,
+    aimY: 0,
+    isShooting: false,
+    focusedEl: null,
+    _initialized: false,
+    _activeIdx: -1,
+    _prevButtons: new Array(18).fill(false),
+    _wasMovingWithPad: false,
+    _lastMouseX: -1,
+    _lastMouseY: -1,
+    _lastScreenId: '',
+    _navDirX: 0,
+    _navDirY: 0,
+    _navNextMs: 0,
+
+    init() {
+        if (isTouchDevice || this._initialized) return;
+        this._initialized = true;
+        window.addEventListener('gamepadconnected', () => {
+            this.connected = true;
+            this.syncConnectHints();
+        });
+        window.addEventListener('gamepaddisconnected', () => {
+            this._syncConnectedFlag();
+            if (!this.connected) {
+                this.setUsingGamepad(false);
+                if (this._wasMovingWithPad && typeof Game !== 'undefined' && Game.inputs) {
+                    Game.inputs.left.active = false;
+                    Game.inputs.left.x = 0;
+                    Game.inputs.left.y = 0;
+                    this._wasMovingWithPad = false;
+                }
+                this.aimActive = false;
+                this.isShooting = false;
+            }
+            this.syncConnectHints();
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (this._lastMouseX >= 0) {
+                const moved = Math.abs(e.clientX - this._lastMouseX) + Math.abs(e.clientY - this._lastMouseY);
+                if (moved > 5) this.setUsingGamepad(false);
+            }
+            this._lastMouseX = e.clientX;
+            this._lastMouseY = e.clientY;
+        }, { passive: true });
+        window.addEventListener('mousedown', () => {
+            this.setUsingGamepad(false);
+        }, { passive: true });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' || e.key.startsWith('Arrow') || e.key === 'Enter' || e.key === 'Escape' || e.code === 'Space' || /^[wasd]$/i.test(e.key)) {
+                this.setUsingGamepad(false);
+            }
+        });
+        this._syncConnectedFlag();
+        this.syncConnectHints();
+    },
+
+    _syncConnectedFlag() {
+        if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') {
+            this.connected = false;
+            return;
+        }
+        let pads;
+        try { pads = navigator.getGamepads(); } catch (e) { pads = null; }
+        let any = false;
+        if (pads) {
+            for (let i = 0; i < pads.length; i++) {
+                if (pads[i] && pads[i].connected) { any = true; break; }
+            }
+        }
+        this.connected = any;
+    },
+
+    syncConnectHints() {
+        if (isTouchDevice) return;
+        const startTextEl = document.getElementById('startText');
+        if (startTextEl) {
+            startTextEl.innerText = this.connected ? 'Premi A o Clicca per Entrare' : 'Clicca per Entrare';
+        }
+        const infoModal = document.getElementById('infoModal');
+        if (infoModal && !infoModal.classList.contains('hidden') && typeof UIManager !== 'undefined') {
+            UIManager.updateInfoModal();
+        }
+    },
+
+    setUsingGamepad(val) {
+        const next = !!val;
+        if (this.usingGamepad === next) return;
+        this.usingGamepad = next;
+        if (!next) {
+            this.clearFocus();
+            this.aimActive = false;
+            this.isShooting = false;
+            if (this._wasMovingWithPad && typeof Game !== 'undefined' && Game.inputs) {
+                Game.inputs.left.active = false;
+                Game.inputs.left.x = 0;
+                Game.inputs.left.y = 0;
+                this._wasMovingWithPad = false;
+            }
+        }
+        this.updateHudHints();
+        const infoModal = document.getElementById('infoModal');
+        if (infoModal && !infoModal.classList.contains('hidden') && typeof UIManager !== 'undefined') {
+            UIManager.updateInfoModal();
+        }
+    },
+
+    updateHudHints() {
+        if (isTouchDevice) return;
+        const setLbl = (btnId, txt) => {
+            const btn = document.getElementById(btnId);
+            const sp = btn ? btn.querySelector('span') : null;
+            if (sp) sp.textContent = txt;
+        };
+        if (this.usingGamepad) {
+            setLbl('btn-dash', 'A / LB');
+            setLbl('btn-shield', 'X / B');
+            setLbl('btn-ult', 'Y');
+        } else {
+            setLbl('btn-dash', 'SPAZIO');
+            setLbl('btn-shield', 'SHIFT');
+            setLbl('btn-ult', 'TASTO DX');
+        }
+    },
+
+    getActivePad() {
+        if (typeof navigator === 'undefined' || typeof navigator.getGamepads !== 'function') return null;
+        let pads;
+        try { pads = navigator.getGamepads(); } catch (e) { return null; }
+        if (!pads) return null;
+
+        let fallback = null;
+        for (let i = 0; i < pads.length; i++) {
+            const p = pads[i];
+            if (!p || !p.connected) continue;
+            if (!fallback) fallback = p;
+            if (i === this._activeIdx) {
+                // Keep current index unless another pad shows active input
+            }
+            let hasInput = false;
+            if (p.buttons) {
+                for (let b = 0; b < p.buttons.length; b++) {
+                    if (p.buttons[b] && (p.buttons[b].pressed || p.buttons[b].value > 0.25)) {
+                        hasInput = true; break;
+                    }
+                }
+            }
+            if (!hasInput && p.axes) {
+                for (let a = 0; a < p.axes.length; a++) {
+                    if (Math.abs(p.axes[a] || 0) > 0.22) { hasInput = true; break; }
+                }
+            }
+            if (hasInput) {
+                this._activeIdx = i;
+                return p;
+            }
+        }
+        if (this._activeIdx >= 0 && pads[this._activeIdx] && pads[this._activeIdx].connected) {
+            return pads[this._activeIdx];
+        }
+        return fallback;
+    },
+
+    _isPressed(gp, idx) {
+        if (!gp || !gp.buttons || idx >= gp.buttons.length) return false;
+        const btn = gp.buttons[idx];
+        if (!btn) return false;
+        if (idx === 6 || idx === 7) return btn.pressed || btn.value > 0.25;
+        return !!btn.pressed;
+    },
+
+    _hasAnyActivity(gp) {
+        if (!gp) return false;
+        if (gp.buttons) {
+            for (let i = 0; i < gp.buttons.length; i++) {
+                if (this._isPressed(gp, i)) return true;
+            }
+        }
+        if (gp.axes) {
+            for (let i = 0; i < Math.min(4, gp.axes.length); i++) {
+                if (Math.abs(gp.axes[i] || 0) > 0.22) return true;
+            }
+        }
+        return false;
+    },
+
+    _shapeStick(rawX, rawY, deadzone) {
+        const mag = Math.hypot(rawX || 0, rawY || 0);
+        if (mag <= deadzone) return { x: 0, y: 0, active: false, mag: 0 };
+        const clamped = Math.min(1, mag);
+        const norm = (clamped - deadzone) / (1 - deadzone);
+        return {
+            x: (rawX / mag) * norm,
+            y: (rawY / mag) * norm,
+            active: true,
+            mag: norm
+        };
+    },
+
+    _getActiveMenuId() {
+        const priority = [
+            'confirmResetModal',
+            'reforgeSelectModal',
+            'collectedRelicsModal',
+            'optionsModal',
+            'infoModal',
+            'skinModal',
+            'highScoreScreen',
+            'pauseModal',
+            'relicScreen',
+            'floorScreen',
+            'deathScreen',
+            'mainMenu',
+            'initScreen'
+        ];
+        for (let i = 0; i < priority.length; i++) {
+            const el = document.getElementById(priority[i]);
+            if (el && !el.classList.contains('hidden')) return priority[i];
+        }
+        return '';
+    },
+
+    _isElementVisible(el) {
+        if (!el) return false;
+        if (el.classList && el.classList.contains('hidden')) return false;
+        const cs = window.getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity) === 0) return false;
+        const r = el.getBoundingClientRect();
+        return r.width > 1 && r.height > 1;
+    },
+
+    _getFocusables(screenId, screenEl) {
+        if (!screenEl) return [];
+        const raw = [];
+        if (screenId === 'initScreen') {
+            return [];
+        } else if (screenId === 'mainMenu') {
+            const ids = ['btn-menu-skins', 'btn-menu-crystals', 'btn-main-play'];
+            ids.forEach(id => { const b = document.getElementById(id); if (b) raw.push(b); });
+            screenEl.querySelectorAll('.menu-sec-btn').forEach(b => raw.push(b));
+        } else if (screenId === 'skinModal') {
+            screenEl.querySelectorAll('#skinListContainer > div').forEach(c => raw.push(c));
+            screenEl.querySelectorAll('button').forEach(b => {
+                if (!b.closest('#skinListContainer')) raw.push(b);
+            });
+        } else if (screenId === 'collectedRelicsModal') {
+            const closeTop = screenEl.querySelector('#inv-header button');
+            if (closeTop) raw.push(closeTop);
+            screenEl.querySelectorAll('.inv-mastery-orb').forEach(o => raw.push(o));
+            screenEl.querySelectorAll('.inv-relic-slot').forEach(s => raw.push(s));
+            const closeBot = document.getElementById('btn-close-inventory');
+            if (closeBot) raw.push(closeBot);
+        } else if (screenId === 'reforgeSelectModal') {
+            screenEl.querySelectorAll('#reforgeSelectGrid > div').forEach(c => raw.push(c));
+            screenEl.querySelectorAll('button').forEach(b => {
+                if (!b.disabled) raw.push(b);
+            });
+        } else if (screenId === 'relicScreen') {
+            const invBtn = screenEl.querySelector('#relic-main-wrap > div:first-child button');
+            if (invBtn) raw.push(invBtn);
+            screenEl.querySelectorAll('#relicCardsContainer .relic-card').forEach(c => raw.push(c));
+            const btnDo = document.getElementById('btn-do-reforge');
+            if (btnDo && !btnDo.disabled) raw.push(btnDo);
+            const btnProc = document.getElementById('btn-proceed-relic');
+            if (btnProc && !btnProc.disabled) raw.push(btnProc);
+        } else if (screenId === 'floorScreen') {
+            screenEl.querySelectorAll('#shop-tree-container .mastery-orb').forEach(o => raw.push(o));
+            screenEl.querySelectorAll('#shop-tree-container .pillar-buy-btn').forEach(b => raw.push(b));
+            screenEl.querySelectorAll('#shop-main-wrap > div:last-child button').forEach(b => raw.push(b));
+        } else if (screenId === 'deathScreen') {
+            const saveBox = document.getElementById('score-save-container');
+            if (saveBox && !saveBox.classList.contains('hidden')) {
+                const inp = document.getElementById('playerName');
+                const btnSave = document.getElementById('btn-save-score');
+                if (inp) raw.push(inp);
+                if (btnSave && !btnSave.disabled) raw.push(btnSave);
+            }
+            screenEl.querySelectorAll('#death-action-console button').forEach(b => {
+                if (b.id !== 'btn-save-score' && !b.disabled) raw.push(b);
+            });
+        } else {
+            screenEl.querySelectorAll('button').forEach(b => {
+                if (!b.disabled) raw.push(b);
+            });
+        }
+
+        const out = [];
+        const seen = new Set();
+        for (let i = 0; i < raw.length; i++) {
+            const el = raw[i];
+            if (!el || seen.has(el)) continue;
+            seen.add(el);
+            if (this._isElementVisible(el)) out.push(el);
+        }
+        return out;
+    },
+
+    _getDefaultFocus(screenId, items) {
+        if (!items || items.length === 0) return null;
+        const pickId = (id) => items.find(el => el.id === id);
+        if (screenId === 'mainMenu') return pickId('btn-main-play') || items[0];
+        if (screenId === 'optionsModal') return pickId('btn-opt-gfx') || items[0];
+        if (screenId === 'pauseModal') return items[0];
+        if (screenId === 'confirmResetModal') return items[0];
+        if (screenId === 'relicScreen') return pickId('main-relic-card-0') || pickId('btn-proceed-relic') || items[0];
+        if (screenId === 'floorScreen') return pickId('totem-btn-hp') || items[0];
+        if (screenId === 'deathScreen') return pickId('btn-respawn') || pickId('btn-restart') || items[0];
+        if (screenId === 'infoModal') return items[items.length - 1];
+        if (screenId === 'skinModal') return items.find(el => el.parentElement && el.parentElement.id === 'skinListContainer') || items[0];
+        if (screenId === 'collectedRelicsModal') return items.find(el => el.classList.contains('inv-mastery-orb')) || pickId('btn-close-inventory') || items[0];
+        if (screenId === 'reforgeSelectModal') return items.find(el => el.id && el.id.startsWith('reforge-choice-')) || items[0];
+        return items[0];
+    },
+
+    clearFocus() {
+        if (this.focusedEl && this.focusedEl.classList) {
+            this.focusedEl.classList.remove('gp-focus');
+        }
+        this.focusedEl = null;
+    },
+
+    setFocus(el, fromMove = false) {
+        if (this.focusedEl && this.focusedEl !== el && this.focusedEl.classList) {
+            this.focusedEl.classList.remove('gp-focus');
+        }
+        this.focusedEl = el || null;
+        if (!el) return;
+        el.classList.add('gp-focus');
+        if (typeof el.scrollIntoView === 'function') {
+            try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {}
+        }
+        const isInspectorHost = !!(el.closest('#shop-tree-container') || el.closest('#collectedRelicsModal') || el.closest('#reforgeSelectModal'));
+        if (isInspectorHost && typeof el.onmouseenter === 'function') {
+            el.onmouseenter();
+        } else if (fromMove && typeof AudioEngine !== 'undefined' && AudioEngine.playHover) {
+            AudioEngine.playHover();
+        }
+        if (fromMove && typeof Haptics !== 'undefined') {
+            Haptics.onMenuMove();
+        }
+    },
+
+    _moveFocus(dx, dy, items) {
+        if (!items || items.length === 0) return;
+        if (!this.focusedEl || !document.body.contains(this.focusedEl) || !this._isElementVisible(this.focusedEl)) {
+            this.setFocus(this._getDefaultFocus(this._lastScreenId, items), true);
+            return;
+        }
+        const curRect = this.focusedEl.getBoundingClientRect();
+        const cx = curRect.left + curRect.width * 0.5;
+        const cy = curRect.top + curRect.height * 0.5;
+
+        let best = null;
+        let bestScore = Infinity;
+        for (let i = 0; i < items.length; i++) {
+            const cand = items[i];
+            if (cand === this.focusedEl) continue;
+            const r = cand.getBoundingClientRect();
+            const rx = r.left + r.width * 0.5;
+            const ry = r.top + r.height * 0.5;
+            const vx = rx - cx;
+            const vy = ry - cy;
+            const prim = vx * dx + vy * dy;
+            if (prim <= 4) continue;
+            const perp = Math.abs(vx * (-dy) + vy * dx);
+            const perpLimit = Math.max(curRect.width, curRect.height, r.width, r.height) * 2.5;
+            if (perp > perpLimit && prim < perp * 0.45) continue;
+            const score = prim + perp * 2.4;
+            if (score < bestScore) {
+                bestScore = score;
+                best = cand;
+            }
+        }
+        if (best) {
+            this.setFocus(best, true);
+        }
+    },
+
+    _activateElement(el) {
+        if (!el) return;
+        if (el.id === 'playerName') {
+            if (!el.value || !el.value.trim()) el.value = 'EROE';
+            if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+            const btnSave = document.getElementById('btn-save-score');
+            if (btnSave && !btnSave.disabled) this.setFocus(btnSave, false);
+            return;
+        }
+        if (this._lastScreenId === 'relicScreen' && el.classList.contains('relic-card') && el.classList.contains('selected-relic')) {
+            const btnProc = document.getElementById('btn-proceed-relic');
+            if (btnProc && !btnProc.disabled) {
+                if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+                btnProc.click();
+                return;
+            }
+        }
+        if (this._lastScreenId === 'reforgeSelectModal' && el.id && el.id.startsWith('reforge-choice-') && el.classList.contains('scale-105')) {
+            const btnConf = document.getElementById('btn-confirm-sacrifice');
+            if (btnConf && !btnConf.disabled) {
+                if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+                btnConf.click();
+                return;
+            }
+        }
+        if (el.id && el.id.startsWith('totem-btn-')) {
+            const statKey = el.id.replace('totem-btn-', '');
+            if (typeof ShopSystem !== 'undefined' && ShopSystem.buy) {
+                ShopSystem.buy(statKey);
+                return;
+            }
+        }
+        if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+        if (typeof el.click === 'function') el.click();
+    },
+
+    _closeTopMenu() {
+        if (typeof UIManager !== 'undefined' && UIManager.closeTopModal && UIManager.closeTopModal()) {
+            if (typeof Haptics !== 'undefined') Haptics.onMenuBack();
+            return true;
+        }
+        const high = document.getElementById('highScoreScreen');
+        if (high && !high.classList.contains('hidden') && typeof hideHighScores === 'function') {
+            hideHighScores();
+            if (typeof Haptics !== 'undefined') Haptics.onMenuBack();
+            return true;
+        }
+        const pause = document.getElementById('pauseModal');
+        if (pause && !pause.classList.contains('hidden') && typeof UIManager !== 'undefined') {
+            UIManager.togglePause();
+            if (typeof Haptics !== 'undefined') Haptics.onMenuBack();
+            return true;
+        }
+        return false;
+    },
+
+    _scrollActivePanel(dy) {
+        const scrollerIds = {
+            infoModal: 'info-scroll-body',
+            highScoreScreen: 'highScoresList',
+            skinModal: 'skinListContainer',
+            collectedRelicsModal: 'collectedRelicsGrid',
+            reforgeSelectModal: 'reforgeSelectGrid'
+        };
+        const targetId = scrollerIds[this._lastScreenId];
+        if (!targetId) return false;
+        const scroller = document.getElementById(targetId);
+        if (!scroller || scroller.scrollHeight <= scroller.clientHeight + 4) return false;
+        scroller.scrollTop += dy;
+        return true;
+    },
+
+    updateMenuNavigation(gp, now, edgeFn, freshScreen) {
+        const screenId = this._lastScreenId;
+        const screenEl = document.getElementById(screenId);
+        if (!screenEl) return;
+
+        if (screenId === 'initScreen') {
+            const startTextEl = document.getElementById('startText');
+            if (startTextEl && !startTextEl.classList.contains('hidden') && !freshScreen) {
+                if (edgeFn(0) || edgeFn(9)) {
+                    if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+                    screenEl.click();
+                }
+            }
+            return;
+        }
+
+        const items = this._getFocusables(screenId, screenEl);
+        if (this.usingGamepad) {
+            if (!this.focusedEl || !document.body.contains(this.focusedEl) || !this._isElementVisible(this.focusedEl)) {
+                this.setFocus(this._getDefaultFocus(screenId, items), false);
+            } else {
+                this.focusedEl.classList.add('gp-focus');
+            }
+        }
+
+        // Right stick scroll for info/highscores/skins/inventory
+        if (gp.axes && gp.axes.length >= 4) {
+            const ry = gp.axes[3] || 0;
+            if (Math.abs(ry) > 0.25) this._scrollActivePanel(ry * 12);
+        }
+
+        // Compute directional nav from D-Pad + Left Stick
+        let dirX = 0, dirY = 0;
+        if (this._isPressed(gp, 12)) dirY = -1;
+        else if (this._isPressed(gp, 13)) dirY = 1;
+        if (this._isPressed(gp, 14)) dirX = -1;
+        else if (this._isPressed(gp, 15)) dirX = 1;
+
+        if (dirX === 0 && dirY === 0 && gp.axes && gp.axes.length >= 2) {
+            const ax = gp.axes[0] || 0;
+            const ay = gp.axes[1] || 0;
+            if (Math.abs(ax) > 0.45 || Math.abs(ay) > 0.45) {
+                if (Math.abs(ax) >= Math.abs(ay)) dirX = ax > 0 ? 1 : -1;
+                else dirY = ay > 0 ? 1 : -1;
+            }
+        }
+
+        if (dirX !== 0 || dirY !== 0) {
+            const changed = (dirX !== this._navDirX || dirY !== this._navDirY);
+            if (changed) {
+                this._navDirX = dirX;
+                this._navDirY = dirY;
+                this._navNextMs = now + 260;
+                if (screenId === 'infoModal' && dirY !== 0) {
+                    if (!this._scrollActivePanel(dirY * 72)) this._moveFocus(dirX, dirY, items);
+                } else {
+                    this._moveFocus(dirX, dirY, items);
+                }
+            } else if (now >= this._navNextMs) {
+                this._navNextMs = now + 115;
+                if (screenId === 'infoModal' && dirY !== 0) {
+                    this._scrollActivePanel(dirY * 72);
+                } else {
+                    this._moveFocus(dirX, dirY, items);
+                }
+            }
+        } else {
+            this._navDirX = 0;
+            this._navDirY = 0;
+        }
+
+        if (freshScreen) return;
+
+        if (edgeFn(0)) {
+            const target = (this.focusedEl && document.body.contains(this.focusedEl) && this._isElementVisible(this.focusedEl))
+                ? this.focusedEl
+                : this._getDefaultFocus(screenId, items);
+            if (target) this._activateElement(target);
+        } else if (edgeFn(1)) {
+            this._closeTopMenu();
+        } else if (edgeFn(9)) {
+            if (screenId === 'pauseModal' && typeof UIManager !== 'undefined') {
+                UIManager.togglePause();
+                if (typeof Haptics !== 'undefined') Haptics.onMenuBack();
+            } else if (screenId === 'mainMenu') {
+                const playBtn = document.getElementById('btn-main-play');
+                if (playBtn) { if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm(); playBtn.click(); }
+            } else if (screenId === 'relicScreen') {
+                const btnProc = document.getElementById('btn-proceed-relic');
+                if (btnProc && !btnProc.disabled) { if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm(); btnProc.click(); }
+            } else if (screenId === 'floorScreen') {
+                const btnNext = document.getElementById('btn-next-floor');
+                if (btnNext) { if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm(); btnNext.click(); }
+            } else if (screenId === 'deathScreen') {
+                const btnResp = document.getElementById('btn-respawn');
+                const btnRest = document.getElementById('btn-restart');
+                const targetBtn = (btnResp && this._isElementVisible(btnResp)) ? btnResp : btnRest;
+                if (targetBtn) { if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm(); targetBtn.click(); }
+            }
+        } else if (edgeFn(3)) {
+            if (screenId === 'collectedRelicsModal' && typeof UIManager !== 'undefined') {
+                UIManager.hideModal('collectedRelicsModal');
+                if (typeof Haptics !== 'undefined') Haptics.onMenuBack();
+            } else if ((screenId === 'floorScreen' || screenId === 'relicScreen' || screenId === 'pauseModal' || screenId === 'deathScreen') && typeof UIManager !== 'undefined') {
+                UIManager.showCollectedRelics();
+                if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+            }
+        } else if (edgeFn(2)) {
+            if (screenId === 'relicScreen' && typeof RelicSystem !== 'undefined') {
+                const btnDo = document.getElementById('btn-do-reforge');
+                if (btnDo && !btnDo.disabled) {
+                    if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+                    RelicSystem.openReforgeModal();
+                }
+            }
+        } else if (edgeFn(8)) {
+            if (screenId === 'pauseModal' && typeof UIManager !== 'undefined') {
+                UIManager.showCollectedRelics();
+                if (typeof Haptics !== 'undefined') Haptics.onMenuConfirm();
+            }
+        }
+    },
+
+    poll(timestamp) {
+        if (isTouchDevice) return;
+        if (!this._initialized) this.init();
+
+        const gp = this.getActivePad();
+        const now = timestamp || performance.now();
+
+        if (!gp) {
+            if (this.connected) {
+                this.connected = false;
+                this.syncConnectHints();
+            }
+            if (this.usingGamepad) this.setUsingGamepad(false);
+            for (let i = 0; i < 18; i++) this._prevButtons[i] = false;
+            return;
+        }
+
+        if (!this.connected) {
+            this.connected = true;
+            this.syncConnectHints();
+        }
+
+        const anyAct = this._hasAnyActivity(gp);
+        if (anyAct) this.setUsingGamepad(true);
+
+        const edge = (idx) => !this._prevButtons[idx] && this._isPressed(gp, idx);
+        const screenId = this._getActiveMenuId();
+        const freshScreen = (screenId !== this._lastScreenId);
+        if (freshScreen) {
+            this.clearFocus();
+            this._navDirX = 0;
+            this._navDirY = 0;
+            this._lastScreenId = screenId;
+        }
+
+        if (screenId) {
+            if (this._wasMovingWithPad && typeof Game !== 'undefined' && Game.inputs) {
+                Game.inputs.left.active = false;
+                Game.inputs.left.x = 0;
+                Game.inputs.left.y = 0;
+                this._wasMovingWithPad = false;
+            }
+            this.aimActive = false;
+            this.isShooting = false;
+            this.updateMenuNavigation(gp, now, edge, freshScreen);
+        } else if (typeof Game !== 'undefined') {
+            this.clearFocus();
+            if (Game.state === 'PLAYING' && Game.player && !Game.player.dead) {
+                const lStick = this._shapeStick(gp.axes ? gp.axes[0] : 0, gp.axes ? gp.axes[1] : 0, 0.16);
+                let mx = lStick.x, my = lStick.y;
+                if (this._isPressed(gp, 12)) my -= 1;
+                if (this._isPressed(gp, 13)) my += 1;
+                if (this._isPressed(gp, 14)) mx -= 1;
+                if (this._isPressed(gp, 15)) mx += 1;
+                const mLen = Math.hypot(mx, my);
+                if (mLen > 0.05) {
+                    if (mLen > 1) { mx /= mLen; my /= mLen; }
+                    Game.inputs.left.x = mx;
+                    Game.inputs.left.y = my;
+                    Game.inputs.left.active = true;
+                    this._wasMovingWithPad = true;
+                } else if (this._wasMovingWithPad) {
+                    Game.inputs.left.x = 0;
+                    Game.inputs.left.y = 0;
+                    Game.inputs.left.active = false;
+                    this._wasMovingWithPad = false;
+                }
+
+                const rStick = this._shapeStick(gp.axes ? gp.axes[2] : 0, gp.axes ? gp.axes[3] : 0, 0.18);
+                if (rStick.active) {
+                    this.aimX = rStick.x;
+                    this.aimY = rStick.y;
+                    this.aimActive = true;
+                } else {
+                    this.aimX = 0;
+                    this.aimY = 0;
+                    this.aimActive = false;
+                }
+
+                this.isShooting = this._isPressed(gp, 7) || this._isPressed(gp, 5) || (rStick.active && rStick.mag >= 0.58);
+
+                if (!freshScreen) {
+                    if (edge(0) || edge(4) || edge(6)) Game.player.dash();
+                    if (edge(2) || edge(1)) Game.player.activateShield();
+                    if (edge(3) || edge(11)) Game.activateUltimate();
+                    if ((edge(9) || edge(8)) && typeof UIManager !== 'undefined') UIManager.togglePause();
+                }
+            } else {
+                if (this._wasMovingWithPad && Game.inputs) {
+                    Game.inputs.left.active = false;
+                    Game.inputs.left.x = 0;
+                    Game.inputs.left.y = 0;
+                    this._wasMovingWithPad = false;
+                }
+                this.aimActive = false;
+                this.isShooting = false;
+            }
+        }
+
+        const btnLen = Math.min(18, gp.buttons ? gp.buttons.length : 0);
+        for (let i = 0; i < btnLen; i++) {
+            this._prevButtons[i] = this._isPressed(gp, i);
+        }
     }
 };
 
@@ -5137,24 +6804,24 @@ const TILE_SIZE = 64; const CHUNK_SIZE = 30; const FIXED_TIME_STEP = 1 / 60; con
 
     {
         dirt: 0x828c78, grass: 0x8eb07c, rock: 0x7a8774, wall: 0x5c6b56,
-        grassShader: 0x13380d, grassEmissive: 0x030802, grassRoot: 0x194310,
-        canopyShader: 0x153b0f, canopyEmissive: 0x040802, tree: 0x1c1812,
+        grassShader: 0x0f270b, grassEmissive: 0x010401, grassRoot: 0x0b1e07,
+        canopyShader: 0x112a0c, canopyEmissive: 0x020501, tree: 0x1c1812,
         debris: 0x232b20, groundMist: 0x4a6e54,
         ambient: 0x24301c, dirLight: 0xe8f8c8, fog: 0x091208
     },
     // TEMA 2: FUCINA INFERNALE (Basalto scuro ad alto contrasto + luce ambra dorata che preserva i blu/verdi e stacca i telegraphs rossi)
     {
         dirt: 0x8c5e52, grass: 0xa85c4a, rock: 0x764e46, wall: 0x523028,
-        grassShader: 0x52140a, grassEmissive: 0x240602, grassRoot: 0x350704,
-        canopyShader: 0x441006, canopyEmissive: 0x1c0401, tree: 0x220b08,
+        grassShader: 0x341008, grassEmissive: 0x0d0201, grassRoot: 0x1c0603,
+        canopyShader: 0x2e0d06, canopyEmissive: 0x0b0201, tree: 0x220b08,
         debris: 0x321612, groundMist: 0x9e3820,
         ambient: 0x3e1814, dirLight: 0xffa870, fog: 0x150506
     },
 
     {
         dirt: 0x557fa3, grass: 0x6b9bc0, rock: 0x4f7699, wall: 0x385a78,
-        grassShader: 0x0e5280, grassEmissive: 0x02101d, grassRoot: 0x092946,
-        canopyShader: 0x14567f, canopyEmissive: 0x051b2f, tree: 0x11223a,
+        grassShader: 0x1d4763, grassEmissive: 0x01070f, grassRoot: 0x14334b,
+        canopyShader: 0x1b445e, canopyEmissive: 0x030f1b, tree: 0x11223a,
         debris: 0x203e5a, groundMist: 0x488eba,
         ambient: 0x1b3554, dirLight: 0xbad9f0, fog: 0x081225
     }
@@ -5860,7 +7527,7 @@ const SkinSystem = {
             fog: 0x090414, skyTop: 0x060412, skyHorizon: 0x1a0b36,
             voidDeep: 0x1e063a, voidGlow: 0x9b4dff, mist: 0x7c3aed,
             dirt: 0x7b8570, grass: 0x86ad72, rock: 0x5d6b57,
-            foliage: 0x143b0e, canopy: 0x174011,
+            foliage: 0x0f270b, canopy: 0x112a0c,
             water: 0x38bdf8, elem: 0x22FF44,
             sprite: 'spriteGreen', suffix: ''
         },
@@ -5868,7 +7535,7 @@ const SkinSystem = {
             fog: 0x12040a, skyTop: 0x0c0206, skyHorizon: 0x340c12,
             voidDeep: 0x320506, voidGlow: 0xff5a1f, mist: 0xea580c,
             dirt: 0x8a5d52, grass: 0xa65a48, rock: 0x5c3c36,
-            foliage: 0x52140a, canopy: 0x441006,
+            foliage: 0x341008, canopy: 0x2e0d06,
             water: 0xff4500, elem: 0xFF1838,
             sprite: 'spriteRed', suffix: '_lava'
         },
@@ -5876,7 +7543,7 @@ const SkinSystem = {
             fog: 0x060a1c, skyTop: 0x030816, skyHorizon: 0x0c274d,
             voidDeep: 0x061b3e, voidGlow: 0x38bdf8, mist: 0x0ea5e9,
             dirt: 0x5882a6, grass: 0x6f9ec2, rock: 0x466685,
-            foliage: 0x0e5280, canopy: 0x14567f,
+            foliage: 0x1d4763, canopy: 0x1b445e,
             water: 0x286f9e, elem: 0x00CCFF,
             sprite: 'spriteBlue', suffix: '_ice'
         }
@@ -6029,7 +7696,7 @@ const SkinSystem = {
 
     // Shader erba e chiome dedicato al menu: funziona a 360° su tutti gli smartphone senza mai sparire!
     createMenuFoliageMaterial(baseColorHex, isCanopy = false) {
-        const mat = new THREE.MeshLambertMaterial({ color: baseColorHex, emissive: 0x040902 });
+        const mat = new THREE.MeshLambertMaterial({ color: baseColorHex, emissive: 0x010401 });
         mat.onBeforeCompile = (shader) => {
             shader.uniforms.uTime = this.uMenuTime;
             shader.uniforms.uShock = this.uShockwave;
@@ -6079,8 +7746,10 @@ const SkinSystem = {
                 '#include <color_fragment>',
                 `
                 #include <color_fragment>
-                vec3 rootCol = ${isCanopy ? 'diffuseColor.rgb * 0.48' : 'diffuseColor.rgb * 0.28'};
-                vec3 tipCol = diffuseColor.rgb * mix(1.22, 1.45, vVar);
+                vec3 rootCol = ${isCanopy ? 'diffuseColor.rgb * 0.48' : 'diffuseColor.rgb * 0.44'};
+                vec3 rawTip = diffuseColor.rgb * mix(1.02, 1.16, vVar);
+                float tipLuma = dot(rawTip, vec3(0.299, 0.587, 0.114));
+                vec3 tipCol = mix(rawTip, vec3(tipLuma), 0.14);
                 diffuseColor.rgb = mix(rootCol, tipCol, ${isCanopy ? 'smoothstep(0.0, 1.0, vH)' : 'pow(smoothstep(0.12, 0.88, vH), 1.5)'});
                 `
             );
@@ -8674,19 +10343,22 @@ const DeathSceneSystem = {
 const UIManager = {
     updateInfoModal() {
         const touchMode = (typeof isTouchDevice !== 'undefined') && isTouchDevice;
+        const gpMode = !touchMode && (typeof GamepadSystem !== 'undefined') && (GamepadSystem.connected || GamepadSystem.usingGamepad);
         const dodgeBtn = document.getElementById('info-dodge-btn');
-        if (dodgeBtn) dodgeBtn.innerText = touchMode ? "Doppio Tap" : "Spazio";
+        if (dodgeBtn) dodgeBtn.innerText = touchMode ? "Doppio Tap" : (gpMode ? "A / LB / Spazio" : "Spazio");
         const shieldBtn = document.getElementById('info-shield-btn');
-        if (shieldBtn) shieldBtn.innerText = touchMode ? "Tasto Scudo" : "Shift";
+        if (shieldBtn) shieldBtn.innerText = touchMode ? "Tasto Scudo" : (gpMode ? "X / B / Shift" : "Shift");
 
         const ctrlIcon = document.getElementById('info-ctrl-icon');
-        if (ctrlIcon) ctrlIcon.className = touchMode ? "fa-solid fa-mobile-screen-button" : "fa-solid fa-keyboard";
+        if (ctrlIcon) ctrlIcon.className = touchMode ? "fa-solid fa-mobile-screen-button" : (gpMode ? "fa-solid fa-gamepad" : "fa-solid fa-keyboard");
 
         const ctrlDesc = document.getElementById('info-controls-desc');
         if (!ctrlDesc) return;
         ctrlDesc.innerHTML = touchMode
             ? '<strong class="text-white">Stick SX</strong> per muoverti, <strong class="text-white">Stick DX</strong> per mirare e sparare, <strong class="text-fuchsia-300">Tasto Ult</strong> per l\'abilità suprema.'
-            : '<strong class="text-white">W A S D</strong> per muoverti, <strong class="text-white">Mouse + Click SX</strong> per mirare e sparare, <strong class="text-fuchsia-300">Click DX</strong> per l\'abilità suprema.';
+            : (gpMode
+                ? '<strong class="text-white">Stick SX / WASD</strong> per muoverti, <strong class="text-white">Stick DX / RT / Mouse</strong> per mirare e sparare, <strong class="text-fuchsia-300">Y / Click DX</strong> per l\'abilità suprema.'
+                : '<strong class="text-white">W A S D</strong> per muoverti, <strong class="text-white">Mouse + Click SX</strong> per mirare e sparare, <strong class="text-fuchsia-300">Click DX</strong> per l\'abilità suprema.');
     },
     showModal(id) {
         AudioEngine.playClick();
@@ -9049,7 +10721,8 @@ const UIManager = {
         const btnVib = document.getElementById('btn-opt-vibration');
         const vibTxt = document.getElementById('opt-vibration-text');
         if (btnVib && vibTxt) {
-            if (isTouchDevice && typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            const canVibrate = (!isTouchDevice) || (isTouchDevice && typeof navigator !== 'undefined' && 'vibrate' in navigator);
+            if (canVibrate) {
 
                 btnVib.classList.remove('hidden');
                 btnVib.classList.add('flex');
@@ -9086,6 +10759,11 @@ const UIManager = {
             else { fpsTxt.innerText = "30 FPS"; fpsTxt.className = "text-yellow-400"; }
         }
 
+        const btnOrient = document.getElementById('btn-opt-orientation');
+        if (btnOrient) {
+            btnOrient.classList.toggle('hidden', !isTouchDevice);
+            btnOrient.classList.toggle('flex', isTouchDevice);
+        }
         const orientTxt = document.getElementById('opt-orientation-text');
         if (orientTxt) {
             if (AppSettings.orientation === 'landscape') {
@@ -9640,6 +11318,7 @@ const RelicSystem = {
         if (this.selectedMainRelic) {
             this.selectedMainRelic.apply(Game.player);
             Game.player.relics.push(this.selectedMainRelic);
+            Haptics.rumble(90, 0.40, 0.70, false);
             Game.getFloatingText().spawn(Game.player.x, Game.player.y, "POTERE ACQUISITO", '#ffff00', 40, true);
         }
 
@@ -15543,7 +17222,7 @@ pushDebris(px, pz, radius, force) {
             this.ultimateCharge = 0; this.ultimateActive = true;
             this.ultimateTimer = (10.0 + this.player.modifiers.ascensionDurationAdd) * this.player.modifiers.ultDurationPenalty;
             this.addTrauma(1.2); this.hitStop = 0.3; AudioEngine.playUltimate();
-            Haptics.vibrate([50, 30, 50, 30, 80]);
+            Haptics.onUltimate();
             if (!SharedMat.spritePurple) {
                 SharedMat.spritePurple = new THREE.SpriteMaterial({color: 0xa855f7, map: GLOW_TEX, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, alphaTest: 0.02});
             }
@@ -15666,6 +17345,7 @@ pushDebris(px, pz, radius, force) {
         this.updateShadowConfig();
     },
     setupInputs() {
+        if (!isTouchDevice && typeof GamepadSystem !== 'undefined') GamepadSystem.init();
         window.addEventListener('keydown', e => {
             this.keys[e.key.toLowerCase()] = true;
             if (e.code === 'Space' && this.state === 'PLAYING' && this.player && !this.player.dead) this.player.dash();
@@ -15997,6 +17677,7 @@ loop(timestamp) {
             return;
         }
         this._loopRunning = true;
+        if (!isTouchDevice && typeof GamepadSystem !== 'undefined') GamepadSystem.poll(timestamp);
 
         let targetFps = AppSettings.fpsCap;
         if (this.state === 'MENU' || this.state === 'DEAD') {
@@ -17341,6 +19022,7 @@ startGame(diffMult) {
                         a.radiusSq = a.radius * a.radius;
 
                         AudioEngine.playObeliskCapture(combatDt);
+                        Haptics.onObeliskDrain(a);
 
                         if (a.volcanoTimer === undefined) a.volcanoTimer = 0;
                         a.volcanoTimer += combatDt;
@@ -17416,6 +19098,7 @@ startGame(diffMult) {
                         this.getHazard().spawn(a.x, a.y, 250, 0.4, 0, 0xffffff, 'nova_ring');
                         this.addTrauma(1.5);
                         AudioEngine.playShoot('explosive_arrow');
+                        Haptics.onObeliskComplete();
 
                         let pCount = AppSettings.isLow ? 5 : 12;
                         for(let p=0; p<pCount; p++) this.getParticle().spawn(a.x, 20, a.y, SharedMat.spriteWhite, 'nova');
@@ -17798,6 +19481,7 @@ startGame(diffMult) {
                         this.getParticle().spawn(dest.x, 30, dest.y, pt.particleMat, 'spark');
                     }
                     AudioEngine.playPortalWarp();
+                    Haptics.rumble(85, 0.35, 0.70, false);
                     Haptics.vibrate([20, 30, 40]);
                     let colStr = '#' + pt.colorHex.toString(16).padStart(6, '0');
                     this.getFloatingText().spawn(dest.x, dest.y + 25, "VARCO ARCANO!", colStr, 28, true);
@@ -18446,6 +20130,7 @@ startGame(diffMult) {
 
         this.uiCtx.clearRect(0, 0, this.width, this.height);
         this._hpBarCount = 0;
+        const uiScale = !isTouchDevice ? (AppSettings.pcUiScale || 1.0) : 1.0;
 
         // FIX CRITICO: Calcolo distanza sicura (usa la telecamera se il giocatore è morto/assente)
         let refX = this.player ? this.player.x : (this.camera ? this.camera.position.x : 0);
@@ -18490,8 +20175,9 @@ startGame(diffMult) {
                     if (auraType) {
                         let iconTex = auraType === 'blue' ? SharedMat.iconTime.map : (auraType === 'green' ? SharedMat.iconMountain.map : (auraType === 'corrupted' ? SharedMat.iconCorrupted.map : SharedMat.iconHysteria.map));
                         if (iconTex && iconTex.image) {
-                            let iconYOffset = e.isBoss ? 42 : 32;
-                            this.uiCtx.drawImage(iconTex.image, pos.x - 13, pos.y - iconYOffset, 26, 26);
+                            let iconSz = 26 * uiScale;
+                            let iconYOffset = (e.isBoss ? 42 : 32) * uiScale;
+                            this.uiCtx.drawImage(iconTex.image, pos.x - iconSz * 0.5, pos.y - iconYOffset, iconSz, iconSz);
                         }
                     }
                 }
@@ -18514,21 +20200,23 @@ startGame(diffMult) {
                     if (pPos.z < 1) {
                         let pIconTex = activeIconType === 'blue' ? SharedMat.iconTime.map : (activeIconType === 'green' ? SharedMat.iconMountain.map : (activeIconType === 'corrupted' ? SharedMat.iconCorrupted.map : SharedMat.iconHysteria.map));
                         if (pIconTex && pIconTex.image) {
-                            this.uiCtx.drawImage(pIconTex.image, pPos.x - 18, pPos.y - 42, 36, 36);
+                            this.uiCtx.save();
+                            this.uiCtx.translate(pPos.x, pPos.y);
+                            if (uiScale !== 1) this.uiCtx.scale(uiScale, uiScale);
+                            this.uiCtx.drawImage(pIconTex.image, -18, -42, 36, 36);
                             if (pBuff) {
                                 let maxDur = (SkinSystem.selectedId === 'emerald_warden') ? 13.0 : 10.0;
                                 let pct = Math.max(0, Math.min(1, remTime / maxDur));
                                 let arcColor = activeIconType === 'blue' ? '#00ddff' : (activeIconType === 'green' ? '#33ff00' : (activeIconType === 'corrupted' ? '#e879f9' : '#ff1133'));
-                                this.uiCtx.save();
 
                                 this.uiCtx.beginPath();
-                                this.uiCtx.arc(pPos.x, pPos.y - 24, 21, 0, Math.PI * 2);
+                                this.uiCtx.arc(0, -24, 21, 0, Math.PI * 2);
                                 this.uiCtx.strokeStyle = 'rgba(5, 7, 15, 0.75)';
                                 this.uiCtx.lineWidth = 4;
                                 this.uiCtx.stroke();
 
                                 this.uiCtx.beginPath();
-                                this.uiCtx.arc(pPos.x, pPos.y - 24, 21, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * pct));
+                                this.uiCtx.arc(0, -24, 21, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * pct));
                                 this.uiCtx.strokeStyle = arcColor;
                                 this.uiCtx.lineWidth = 3.2;
                                 if (!AppSettings.useMobileLimits) {
@@ -18536,8 +20224,8 @@ startGame(diffMult) {
                                     this.uiCtx.shadowBlur = 8;
                                 }
                                 this.uiCtx.stroke();
-                                this.uiCtx.restore();
                             }
+                            this.uiCtx.restore();
                         }
                     }
                 }
@@ -18556,15 +20244,15 @@ startGame(diffMult) {
                                    (this.player.essence === 'green' ? '#22ff44' : '#00ddff'));
 
                     this.uiCtx.beginPath();
-                    this.uiCtx.arc(sPos.x, sPos.y, 28, 0, Math.PI * 2);
+                    this.uiCtx.arc(sPos.x, sPos.y, 28 * uiScale, 0, Math.PI * 2);
                     this.uiCtx.strokeStyle = 'rgba(5, 5, 10, 0.65)';
-                    this.uiCtx.lineWidth = 4.5;
+                    this.uiCtx.lineWidth = 4.5 * uiScale;
                     this.uiCtx.stroke();
 
                     this.uiCtx.beginPath();
-                    this.uiCtx.arc(sPos.x, sPos.y, 28, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * pct));
+                    this.uiCtx.arc(sPos.x, sPos.y, 28 * uiScale, -Math.PI / 2, -Math.PI / 2 + (Math.PI * 2 * pct));
                     this.uiCtx.strokeStyle = arcColor;
-                    this.uiCtx.lineWidth = isExpiring ? 3.5 : 2.5;
+                    this.uiCtx.lineWidth = (isExpiring ? 3.5 : 2.5) * uiScale;
                     this.uiCtx.stroke();
                 }
             }
@@ -18573,12 +20261,15 @@ startGame(diffMult) {
         if (this._hpBarCount > 0) {
             for(let i=0; i<this._hpBarCount; i++) {
                 let b = this._hpBars[i];
+                this.uiCtx.save();
+                this.uiCtx.translate(Math.round(b.x), Math.round(b.y));
+                if (uiScale !== 1) this.uiCtx.scale(uiScale, uiScale);
                 if (b.isBoss) {
 
                     let w = 88;
                     let h = 9;
-                    let bx = b.x - w * 0.5;
-                    let by = b.y - 6;
+                    let bx = -w * 0.5;
+                    let by = -6;
 
                     if (this._bossCatchupPct === undefined || this._bossCatchupPct < b.pct) this._bossCatchupPct = b.pct;
                     else this._bossCatchupPct += (b.pct - this._bossCatchupPct) * 0.08;
@@ -18609,10 +20300,10 @@ startGame(diffMult) {
 
                     this.uiCtx.fillStyle = frameCol;
                     this.uiCtx.beginPath();
-                    this.uiCtx.moveTo(b.x, by - 9);
-                    this.uiCtx.lineTo(b.x + 5, by - 4);
-                    this.uiCtx.lineTo(b.x, by - 1);
-                    this.uiCtx.lineTo(b.x - 5, by - 4);
+                    this.uiCtx.moveTo(0, by - 9);
+                    this.uiCtx.lineTo(5, by - 4);
+                    this.uiCtx.lineTo(0, by - 1);
+                    this.uiCtx.lineTo(-5, by - 4);
                     this.uiCtx.closePath();
                     this.uiCtx.fill();
 
@@ -18620,11 +20311,11 @@ startGame(diffMult) {
                         this.uiCtx.font = 'bold 9px sans-serif';
                         this.uiCtx.textAlign = 'center';
                         this.uiCtx.fillStyle = '#fde047';
-                        this.uiCtx.fillText('VULNERABILE!', b.x, by - 12);
+                        this.uiCtx.fillText('VULNERABILE!', 0, by - 12);
                     } else if (b.bossShieldCount > 0) {
                         let pipCol = b.bossElement === 'blue' ? '#38bdf8' : '#4ade80';
                         this.uiCtx.fillStyle = pipCol;
-                        let startX = b.x + 10;
+                        let startX = 10;
                         for (let p = 0; p < Math.min(3, b.bossShieldCount); p++) {
                             this.uiCtx.fillRect(startX + p * 7, by - 7, 5, 4);
                         }
@@ -18633,8 +20324,8 @@ startGame(diffMult) {
 
                     let w = 68;
                     let h = 8;
-                    let bx = Math.round(b.x - w * 0.5);
-                    let by = Math.round(b.y - 5);
+                    let bx = Math.round(-w * 0.5);
+                    let by = -5;
                     let fillW = Math.max(0, Math.round(w * b.pct));
                     let dangerPulse = 0.5 + 0.5 * Math.sin(Game.playTime * 9.0);
 
@@ -18677,10 +20368,10 @@ startGame(diffMult) {
 
                     this.uiCtx.fillStyle = '#ff1e42';
                     this.uiCtx.beginPath();
-                    this.uiCtx.moveTo(b.x, by - 10.5);
-                    this.uiCtx.lineTo(b.x + 5, by - 5.5);
-                    this.uiCtx.lineTo(b.x, by - 2);
-                    this.uiCtx.lineTo(b.x - 5, by - 5.5);
+                    this.uiCtx.moveTo(0, by - 10.5);
+                    this.uiCtx.lineTo(5, by - 5.5);
+                    this.uiCtx.lineTo(0, by - 2);
+                    this.uiCtx.lineTo(-5, by - 5.5);
                     this.uiCtx.closePath();
                     this.uiCtx.fill();
                     this.uiCtx.strokeStyle = '#fbbf24';
@@ -18690,8 +20381,8 @@ startGame(diffMult) {
 
                     let w = 54;
                     let h = 7;
-                    let bx = Math.round(b.x - w * 0.5);
-                    let by = Math.round(b.y - 4);
+                    let bx = Math.round(-w * 0.5);
+                    let by = -4;
                     let fillW = Math.max(0, Math.round(w * b.pct));
                     let borderCol = b.isGolden ? '#fef08a' : '#fbbf24';
                     let barCol = b.isGolden ? '#fde047' : '#f59e0b';
@@ -18720,17 +20411,17 @@ startGame(diffMult) {
 
                     this.uiCtx.fillStyle = borderCol;
                     this.uiCtx.beginPath();
-                    this.uiCtx.moveTo(b.x, by - 6.5);
-                    this.uiCtx.lineTo(b.x + 3.5, by - 3.5);
-                    this.uiCtx.lineTo(b.x, by - 1);
-                    this.uiCtx.lineTo(b.x - 3.5, by - 3.5);
+                    this.uiCtx.moveTo(0, by - 6.5);
+                    this.uiCtx.lineTo(3.5, by - 3.5);
+                    this.uiCtx.lineTo(0, by - 1);
+                    this.uiCtx.lineTo(-3.5, by - 3.5);
                     this.uiCtx.closePath();
                     this.uiCtx.fill();
                 } else {
                     let w = 34;
                     let h = 5;
-                    let bx = Math.round(b.x - w * 0.5);
-                    let by = Math.round(b.y - 2);
+                    let bx = Math.round(-w * 0.5);
+                    let by = -2;
                     let fillW = Math.max(0, Math.round(w * b.pct));
 
                     this.uiCtx.fillStyle = 'rgba(4, 7, 15, 0.92)';
@@ -18748,6 +20439,7 @@ startGame(diffMult) {
                         this.uiCtx.fillRect(bx + fillW - 1.5, by, 1.5, h);
                     }
                 }
+                this.uiCtx.restore();
             }
         }
 
@@ -18761,7 +20453,7 @@ startGame(diffMult) {
                let distSq = MathUtils.distanceSq(this.player, e);
                if (distSq < (e.aggroRangeSq || 1000000)) {
                    let pos = this.toScreenPosition(e.x, 20, e.y);
-                   let padding = 22;
+                   let padding = 22 * uiScale;
                    if (pos.x < padding || pos.x > this.width - padding || pos.y < padding || pos.y > this.height - padding || pos.z > 1) {
                        if (offCount < this._offScreenEnemies.length) {
                            this._offScreenEnemies[offCount].enemy = e;
@@ -18787,7 +20479,7 @@ startGame(diffMult) {
 
        for (let i = 0; i < Math.min(maxArrows, offCount); i++) {
            let e = this._offScreenEnemies[i].enemy;
-           let padding = 22;
+           let padding = 22 * uiScale;
            let cx = this.width / 2; let cy = this.height / 2;
            let angle = Math.atan2(e.y - this.player.y, e.x - this.player.x);
 
@@ -18798,9 +20490,9 @@ startGame(diffMult) {
 
            this.uiCtx.fillStyle = e.isMegaElite ? 'rgba(255, 24, 68, 0.62)' : (e.isElite ? 'rgba(251, 191, 36, 0.32)' : 'rgba(239, 68, 68, 0.25)');
            this.uiCtx.beginPath();
-           this.uiCtx.moveTo(edgeX + Math.cos(angle) * 10, edgeY + Math.sin(angle) * 10);
-           this.uiCtx.lineTo(edgeX + Math.cos(angle - 2.5) * 14, edgeY + Math.sin(angle - 2.5) * 14);
-           this.uiCtx.lineTo(edgeX + Math.cos(angle + 2.5) * 14, edgeY + Math.sin(angle + 2.5) * 14);
+           this.uiCtx.moveTo(edgeX + Math.cos(angle) * (10 * uiScale), edgeY + Math.sin(angle) * (10 * uiScale));
+           this.uiCtx.lineTo(edgeX + Math.cos(angle - 2.5) * (14 * uiScale), edgeY + Math.sin(angle - 2.5) * (14 * uiScale));
+           this.uiCtx.lineTo(edgeX + Math.cos(angle + 2.5) * (14 * uiScale), edgeY + Math.sin(angle + 2.5) * (14 * uiScale));
            this.uiCtx.closePath();
            this.uiCtx.fill();
        }
@@ -18831,7 +20523,7 @@ startGame(diffMult) {
                 textsDrawn++;
                 this.uiCtx.globalAlpha = Math.max(0, progress);
 
-                let targetSize = ft.size * (isTouchDevice ? 0.7 : 1);
+                let targetSize = ft.size * (isTouchDevice ? 0.7 : uiScale);
                 let dynamicScale = targetSize / 40.0;
                 let finalScale = (ft.isCrit ? (1.5 - progress*0.5) : (1.2 - progress*0.2)) * dynamicScale * ft.scalePop;
 
@@ -18878,7 +20570,7 @@ const InteractiveGrassSystem = {
         // vec4(dirX, dirZ, speedRatio, wakePhase) orientamento e deformazione dinamica delle onde
         uPlayerPitDir: { value: new THREE.Vector4(1, 0, 0, 0) },
         uBloomActive: { value: 0.0 },
-        uGroundGrassColor: { value: new THREE.Color(0x194310) }
+        uGroundGrassColor: { value: new THREE.Color(0x0b1e07) }
     },
     geo: null,
     mat: null,
@@ -18921,8 +20613,8 @@ const InteractiveGrassSystem = {
         normals.needsUpdate = true;
 
         this.mat = new THREE.MeshLambertMaterial({
-            color: 0x0e2e09,
-            emissive: 0x040902    // Usa la normale morbida (0,1,0) evitando sfaccettature nere e calcoli dFdx/dFdy nel Fragment Shader
+            color: 0x0f270b,
+            emissive: 0x010401    // Usa la normale morbida (0,1,0) evitando sfaccettature nere e calcoli dFdx/dFdy nel Fragment Shader
         });
 
         this.mat.customProgramCacheKey = () => 'interactive_grass_v5';
@@ -19042,19 +20734,21 @@ const InteractiveGrassSystem = {
                 `
                 #include <color_fragment>
                 
-                // Colore punta viva del ciuffo d'erba (colorazione attuale Three.js)
-                vec3 bladeTipCol = diffuseColor.rgb * 1.35; 
-                vec3 dryTipColor = diffuseColor.rgb * vec3(1.16, 1.10, 0.92) * 1.28;
-                vec3 finalTipColor = mix(bladeTipCol, dryTipColor, vColorRandom * 0.35); float maxTipLuma = max(finalTipColor.r, max(finalTipColor.g, finalTipColor.b)); if (maxTipLuma > 0.82) { finalTipColor *= (0.82 + 0.18 * smoothstep(0.82, 1.25, maxTipLuma)) / maxTipLuma; }
+                // Punta bilanciata e coerente con la texture del terreno (nessun effetto fluorescente)
+                vec3 bladeTipCol = diffuseColor.rgb * 1.12;
+                vec3 dryTipColor = diffuseColor.rgb * vec3(1.14, 1.04, 0.86) * 1.06;
+                vec3 rawTipCol = mix(bladeTipCol, dryTipColor, vColorRandom * 0.42);
+                float tipLuma = dot(rawTipCol, vec3(0.299, 0.587, 0.114));
+                vec3 finalTipColor = mix(rawTipCol, vec3(tipLuma), 0.14);
+                float maxTipLuma = max(finalTipColor.r, max(finalTipColor.g, finalTipColor.b));
+                if (maxTipLuma > 0.72) {
+                    finalTipColor *= (0.72 + 0.14 * smoothstep(0.72, 1.15, maxTipLuma)) / maxTipLuma;
+                }
                 
-                // Base del ciuffo: perfettamente calibrata sulla tonalitÃ  della texture del terreno sottostante (piÃ¹ scura)
-                // con micro-occlusione ambientale (AO) alla radice e leggera variazione organica per zero stacco
-                vec3 groundRootCol = uGroundGrassColor * mix(0.52, 0.78, vColorRandom);
+                // Base del ciuffo ancorata alla tonalità reale della texture sottostante con AO organica
+                vec3 groundRootCol = uGroundGrassColor * mix(0.58, 0.84, vColorRandom);
                 
-                // Sfumatura morbida radice-punta:
-                // Ancoraggio solido nei primi centimetri a terra (zero stacco col terreno),
-                // poi transizione fluida verso la punta che conserva l'attuale colorazione viva
-                float hCurve = pow(smoothstep(0.15, 0.85, vHeight), 1.6);
+                float hCurve = pow(smoothstep(0.14, 0.86, vHeight), 1.55);
                 vec3 finalGrassColor = mix(groundRootCol, finalTipColor, hCurve);
                 
                 diffuseColor.rgb = finalGrassColor;
@@ -19275,8 +20969,8 @@ const TreeCanopySystem = {
         this.geo._isGlobalCached = true;
 
         this.mat = new THREE.MeshLambertMaterial({
-            color: 0x10330a,
-            emissive: 0x040802
+            color: 0x112a0c,
+            emissive: 0x020501
         });
         this.mat._isGlobalCached = true;
         this.mat.customProgramCacheKey = () => 'interactive_tree_canopy_v1';
@@ -19386,8 +21080,8 @@ const TreeCanopySystem = {
                 #include <color_fragment>
                 vec3 baseAlbedo = diffuseColor.rgb;
                 vec3 innerColor = baseAlbedo * 0.50;
-                vec3 outerTipColor = baseAlbedo * 1.15;
-                vec3 warmTipColor = baseAlbedo * vec3(1.08, 1.00, 0.88);
+                vec3 outerTipColor = baseAlbedo * 1.06;
+                vec3 warmTipColor = baseAlbedo * vec3(1.06, 0.98, 0.86);
                 vec3 finalTip = mix(outerTipColor, warmTipColor, vColorRandom * 0.55);
                 float curve = smoothstep(0.0, 1.0, vHeight * 0.75 + vCanopyShade * 0.25);
                 diffuseColor.rgb = mix(innerColor, finalTip, curve);
@@ -23283,6 +24977,7 @@ class Player extends Entity {
                 this.essenceTimer = Math.min(baseOdTime * 1.5, this.essenceTimer + bonusTime);
                 let colHex = '#' + ESSENCE_COLORS[this.essence].toString(16).padStart(6, '0');
                 Game.getFloatingText().spawn(this.x, this.y + 20, "+OVERDRIVE!", colHex, 28, true);
+                Haptics.rumble(75, 0.35, 0.65, false);
             }
             return;
         }
@@ -23305,7 +25000,7 @@ class Player extends Entity {
         else if (counts.blue === 3) { this.essence = 'blue'; this.triggerOverdrive(); }
         else if (counts.green === 3) { this.essence = 'green'; this.triggerOverdrive(); }
         else {
-            Game.addTrauma(1.5); let comboName = ""; let color = '#ffffff';
+            Game.addTrauma(1.5); Haptics.onElementalCombo(); let comboName = ""; let color = '#ffffff';
 
             if (counts.red > 0 && counts.blue > 0 && counts.green === 0) {
                 comboName = "ONDA D'URTO!"; color = "#00AAFF";
@@ -23411,6 +25106,7 @@ class Player extends Entity {
     triggerOverdrive() {
         this.overdrive = true; Game.hitStop = 0.2; Game.addTrauma(1.0);
         AudioEngine.playOverdrive(this.essence);
+        Haptics.onOverdrive();
         let odBase = 5.0 + (SkinSystem.selectedId === 'dark_mage' ? 2.0 : 0.0);
         this.essenceTimer = odBase * this.modifiers.essenceDurationMult;
         if (typeof UI !== 'undefined' && UI.triggerPulseClass && UI.els.essenceHud) {
@@ -24066,6 +25762,7 @@ class Player extends Entity {
                     }
                     Game.addTrauma(1.5);
                     AudioEngine.playShoot('explosive_arrow');
+                    Haptics.onAttack('nova');
                     if (stacks > 0) Game.getFloatingText().spawn(this.x, this.y + 20, `AEGIS NOVA (${stacks}x)!`, '#e879f9', 35, true);
                     this.shieldAbsorbed = 0;
                 } else {
@@ -24110,6 +25807,7 @@ class Player extends Entity {
                 this.shieldMesh.material.opacity = 0.6;
                 this.autoShieldActive = true;
                 AudioEngine.playShieldUp(!!this.modifiers.seismicShield);
+                Haptics.onShieldUp(!!this.modifiers.seismicShield);
                 if (this.modifiers.seismicShield) {
                     Game.getHazard().spawn(this.x, this.y, 250, 0.4, this.stats.maxDmg * 0.2, 0xffffff, 'seismic_nova_ring');
                 }
@@ -24224,8 +25922,11 @@ class Player extends Entity {
 
         if (this.dashCooldown > 0) this.dashCooldown -= dt;
 
-        if (Game.inputs.right.active) {
-            let rawAngle = Math.atan2(Game.inputs.right.y, Game.inputs.right.x);
+        const padAiming = (!isTouchDevice && typeof GamepadSystem !== 'undefined' && GamepadSystem.aimActive);
+        if (Game.inputs.right.active || padAiming) {
+            let rawAngle = padAiming
+                ? Math.atan2(GamepadSystem.aimY, GamepadSystem.aimX)
+                : Math.atan2(Game.inputs.right.y, Game.inputs.right.x);
             let finalAngle = rawAngle;
 
             // Cono magnetico stretto (±16°, cioè 0.28 rad): corregge solo i piccoli errori del pollice
@@ -24271,6 +25972,10 @@ class Player extends Entity {
                 finalAngle = rawAngle + bestDiff * strength;
             }
             this.angle = finalAngle;
+        } else if (!isTouchDevice && typeof GamepadSystem !== 'undefined' && GamepadSystem.usingGamepad) {
+            if (Game.inputs.left.active) {
+                this.angle = Math.atan2(Game.inputs.left.y, Game.inputs.left.x);
+            }
         } else if (!isTouchDevice || Game.mouse.leftDown) {
             this.angle = Math.atan2(Game.mouse.worldY - this.y, Game.mouse.worldX - this.x);
         }
@@ -24484,6 +26189,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
               let healTickVal = Math.max(1, Math.floor(this.stats.maxHp * 0.02));
               Game.getFloatingText().spawn(this.x, this.y + 15, `+${healTickVal} HP`, '#c084fc', 18);
               Game.getParticle().spawn(this.x, 20, this.y, SharedMat.spritePurple, 'spark');
+              Haptics.rumble(45, 0.18, 0.38, false);
           }
       } else {
           this.ultHealTick = 0;
@@ -24491,7 +26197,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
               this.ultArcaneGroup.visible = false;
           }
       }
-        let isShooting = Game.mouse.leftDown || Game.inputs.right.active;
+        let isShooting = Game.mouse.leftDown || Game.inputs.right.active || (!isTouchDevice && typeof GamepadSystem !== 'undefined' && GamepadSystem.isShooting);
         if (this.overdrive && this.essence === 'red' && isShooting && !this.isDashing) this.flamethrower(dt);
 
         if (inPit && !this._wasInPit) {
@@ -24700,6 +26406,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
                     this.takeDamage(this.stats.maxHp * 0.10, 'hazard', false, false);
                     this.lavaTimer = 0;
                     AudioEngine.playLavaBurn();
+                    Haptics.rumble(110, 0.60, 0.75, true);
                     for (let i = 0; i < 6; i++) {
                         let p = Game.getParticle();
                         p.spawn(this.x + MathUtils.randomRange(-6, 6), 4, this.y + MathUtils.randomRange(-6, 6), SharedMat.spriteRed, 'flame');
@@ -24836,6 +26543,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
                 if (this.modifiers.dashLightning) {
                     Game.addTrauma(1.2);
                     AudioEngine.playShoot('chain_lightning');
+                    Haptics.onAttack('laser');
                     Game.spawnLightFlash(this.x, this.y, 0x00aaff, 5.0, 600, 0.4);
 
                     let pCount = AppSettings.isLow ? 15 : 40;
@@ -25100,7 +26808,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
                 p.baseSize = MathUtils.randomRange(25, 45);
             }
         }
-       if (Game.frameCount % 8 === 0) AudioEngine.playShoot('flame');
+       if (Game.frameCount % 8 === 0) { AudioEngine.playShoot('flame'); Haptics.onAttack('flamethrower'); }
 
        // FIX: Calcoliamo l'angolo FUORI dall'if per evitare che generi "undefined"
         let cosA = Math.cos(this.angle); let sinA = Math.sin(this.angle);
@@ -25213,6 +26921,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         let isDoubleBarrel = (typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('atkSpeed', 2)) && (this.rhythmShotCount % 5 === 0);
 
         AudioEngine.playShoot(projType, isCrit);
+        if (isCrit) Haptics.onAttack('crit');
 
         if (!AppSettings.isLow) {
             let muzzleX = this.x + Math.cos(this.angle) * 24 + Math.cos(this.angle + Math.PI/2) * 10;
@@ -25300,6 +27009,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         AudioEngine.playShoot('chain_lightning', true);
         AudioEngine.playShoot('explosive_arrow', false);
         Game.addTrauma(0.35);
+        Haptics.onAttack('laser');
 
         let muzzleFlash = Game.getParticle();
         muzzleFlash.spawn(startX, 18, startY, SharedMat.spriteWhite, 'nova');
@@ -25392,6 +27102,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
        this.isDashing = true; this.dashTimer = 0.25;
         this.lastDashTime = Game.playTime;
         this.dashCooldown = perfectDodge ? 0.5 : 2.0 * this.modifiers.dashCooldownMult;
+        Haptics.onDash(perfectDodge);
         if (this.modifiers.dashCritsEnabled) this.modifiers.dashCritsStacks = 2;
         if (typeof UI !== 'undefined' && UI.triggerPulseClass && UI.els.btnDash) {
             UI.triggerPulseClass(UI.els.btnDash, 'anim-hud-pop');
@@ -25475,6 +27186,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             Game.spawnLightFlash(this.x, this.y, 0x00eeff, 3.8, 420, 0.32);
             AudioEngine.playShoot('chain_lightning');
             Game.addTrauma(0.45);
+            Haptics.onAttack('nova');
             Game.getFloatingText().spawn(this.x, this.y + 24, "NOVA GELIDA!", '#38bdf8', 24, true);
             let pCount = AppSettings.isLow ? 10 : (AppSettings.useMobileLimits ? 16 : 26);
             for (let i = 0; i < pCount; i++) {
@@ -25547,6 +27259,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             amount *= shieldReduction;
 
             this.shieldAbsorbed++;
+            Haptics.onShieldBlock();
 
             if (this.essence === 'blue' && source && source.frozenTimer !== undefined && !source.dead) {
                 source.frozenTimer = 1.5;
@@ -25585,6 +27298,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
 
             if (this.tempHp >= amount) {
                 this.tempHp -= amount;
+                Haptics.onShieldBlock();
                 return;
             } else {
                 amount -= this.tempHp;
@@ -25601,7 +27315,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         this.invincibilityTimer = 0.2;
       this.outOfCombatTimer = 5.0;
         AudioEngine.playHit('player');
-       Haptics.vibrate([40, 30, 40]);
+       Haptics.onPlayerHit(this.stats.hp <= 0);
       // La combo si spezza sempre quando vieni colpito
         Game.resetCombo();
 
@@ -25946,6 +27660,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             for(let i=0; i< (AppSettings.useMobileLimits?10:(AppSettings.isDesktopUltra?60:30)); i++) Game.getParticle().spawn(this.x, 20, this.y, SharedMat.spriteLevel, 'level');
             Game.getFloatingText().spawn(this.x, this.y, "LEVEL UP!", '#ffffff', 28, true);
             AudioEngine.playLevelUp();
+            Haptics.rumble(110, 0.50, 0.75, false);
             Game.pushDebris(this.x, this.y, 250, 400);
             if (this.modifiers.levelUpNova) {
                 Game.getHazard().spawn(this.x, this.y, 260, 0.45, this.stats.maxDmg * 2.0 * this.modifiers.dmgMult, 0xffd700, 'nova_ring');
@@ -25976,6 +27691,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
                 UI.triggerPulseClass(UI.els.btnShield, 'anim-hud-pop');
             }
             AudioEngine.playShieldUp(!!this.modifiers.seismicShield);
+            Haptics.onShieldUp(!!this.modifiers.seismicShield);
         }
     }
 }
@@ -31851,7 +33567,7 @@ const Preloader = {
             baseColor = '#1c557d'; darkColor = 'rgba(12,30,50,0.55)'; lightColor = 'rgba(70,155,215,0.30)';
         } else {
 
-            baseColor = '#3a7d2c'; darkColor = 'rgba(22,55,16,0.42)'; lightColor = 'rgba(78,158,54,0.30)';
+            baseColor = '#37682c'; darkColor = 'rgba(22,55,16,0.42)'; lightColor = 'rgba(68,128,52,0.28)';
         }
         ctx.fillStyle = baseColor;
         ctx.fillRect(0, 0, size, size);
@@ -32298,7 +34014,7 @@ const ShopSystem = {
             let tx, ty, dur;
 
             if (mode === 'upward') {
-                if (AppSettings.orientation === 'landscape') {
+                if (isTouchDevice && AppSettings.orientation === 'landscape') {
                     tx = -MathUtils.randomRange(45, 135);
                     ty = MathUtils.randomRange(-18, 18);
                 } else {
@@ -32565,7 +34281,7 @@ const ShopSystem = {
 
                 AudioEngine.playLevelUp();
                 AudioEngine.playShoot('chain_lightning');
-                Haptics.vibrate([40, 25, 80]);
+                Haptics.onElementalCombo();
 
                 if (beamEl) {
                     beamEl.classList.remove('active');
@@ -32744,6 +34460,7 @@ history.pushState(null, null, document.URL);
 
     window.onload = () => {
     AppSettings.loadAndDetect(); AppSettings.init(); UIManager.updateOptionsUI();
+    if (!isTouchDevice && typeof GamepadSystem !== 'undefined') GamepadSystem.init();
         RunSaveSystem.updateMainMenuButton();
     window.addEventListener('pagehide', () => RunSaveSystem.saveCurrentRun());
     window.addEventListener('beforeunload', () => RunSaveSystem.saveCurrentRun());
