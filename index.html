@@ -4613,14 +4613,18 @@ const AppSettings = {
         else document.body.classList.remove('low-spec');
 
         const wantCharTex = (typeof PcUltraGraphics !== 'undefined') ? PcUltraGraphics.getCharTex() : CHAR_GRUNGE_TEX;
+        const wantDarkArmorTex = (typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures.mon_dark_armor)
+            ? Preloader.textures.mon_dark_armor
+            : wantCharTex;
         const wantDesktopBump = !this.useMobileLimits ? wantCharTex : null;
+        const wantDarkArmorBump = !this.useMobileLimits ? wantDarkArmorTex : null;
         if (typeof SharedMat !== 'undefined') {
             if (SharedMat.blobShadow) {
                 SharedMat.blobShadow.opacity = this.isUltraPC ? 0.34 : 0.75;
             }
-            if (SharedMat.enemyDark && (SharedMat.enemyDark.bumpMap !== wantDesktopBump || SharedMat.enemyDark.map !== wantCharTex)) {
-                SharedMat.enemyDark.map = wantCharTex;
-                SharedMat.enemyDark.bumpMap = wantDesktopBump;
+            if (SharedMat.enemyDark && (SharedMat.enemyDark.bumpMap !== wantDarkArmorBump || SharedMat.enemyDark.map !== wantDarkArmorTex)) {
+                SharedMat.enemyDark.map = wantDarkArmorTex;
+                SharedMat.enemyDark.bumpMap = wantDarkArmorBump;
                 SharedMat.enemyDark.needsUpdate = true;
             }
             if (SharedMat.deadObelisk && (SharedMat.deadObelisk.bumpMap !== wantDesktopBump || SharedMat.deadObelisk.map !== wantCharTex)) {
@@ -4649,9 +4653,19 @@ const AppSettings = {
                         }
                     }
                 }
-                if (Preloader.textures.coin && Preloader.textures.coin.anisotropy !== targetAniso) {
-                    Preloader.textures.coin.anisotropy = targetAniso;
-                    Preloader.textures.coin.needsUpdate = true;
+                const extraTexKeys = [
+                    'coin', 'crate', 'urn', 'treeBark', 'arcaneBox', 'runeCircle',
+                    'mon_dark_armor', 'mon_flesh', 'mon_bone', 'mon_slime',
+                    'mon_magma', 'mon_rune_metal', 'mon_cloth', 'mon_chitin',
+                    'skin_dark_mage', 'skin_astral_arcanist', 'skin_emerald_warden',
+                    'skin_crimson_inquisitor', 'skin_void_walker', 'skin_solar_archon', 'skin_cyber_phantom'
+                ];
+                for (let i = 0; i < extraTexKeys.length; i++) {
+                    let et = Preloader.textures[extraTexKeys[i]];
+                    if (et && et.anisotropy !== targetAniso) {
+                        et.anisotropy = targetAniso;
+                        et.needsUpdate = true;
+                    }
                 }
             }
 
@@ -6845,7 +6859,7 @@ const TILE_SIZE = 64; const CHUNK_SIZE = 30; const FIXED_TIME_STEP = 1 / 60; con
     {
         dirt: 0x828c78, grass: 0x8eb07c, rock: 0x7a8774, wall: 0x5c6b56,
         grassShader: 0x0f270b, grassEmissive: 0x010401, grassRoot: 0x0b1e07,
-        canopyShader: 0x112a0c, canopyEmissive: 0x020501, tree: 0x1c1812,
+        canopyShader: 0x112a0c, canopyEmissive: 0x020501, tree: 0x5c4938,
         debris: 0x232b20, groundMist: 0x4a6e54,
         ambient: 0x24301c, dirLight: 0xe8f8c8, fog: 0x091208
     },
@@ -6853,7 +6867,7 @@ const TILE_SIZE = 64; const CHUNK_SIZE = 30; const FIXED_TIME_STEP = 1 / 60; con
     {
         dirt: 0x8c5e52, grass: 0xa85c4a, rock: 0x764e46, wall: 0x523028,
         grassShader: 0x341008, grassEmissive: 0x0d0201, grassRoot: 0x1c0603,
-        canopyShader: 0x2e0d06, canopyEmissive: 0x0b0201, tree: 0x220b08,
+        canopyShader: 0x2e0d06, canopyEmissive: 0x0b0201, tree: 0x63261d,
         debris: 0x321612, groundMist: 0x9e3820,
         ambient: 0x3e1814, dirLight: 0xffa870, fog: 0x150506
     },
@@ -6861,7 +6875,7 @@ const TILE_SIZE = 64; const CHUNK_SIZE = 30; const FIXED_TIME_STEP = 1 / 60; con
     {
         dirt: 0x557fa3, grass: 0x6b9bc0, rock: 0x4f7699, wall: 0x385a78,
         grassShader: 0x1d4763, grassEmissive: 0x01070f, grassRoot: 0x14334b,
-        canopyShader: 0x1b445e, canopyEmissive: 0x030f1b, tree: 0x11223a,
+        canopyShader: 0x1b445e, canopyEmissive: 0x030f1b, tree: 0x35506b,
         debris: 0x203e5a, groundMist: 0x488eba,
         ambient: 0x1b3554, dirLight: 0xbad9f0, fog: 0x081225
     }
@@ -8423,7 +8437,7 @@ const SkinSystem = {
         this.runeMesh = new THREE.Mesh(
             new THREE.PlaneGeometry(74, 74).rotateX(-Math.PI / 2),
             new THREE.MeshBasicMaterial({
-                map: RUNE_TEX,
+                map: (typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures.runeCircle) ? Preloader.textures.runeCircle : RUNE_TEX,
                 color: preset0.elem,
                 transparent: true,
                 opacity: 0.56,
@@ -8466,7 +8480,11 @@ const SkinSystem = {
 
         // Alberi proporzionati in boschetti perimetrali asimmetrici: mai davanti alla linea di vista della camera
         if (!window.GLOBAL_TREE_GEO) window.GLOBAL_TREE_GEO = createDarkTreeGeometry();
-        const menuTreeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x1c1812, roughness: 0.9 });
+        const menuTreeTrunkMat = new THREE.MeshStandardMaterial({
+            color: 0x5c4938,
+            map: (typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures.treeBark) ? Preloader.textures.treeBark : null,
+            roughness: 0.9
+        });
         this.menuCanopyMat = this.createMenuFoliageMaterial(preset0.canopy, true);
 
         const treeSpots = [
@@ -8566,9 +8584,10 @@ const SkinSystem = {
             const mx = Math.cos(radAng) * dist;
             const mz = Math.sin(radAng) * dist;
             const gy = this.getTerrainHeight(mx, mz);
-            let mat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: colorHex, map: CHAR_GRUNGE_TEX }), 0.75);
+            const guardTex = getEnemyTexture(type);
+            let mat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: colorHex, map: guardTex }), 0.75);
             if (type === 'slime') {
-                mat = new THREE.MeshLambertMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 0.35, transparent: true, opacity: 0.9 });
+                mat = new THREE.MeshLambertMaterial({ color: colorHex, emissive: colorHex, emissiveIntensity: 0.35, map: guardTex, transparent: true, opacity: 0.9 });
             }
             const obj = ModelFactory.buildEnemy(type, size, mat);
             obj.group.position.set(mx, gy, mz);
@@ -8591,7 +8610,7 @@ const SkinSystem = {
         spawnGuard('leaper', 13, 0xaa00ff, 138, 180);
 
         for (let g = 0; g < 2; g++) {
-            const gobMat = new THREE.MeshLambertMaterial({ color: 0xffcc00, emissive: 0xff2200, emissiveIntensity: 0.75 });
+            const gobMat = new THREE.MeshLambertMaterial({ color: 0xffcc00, emissive: 0xff2200, emissiveIntensity: 0.75, map: getEnemyTexture('goblin') });
             const gob = ModelFactory.buildEnemy('goblin', 10.5, gobMat);
             this.worldGroup.add(gob.group);
             this.flyers.push({ group: gob.group, parts: gob.parts, angle: g * Math.PI, radius: 100 + g * 24, speed: 1.05 + g * 0.2 });
@@ -8601,7 +8620,8 @@ const SkinSystem = {
         this.boxGroup = new THREE.Group();
         this.boxGroup.position.set(0, 68, 0);
         const wallTex = this.prepareMenuTex('wall', 1, 1);
-        const boxMat = new THREE.MeshStandardMaterial({ color: 0x334155, map: wallTex, roughness: 0.36, metalness: 0.65 });
+        const boxTex = (typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures.arcaneBox) ? Preloader.textures.arcaneBox : wallTex;
+        const boxMat = new THREE.MeshStandardMaterial({ color: 0xdbeafe, map: boxTex, roughness: 0.36, metalness: 0.55 });
         const boxMesh = new THREE.Mesh(new THREE.BoxGeometry(22, 22, 22), boxMat);
         boxMesh.castShadow = true;
         this.wireMat = new THREE.MeshBasicMaterial({ color: preset0.elem, wireframe: true, transparent: true, opacity: 0.85 });
@@ -9611,15 +9631,16 @@ const DeathSceneSystem = {
         else if (eType === 'orc') baseSize = 18;
 
         let eColor = k.color || 0x5c4033;
-        let eMat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: eColor, map: CHAR_GRUNGE_TEX, side: THREE.DoubleSide }), 0.75);
+        const eTex = getEnemyTexture(eType, k.bossElement || 'red');
+        let eMat = applyCharacterShader(new THREE.MeshLambertMaterial({ color: eColor, map: eTex, side: THREE.DoubleSide }), 0.75);
         if (eType === 'slime' || eType === 'slime_mini') {
-            eMat = new THREE.MeshLambertMaterial({ color: eColor, emissive: eColor, emissiveIntensity: 0.3, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
+            eMat = new THREE.MeshLambertMaterial({ color: eColor, emissive: eColor, emissiveIntensity: 0.3, map: eTex, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
         } else if (k.isPursuer) {
             eMat = new THREE.MeshLambertMaterial({ color: 0x050505, emissive: 0xaa0000, emissiveIntensity: 1.4, side: THREE.DoubleSide });
         } else if (k.isGolden) {
-            eMat = new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0xffaa00, emissiveIntensity: 1.1, side: THREE.DoubleSide });
+            eMat = new THREE.MeshLambertMaterial({ color: 0xffd700, emissive: 0xffaa00, emissiveIntensity: 1.1, map: eTex, side: THREE.DoubleSide });
         } else if (k.isMegaElite) {
-            eMat = new THREE.MeshLambertMaterial({ color: eColor, emissive: 0x77001a, emissiveIntensity: 1.15, map: CHAR_GRUNGE_TEX, side: THREE.DoubleSide });
+            eMat = new THREE.MeshLambertMaterial({ color: eColor, emissive: 0x77001a, emissiveIntensity: 1.15, map: eTex, side: THREE.DoubleSide });
             baseSize *= 1.22;
         }
 
@@ -11494,6 +11515,9 @@ const PcUltraGraphics = {
     },
 
     getSkinTex(skinId) {
+        if (skinId && typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures['skin_' + skinId]) {
+            return Preloader.textures['skin_' + skinId];
+        }
         return (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? this.getSkinHdTexture(skinId) : getSkinTexture(skinId);
     },
 
@@ -11967,14 +11991,14 @@ const PcUltraGraphics = {
         }
 
         if (typeof Game !== 'undefined' && Game.enemies) {
-            const cTex = this.getCharTex();
             for (let i = 0; i < Game.enemies.length; i++) {
                 const e = Game.enemies[i];
                 if (!e || !e.mat || e.type === 'crystal' || e.isPursuer) continue;
-                const wantBump = !AppSettings.useMobileLimits ? cTex : null;
-                if (e.mat.map !== cTex || e.mat.bumpMap !== wantBump) {
+                const eTex = getEnemyTexture(e.type, e._builtBossElement);
+                const wantBump = !AppSettings.useMobileLimits ? eTex : null;
+                if (e.mat.map !== eTex || e.mat.bumpMap !== wantBump) {
                     const chg = (!!e.mat.bumpMap !== !!wantBump);
-                    e.mat.map = cTex;
+                    e.mat.map = eTex;
                     e.mat.bumpMap = wantBump;
                     if (chg) e.mat.needsUpdate = true;
                 }
@@ -11983,9 +12007,34 @@ const PcUltraGraphics = {
     }
 };
 
+function getEnemyTexture(type, bossElement = null) {
+    const pt = (typeof Preloader !== 'undefined' && Preloader.textures) ? Preloader.textures : null;
+    const fallback = (typeof PcUltraGraphics !== 'undefined') ? PcUltraGraphics.getCharTex() : CHAR_GRUNGE_TEX;
+    if (!pt) return fallback;
+    let key = null;
+    if (type === 'orc' || type === 'goblin' || type === 'leaper' || type === 'pyromancer') key = 'mon_flesh';
+    else if (type === 'skeleton_archer') key = 'mon_bone';
+    else if (type === 'slime' || type === 'slime_mini') key = 'mon_slime';
+    else if (type === 'fire_demon') key = 'mon_magma';
+    else if (type === 'golem' || type === 'trapper' || type === 'ring_walker') key = 'mon_rune_metal';
+    else if (type === 'mage' || type === 'dark_prophet') key = 'mon_cloth';
+    else if (type === 'roller') key = 'mon_chitin';
+    else if (type === 'boss') {
+        if (bossElement === 'blue') key = 'mon_rune_metal';
+        else if (bossElement === 'green') key = 'mon_chitin';
+        else key = 'mon_flesh';
+    } else if (type === 'dark_armor') {
+        key = 'mon_dark_armor';
+    }
+    return (key && pt[key]) ? pt[key] : fallback;
+}
+
 const SKIN_TEX_CACHE = {};
-function getSkinTexture(skinId) {
+function getSkinTexture(skinId, forceProcedural = false) {
     if (!skinId) return CHAR_GRUNGE_TEX;
+    if (!forceProcedural && typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures['skin_' + skinId]) {
+        return Preloader.textures['skin_' + skinId];
+    }
     if (SKIN_TEX_CACHE[skinId]) return SKIN_TEX_CACHE[skinId];
 
     const canvas = document.createElement('canvas');
@@ -21281,9 +21330,10 @@ class GameMap {
         const maxTrees = floorCount * (AppSettings.useMobileLimits ? 1 : 2);
         if (!window.GLOBAL_TREE_GEO) window.GLOBAL_TREE_GEO = createDarkTreeGeometry();
         if (!window.GLOBAL_TREE_MAT) {
+            const barkTex = (typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures.treeBark) ? Preloader.textures.treeBark : null;
             window.GLOBAL_TREE_MAT = AppSettings.useMobileLimits
-                ? new THREE.MeshLambertMaterial({ color: 0x241f16, emissive: 0x020101 })
-                : new THREE.MeshStandardMaterial({ color: 0x241f16, emissive: 0x020101, roughness: 0.9 });
+                ? new THREE.MeshLambertMaterial({ color: 0x5c4938, emissive: 0x020101, map: barkTex })
+                : new THREE.MeshStandardMaterial({ color: 0x5c4938, emissive: 0x020101, roughness: 0.9, map: barkTex });
         }
         const meshTrees = new THREE.InstancedMesh(window.GLOBAL_TREE_GEO, window.GLOBAL_TREE_MAT, maxTrees);
         meshTrees.receiveShadow = true;
@@ -27936,19 +27986,20 @@ class Enemy extends Entity {
             }
 
             const EnemyMatClass = useMobEnemyMat ? THREE.MeshLambertMaterial : THREE.MeshPhongMaterial;
+            const eTex = getEnemyTexture(type, requestedBossElem);
             this.mat = type === 'crystal'
                 ? new EnemyMatClass({ color: 0x000000, emissive: color })
                 : applyCharacterShader(
                     useMobEnemyMat
                         ? new THREE.MeshLambertMaterial({
                             color: color,
-                            map: PcUltraGraphics.getCharTex()
+                            map: eTex
                         })
                         : new THREE.MeshPhongMaterial({
                             color: color,
                             shininess: desiredShininess,
-                            map: PcUltraGraphics.getCharTex(),
-                            bumpMap: PcUltraGraphics.getCharTex(),
+                            map: eTex,
+                            bumpMap: eTex,
                             bumpScale: 0.06
                         }),
                     type === 'ring_walker' ? 0.85 : 0.75
@@ -33828,6 +33879,23 @@ const Preloader = {
         tex.encoding = THREE.sRGBEncoding;
         return tex;
     },
+    createBarkFallbackTexture() {
+        const size = 64;
+        const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#a89f94';
+        ctx.fillRect(0, 0, size, size);
+        for (let i = 0; i < 24; i++) {
+            const x = (i * 5) % size;
+            ctx.fillStyle = (i % 2 === 0) ? '#403830' : '#dfd7cc';
+            ctx.fillRect(x, 0, 2, size);
+        }
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.encoding = THREE.sRGBEncoding;
+        return tex;
+    },
     init(onComplete) {
         const loadingText = document.getElementById('loadingText');
         const loadingProgress = document.getElementById('loadingProgress');
@@ -33958,6 +34026,68 @@ const Preloader = {
             SharedMat.coin.emissiveMap = this.textures.coin;
             SharedMat.coin.needsUpdate = true;
         }
+
+        const fbCrate = (typeof SharedMat !== 'undefined' && SharedMat.crate) ? SharedMat.crate.map : null;
+        const fbUrn = (typeof SharedMat !== 'undefined' && SharedMat.urn) ? SharedMat.urn.map : null;
+
+        this.textures.crate = loadTerrainTex('crate.png', () => fbCrate || createPatternTexture('crate'));
+        this.textures.crate.wrapS = THREE.ClampToEdgeWrapping;
+        this.textures.crate.wrapT = THREE.ClampToEdgeWrapping;
+
+        this.textures.urn = loadTerrainTex('urn.png', () => fbUrn || createPatternTexture('urn'));
+        this.textures.urn.wrapS = THREE.RepeatWrapping;
+        this.textures.urn.wrapT = THREE.ClampToEdgeWrapping;
+
+        this.textures.treeBark = loadTerrainTex('tree_bark.png', () => this.createBarkFallbackTexture());
+        this.textures.treeBark.wrapS = THREE.RepeatWrapping;
+        this.textures.treeBark.wrapT = THREE.RepeatWrapping;
+        this.textures.treeBark.repeat.set(2, 4);
+
+        this.textures.arcaneBox = loadTerrainTex('arcane_box.png', () => createPatternTexture('wall'));
+        this.textures.arcaneBox.wrapS = THREE.ClampToEdgeWrapping;
+        this.textures.arcaneBox.wrapT = THREE.ClampToEdgeWrapping;
+
+        this.textures.runeCircle = loadTerrainTex('rune_circle.png', () => RUNE_TEX);
+        this.textures.runeCircle.wrapS = THREE.ClampToEdgeWrapping;
+        this.textures.runeCircle.wrapT = THREE.ClampToEdgeWrapping;
+
+        const monTexKeys = [
+            'mon_dark_armor', 'mon_flesh', 'mon_bone', 'mon_slime',
+            'mon_magma', 'mon_rune_metal', 'mon_cloth', 'mon_chitin'
+        ];
+        monTexKeys.forEach(mk => {
+            const mt = loadTerrainTex(`${mk}.png`, () => CHAR_GRUNGE_TEX);
+            mt.wrapS = THREE.RepeatWrapping;
+            mt.wrapT = THREE.RepeatWrapping;
+            mt.repeat.set(2, 2);
+            this.textures[mk] = mt;
+        });
+
+        const skinIds = [
+            'dark_mage', 'astral_arcanist', 'emerald_warden',
+            'crimson_inquisitor', 'void_walker', 'solar_archon', 'cyber_phantom'
+        ];
+        skinIds.forEach(sid => {
+            const sk = loadTerrainTex(`skin_${sid}.png`, () => getSkinTexture(sid, true));
+            sk.wrapS = THREE.RepeatWrapping;
+            sk.wrapT = THREE.RepeatWrapping;
+            sk.repeat.set(2, 2);
+            this.textures['skin_' + sid] = sk;
+        });
+
+        if (typeof SharedMat !== 'undefined') {
+            if (SharedMat.crate) { SharedMat.crate.map = this.textures.crate; SharedMat.crate.needsUpdate = true; }
+            if (SharedMat.urn) { SharedMat.urn.map = this.textures.urn; SharedMat.urn.needsUpdate = true; }
+            if (SharedMat.enemyDark) {
+                SharedMat.enemyDark.map = this.textures.mon_dark_armor;
+                SharedMat.enemyDark.bumpMap = !AppSettings.useMobileLimits ? this.textures.mon_dark_armor : null;
+                SharedMat.enemyDark.needsUpdate = true;
+            }
+            if (SharedMat.golemArmor) { SharedMat.golemArmor.map = this.textures.mon_rune_metal; SharedMat.golemArmor.needsUpdate = true; }
+            if (SharedMat.golemShieldFrame) { SharedMat.golemShieldFrame.map = this.textures.mon_rune_metal; SharedMat.golemShieldFrame.needsUpdate = true; }
+            if (SharedMat.orcClub) { SharedMat.orcClub.map = this.textures.mon_dark_armor; SharedMat.orcClub.needsUpdate = true; }
+        }
+
         this.textures.water = loadTerrainTex('forest_water.png', () => this.createLiquidTexture('water'));
         this.textures.waterLava = loadTerrainTex('lava_water.png', () => this.createLiquidTexture('lava'));
         this.textures.waterIce = loadTerrainTex('ice_water.png', () => this.createCanvasNoise('#062c4d', '#38bdf8', 320));
