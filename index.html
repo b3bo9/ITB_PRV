@@ -104,7 +104,7 @@
             display: flex; align-items: center; justify-content: center; gap: 0.5rem;
         }
         .btn-cyber:hover { filter: brightness(1.18); }
-        .btn-cyber:active { transform: scale(0.97) !important; }
+        .btn-cyber:active { transform: none !important; filter: brightness(0.95); }
 
         @keyframes plasma-flow {
             0% { background-position: 0% 0%; }
@@ -247,7 +247,6 @@
         }
         #floorScreen .mastery-orb:hover,
         #floorScreen .mastery-orb.inspected {
-            transform: scale(1.18);
             border-color: #ffffff !important;
             color: #ffffff !important;
             box-shadow: 0 0 22px var(--c-main), 0 0 35px var(--c-main), inset 0 0 10px #ffffff !important;
@@ -286,10 +285,9 @@
         }
         #floorScreen .pillar-buy-btn.can-afford:hover {
             filter: brightness(1.25);
-            transform: translateY(-2px);
             box-shadow: 0 0 22px rgba(250, 204, 21, 0.6), 0 0 15px var(--c-main) !important;
         }
-        #floorScreen .pillar-buy-btn.can-afford:active { transform: scale(0.93); }
+        #floorScreen .pillar-buy-btn.can-afford:active { filter: brightness(0.95); }
         #floorScreen .pillar-buy-btn.locked {
             background: rgba(12, 15, 26, 0.75) !important;
             border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
@@ -376,7 +374,6 @@
         }
         #collectedRelicsModal .inv-mastery-orb.inv-selected,
         #collectedRelicsModal .inv-mastery-orb:hover {
-            transform: scale(1.14);
             border-color: #ffffff !important;
             color: #ffffff !important;
             box-shadow: 0 0 20px var(--c-main), 0 0 32px var(--c-main), inset 0 0 8px #ffffff !important;
@@ -393,7 +390,6 @@
         }
         #collectedRelicsModal .inv-relic-slot:hover,
         #collectedRelicsModal .inv-relic-slot.inv-selected {
-            transform: scale(1.06);
             border-color: #ffffff !important;
             box-shadow: 0 0 22px var(--r-glow, rgba(255, 255, 255, 0.45)), 0 0 0 2px rgba(255, 255, 255, 0.85) !important;
         }
@@ -835,20 +831,19 @@
         background: rgba(10, 12, 22, 0.9) !important; border-radius: 12px !important; border-width: 1.5px !important;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
     }
-    .relic-card:hover { transform: translateY(-3px); filter: brightness(1.15); }
-    .relic-card:active { transform: scale(0.98); }
+    .relic-card:hover { filter: brightness(1.15); }
+    .relic-card:active { filter: brightness(0.98); }
 
     #relicScreen .relic-card {
         background: linear-gradient(180deg, var(--r-bg-top, rgba(30, 41, 59, 0.92)) 0%, rgba(12, 16, 30, 0.92) 52%, var(--r-bg-bot, rgba(15, 23, 42, 0.96)) 100%) !important;
         border: 2px solid var(--r-border, rgba(255, 255, 255, 0.25)) !important;
         border-radius: 14px !important;
         box-shadow: 0 0 20px var(--r-glow, rgba(0, 0, 0, 0.5)), inset 0 0 16px var(--r-glow, rgba(255, 255, 255, 0.06)) !important;
-        transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
+        transition: border-color 0.22s ease, box-shadow 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
     }
     #relicScreen .relic-card.selected-relic {
         border-color: #ffffff !important;
         box-shadow: 0 0 28px var(--r-main, #fbbf24), 0 0 12px #ffffff, inset 0 0 22px var(--r-glow, rgba(251, 191, 36, 0.35)) !important;
-        transform: translateY(-5px) scale(1.02);
     }
     #relicScreen .relic-icon-frame {
         border-radius: 14px !important;
@@ -1748,10 +1743,13 @@ body.colorblind-mode .stack-dot.active.green {
         }
         body.mobile-landscape #collectedRelicsModal #relic-detail-box,
         body.force-rotate-landscape #collectedRelicsModal #relic-detail-box {
-            min-height: 50px !important;
+            height: 58px !important;
+            min-height: 58px !important;
+            max-height: 58px !important;
             padding: 5px 11px !important;
             margin: 0 !important;
             gap: 10px !important;
+            overflow: hidden !important;
         }
         body.mobile-landscape #collectedRelicsModal #inv-insp-icon-wrap,
         body.force-rotate-landscape #collectedRelicsModal #inv-insp-icon-wrap {
@@ -1766,6 +1764,10 @@ body.colorblind-mode .stack-dot.active.green {
         body.force-rotate-landscape #collectedRelicsModal #relic-detail-desc {
             font-size: 10.5px !important;
             line-height: 1.22 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
         }
         body.mobile-landscape #collectedRelicsModal #inventoryScrollBody,
         body.force-rotate-landscape #collectedRelicsModal #inventoryScrollBody {
@@ -1948,9 +1950,12 @@ body.colorblind-mode .stack-dot.active.green {
         }
         html body.mobile-landscape #reforgeSelectModal .modal-enter > div:nth-child(3),
         html body.force-rotate-landscape #reforgeSelectModal .modal-enter > div:nth-child(3) {
-            min-height: 48px !important;
+            height: 58px !important;
+            min-height: 58px !important;
+            max-height: 58px !important;
             padding: 5px 8px !important;
             margin-top: 5px !important;
+            overflow: hidden !important;
         }
         html body.mobile-landscape #reforgeSelectModal .modal-enter > div:last-child,
         html body.force-rotate-landscape #reforgeSelectModal .modal-enter > div:last-child {
@@ -2006,10 +2011,13 @@ body.colorblind-mode .stack-dot.active.green {
         html body.force-rotate-landscape #shop-inspector {
             grid-column: 2 / 3 !important;
             grid-row: 1 / 2 !important;
-            min-height: 0 !important;
+            height: 56px !important;
+            min-height: 56px !important;
+            max-height: 56px !important;
             padding: 5px 12px !important;
             margin: 0 !important;
             gap: 10px !important;
+            overflow: hidden !important;
         }
         html body.mobile-landscape #shop-insp-icon-wrap,
         html body.force-rotate-landscape #shop-insp-icon-wrap {
@@ -2025,6 +2033,10 @@ body.colorblind-mode .stack-dot.active.green {
             font-size: 10px !important;
             line-height: 1.2 !important;
             margin-top: 1px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
         }
         html body.mobile-landscape #shop-tree-container,
         html body.force-rotate-landscape #shop-tree-container {
@@ -3039,11 +3051,14 @@ body.colorblind-mode .stack-dot.active.green {
             font-size: clamp(1.5rem, 2.8vh, 3.7rem) !important;
         }
         html body.pc-desktop #shop-inspector {
-            min-height: clamp(72px, 9.5vh, 175px) !important;
+            height: clamp(84px, 10.5vh, 175px) !important;
+            min-height: clamp(84px, 10.5vh, 175px) !important;
+            max-height: clamp(84px, 10.5vh, 175px) !important;
             padding: clamp(10px, 1.5vh, 28px) clamp(14px, 1.8vw, 36px) !important;
             gap: clamp(12px, 1.4vw, 30px) !important;
             margin: 0 !important;
             border-radius: clamp(12px, 1.5vh, 24px) !important;
+            overflow: hidden !important;
         }
         html body.pc-desktop #shop-insp-icon-wrap {
             width: clamp(46px, 6vh, 108px) !important;
@@ -3062,6 +3077,10 @@ body.colorblind-mode .stack-dot.active.green {
         html body.pc-desktop #shop-insp-desc {
             font-size: clamp(0.75rem, 1.35vh, 1.6rem) !important;
             margin-top: clamp(3px, 0.5vh, 10px) !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
         }
         html body.pc-desktop #shop-tree-container {
             display: grid !important;
@@ -3302,9 +3321,12 @@ body.colorblind-mode .stack-dot.active.green {
             height: clamp(38px, 4.8vh, 76px) !important;
         }
         html body.pc-desktop #collectedRelicsModal #relic-detail-box {
-            min-height: clamp(72px, 9.2vh, 168px) !important;
+            height: clamp(84px, 10.2vh, 168px) !important;
+            min-height: clamp(84px, 10.2vh, 168px) !important;
+            max-height: clamp(84px, 10.2vh, 168px) !important;
             padding: clamp(10px, 1.5vh, 26px) clamp(14px, 1.8vw, 34px) !important;
             gap: clamp(12px, 1.5vw, 30px) !important;
+            overflow: hidden !important;
         }
         html body.pc-desktop #collectedRelicsModal #inv-insp-icon-wrap {
             width: clamp(50px, 6.6vh, 114px) !important;
@@ -3318,6 +3340,10 @@ body.colorblind-mode .stack-dot.active.green {
         }
         html body.pc-desktop #collectedRelicsModal #relic-detail-desc {
             font-size: clamp(0.76rem, 1.35vh, 1.62rem) !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
         }
         @media (min-width: 760px) {
             html body.pc-desktop #collectedRelicsModal #inventoryScrollBody {
@@ -3620,11 +3646,21 @@ body.colorblind-mode .stack-dot.active.green {
             width: clamp(52px, 6.2vh, 110px) !important;
             height: clamp(52px, 6.2vh, 110px) !important;
         }
+        html body.pc-desktop #reforgeSelectModal .modal-enter > div:nth-child(3) {
+            height: clamp(88px, 10.5vh, 170px) !important;
+            min-height: clamp(88px, 10.5vh, 170px) !important;
+            max-height: clamp(88px, 10.5vh, 170px) !important;
+            overflow: hidden !important;
+        }
         html body.pc-desktop #reforge-modal-name {
             font-size: clamp(0.84rem, 1.5vh, 1.75rem) !important;
         }
         html body.pc-desktop #reforge-modal-desc {
             font-size: clamp(0.76rem, 1.35vh, 1.6rem) !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
         }
         html body.pc-desktop #reforgeSelectModal .modal-enter > div:last-child button {
             min-height: clamp(48px, 6vh, 100px) !important;
@@ -4000,7 +4036,7 @@ body.colorblind-mode .stack-dot.active.green {
                 </div>
             </div>
 
-            <div id="shop-inspector" class="w-full px-3.5 py-2.5 flex items-center gap-3 rounded-xl bg-slate-950/85 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.2)] shrink-0 min-h-[64px] my-1.5 transition-all duration-200">
+            <div id="shop-inspector" class="w-full px-3.5 py-2.5 flex items-center gap-3 rounded-xl bg-slate-950/85 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.2)] shrink-0 h-[80px] sm:h-[88px] overflow-hidden my-1.5 transition-colors duration-200">
                 <div id="shop-insp-icon-wrap" class="w-11 h-11 rounded-full bg-black border-2 border-amber-400 flex items-center justify-center shrink-0 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.5)]">
                     <i id="shop-insp-icon" class="fa-solid fa-wand-magic-sparkles text-base"></i>
                 </div>
@@ -4009,7 +4045,7 @@ body.colorblind-mode .stack-dot.active.green {
                         <span id="shop-insp-title" class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-300 truncate">Poteri Esclusivi (Grado 5 & 10)</span>
                         <span id="shop-insp-badge" class="text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-400/50 shrink-0">Tocca un Sigillo</span>
                     </div>
-                    <p id="shop-insp-desc" class="text-[10px] sm:text-xs text-gray-100 font-bold leading-snug mt-1 m-0">Riempi i condotti di plasma e tocca i medaglioni per scoprire i poteri supremi.</p>
+                    <p id="shop-insp-desc" class="text-[10px] sm:text-xs text-gray-100 font-bold leading-snug mt-1 m-0 line-clamp-2 overflow-hidden">Riempi i condotti di plasma e tocca i medaglioni per scoprire i poteri supremi.</p>
                 </div>
             </div>
 
@@ -4115,9 +4151,9 @@ body.colorblind-mode .stack-dot.active.green {
           <div id="reforgeSelectGrid" class="grid grid-cols-6 gap-1.5 sm:gap-2 overflow-y-auto custom-scrollbar p-1 justify-items-center content-start shrink-0 relative z-10">
             </div>
 
-            <div class="mt-3 bg-slate-950/90 border-2 border-purple-400/45 rounded-xl p-3 min-h-[88px] shadow-[0_0_18px_rgba(168,85,247,0.2)] flex flex-col justify-center items-center text-center shrink-0 relative z-10">
-                <h3 id="reforge-modal-name" class="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-widest mb-1">NESSUNA SELEZIONE</h3>
-                <p id="reforge-modal-desc" class="text-[11px] sm:text-xs text-gray-500 font-bold leading-snug m-0">Tocca un'icona qui sopra per visualizzarne l'effetto.</p>
+            <div class="mt-3 bg-slate-950/90 border-2 border-purple-400/45 rounded-xl p-3 h-[96px] sm:h-[104px] shadow-[0_0_18px_rgba(168,85,247,0.2)] flex flex-col justify-center items-center text-center shrink-0 relative z-10 overflow-hidden">
+                <h3 id="reforge-modal-name" class="text-xs sm:text-sm font-black text-gray-400 uppercase tracking-widest mb-1 truncate max-w-full">NESSUNA SELEZIONE</h3>
+                <p id="reforge-modal-desc" class="text-[11px] sm:text-xs text-gray-500 font-bold leading-snug m-0 line-clamp-3 overflow-hidden">Tocca un'icona qui sopra per visualizzarne l'effetto.</p>
             </div>
 
             <div class="flex gap-3 mt-4 w-full shrink-0 relative z-10">
@@ -4157,7 +4193,7 @@ body.colorblind-mode .stack-dot.active.green {
                 </div>
             </div>
 
-            <div id="relic-detail-box" class="w-full px-3.5 py-2.5 flex items-center gap-3 rounded-xl bg-slate-950/90 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.18)] shrink-0 min-h-[64px] transition-all duration-200 relative z-10">
+            <div id="relic-detail-box" class="w-full px-3.5 py-2.5 flex items-center gap-3 rounded-xl bg-slate-950/90 border-2 border-amber-400/50 shadow-[0_0_20px_rgba(251,191,36,0.18)] shrink-0 h-[82px] sm:h-[90px] overflow-hidden transition-colors duration-200 relative z-10">
                 <div id="inv-insp-icon-wrap" class="w-12 h-12 sm:w-13 sm:h-13 rounded-xl bg-black border-2 border-amber-400 flex items-center justify-center shrink-0 text-amber-400 shadow-[0_0_14px_rgba(251,191,36,0.4)] overflow-hidden relative">
                     <i id="inv-insp-icon" class="fa-solid fa-wand-magic-sparkles text-lg"></i>
                     <img id="inv-insp-img" src="" alt="" class="hidden w-full h-full object-cover relative z-10" onerror="window.handleRelicImgError(this, false)">
@@ -4167,15 +4203,15 @@ body.colorblind-mode .stack-dot.active.green {
                         <h3 id="relic-detail-name" class="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-300 truncate m-0">Arsenale Eroe</h3>
                         <span id="relic-detail-badge" class="text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-200 border border-amber-400/50 shrink-0">Ispettore</span>
                     </div>
-                    <p id="relic-detail-desc" class="text-[11px] sm:text-xs text-gray-100 font-bold leading-snug mt-1 m-0">Tocca un pilastro Stat, una Maestria o una Reliquia per scoprirne dettagli ed effetti.</p>
+                    <p id="relic-detail-desc" class="text-[11px] sm:text-xs text-gray-100 font-bold leading-snug mt-1 m-0 line-clamp-2 overflow-hidden">Tocca un pilastro Stat, una Maestria o una Reliquia per scoprirne dettagli ed effetti.</p>
                 </div>
             </div>
 
             <div id="inventoryScrollBody" class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[1.06fr_0.94fr] gap-2.5 sm:gap-3.5 overflow-hidden relative z-10">
                 <div id="inv-stats-section" class="bg-slate-950/85 border-2 border-cyan-400/35 rounded-xl p-2.5 sm:p-3.5 flex flex-col min-h-0 shadow-[inset_0_0_24px_rgba(0,0,0,0.65)]">
                     <div class="flex items-center justify-between gap-2 border-b border-cyan-500/25 pb-2 mb-2 shrink-0">
-                        <span class="text-[11px] sm:text-xs font-display font-black text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-bolt text-amber-300"></i> Statistiche &amp; Maestrie
+                        <span class="text-[11px] sm:text-xs font-display font-black text-cyan-300 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                            <i class="fa-solid fa-bolt text-amber-300"></i> Statistiche
                         </span>
                         <span id="inventoryPlayerSummary" class="text-[9px] sm:text-[10px] font-black text-cyan-100 bg-cyan-950/70 border border-cyan-400/45 px-2.5 py-0.5 rounded-md uppercase tracking-wider truncate">Piano 1 • Lv.1</span>
                     </div>
@@ -10361,6 +10397,7 @@ const UIManager = {
                 : '<strong class="text-white">W A S D</strong> per muoverti, <strong class="text-white">Mouse + Click SX</strong> per mirare e sparare, <strong class="text-fuchsia-300">Click DX</strong> per l\'abilità suprema.');
     },
     showModal(id) {
+        if (typeof Game !== 'undefined' && Game.state === 'MENU' && performance.now() < (window._mainMenuLockedUntil || 0)) return;
         AudioEngine.playClick();
         document.getElementById(id).classList.remove('hidden');
         if(id === 'optionsModal') this.updateOptionsUI();
@@ -10485,21 +10522,27 @@ const UIManager = {
 
         const pl = Game.player;
         const liveValues = { hp: '—', dmg: '—', speed: '—', atkSpeed: '—', crit: '—' };
-        let summaryText = `Piano ${Game.floor || 1}`;
+        let summaryText = `P.${Game.floor || 1}`;
+        let armorPts = 0;
+        let miserHoardBonus = 0;
         if (pl && pl.stats && pl.modifiers) {
-            const minD = Math.round(pl.stats.minDmg * pl.modifiers.dmgMult);
-            const maxD = Math.round(pl.stats.maxDmg * pl.modifiers.dmgMult);
+            miserHoardBonus = pl.modifiers.miserPact ? Math.min(0.30, Math.floor((Game.coins || 0) / 25) * 0.03) : 0;
+            const minD = Math.round(pl.stats.minDmg * pl.modifiers.dmgMult * (1 + miserHoardBonus));
+            const maxD = Math.round(pl.stats.maxDmg * pl.modifiers.dmgMult * (1 + miserHoardBonus));
             const spdPct = Math.round(pl.modifiers.speedMult * 100);
             const atkSec = (pl.baseAttackSpeed * pl.modifiers.atkSpeedMult * (1 + pl.modifiers.bonusAtkSpeed) * (pl.modifiers.atkSpeedPenalty || 1)).toFixed(1);
             const critPct = Math.min(100, Math.round((pl.modifiers.critChance + pl.modifiers.bonusCritChance) * 100));
+            armorPts = pl.getEffectiveArmor ? pl.getEffectiveArmor() : 0;
             liveValues.hp = `${Math.ceil(pl.stats.hp)}/${Math.ceil(pl.stats.maxHp)}`;
             liveValues.dmg = `${minD}-${maxD}`;
             liveValues.speed = `${spdPct}%`;
             liveValues.atkSpeed = `${atkSec}/s`;
             liveValues.crit = `${critPct}%`;
-            summaryText = `Piano ${Game.floor || 1} • Lv.${pl.level || 1} • Crit ×${(pl.modifiers.critDmgMult || 1.5).toFixed(2)}`;
+            summaryText = `P.${Game.floor || 1} • Lv.${pl.level || 1} • Arm.${armorPts} • Crit ×${(pl.modifiers.critDmgMult || 1.5).toFixed(2)}`;
         }
         if (summaryBadge) summaryBadge.innerText = summaryText;
+
+        const shortLabels = { hp: 'VITA', dmg: 'DANNO', speed: 'VEL', atkSpeed: 'RITMO', crit: 'CRIT' };
 
         // Sezione Statistiche & Peak stile Forgia dell'Ascesa (5 rami x barra plasma + 2 tier orb)
         let unlockedPeaks = 0;
@@ -10511,6 +10554,7 @@ const UIManager = {
                 const lvl = (ShopSystem.levels && ShopSystem.levels[key]) ? ShopSystem.levels[key] : 0;
                 const pct = Math.min(100, (lvl / 10) * 100);
                 const isAlmost = (lvl === 4 || lvl === 9);
+                const shortLbl = shortLabels[key] || b.short;
 
                 const col = document.createElement('div');
                 col.className = `inv-stat-pillar flex flex-col items-center justify-between p-1.5 sm:p-2 relative overflow-visible cursor-pointer${isAlmost ? ' almost-mastery' : ''}${lvl >= 10 ? ' mastery-maxed' : ''}`;
@@ -10589,11 +10633,18 @@ const UIManager = {
                 meta.innerHTML = `
                     <div class="flex items-center justify-center gap-1 max-w-full">
                         <i class="fa-solid ${b.icon} text-[10px] sm:text-xs shrink-0" style="color:${b.color}; filter:drop-shadow(0 0 5px ${b.color});"></i>
-                        <span class="text-[8.5px] sm:text-[10px] font-black uppercase tracking-wide text-white truncate">${b.short}</span>
+                        <span class="text-[8.5px] sm:text-[10px] font-black uppercase tracking-wide text-white truncate">${shortLbl}</span>
                     </div>
                     <span class="inv-pillar-val text-[9px] sm:text-[11px] font-display font-black text-amber-200 mt-0.5 truncate max-w-full">${liveValues[key]}</span>
-                    <span class="text-[7.5px] sm:text-[8.5px] font-bold text-gray-300/80 uppercase">Lv.${lvl}</span>
                 `;
+
+                const statDescs = {
+                    hp: `Salute: ${liveValues.hp} • Armatura: ${armorPts} pt (-${(armorPts * 1.5).toFixed(1).replace('.0','')}% danni subiti).`,
+                    dmg: (pl && pl.modifiers) ? `Danno per colpo: ${liveValues.dmg} (Bonus: +${Math.round(((pl.modifiers.dmgMult * (1 + miserHoardBonus)) - 1) * 100)}%).` : `Danno per colpo: ${liveValues.dmg}.`,
+                    speed: `Velocità movimento: ${liveValues.speed} rispetto alla base.`,
+                    atkSpeed: `Cadenza di tiro: ${liveValues.atkSpeed} colpi al secondo.`,
+                    crit: (pl && pl.modifiers) ? `Prob. Critico: ${liveValues.crit} • Moltiplicatore: ×${(pl.modifiers.critDmgMult || 1.5).toFixed(2)}.` : `Prob. Critico: ${liveValues.crit}.`
+                };
 
                 const handlePillarSelect = () => selectAndInspect(null, {
                     accent: b.color,
@@ -10602,7 +10653,7 @@ const UIManager = {
                     title: `${b.name} • Lv.${lvl}`,
                     badge: `Valore: ${liveValues[key]}`,
                     badgeClass: 'text-[8px] sm:text-[9px] font-black uppercase px-2 py-0.5 rounded bg-white/10 text-white border border-white/30 shrink-0',
-                    desc: `Maestria Lv.5: ${b.tier1.name}. Maestria Lv.10: ${b.tier2.name}.`,
+                    desc: statDescs[key] || `Lv.${lvl}`,
                     muted: false
                 });
                 col.onclick = handlePillarSelect;
@@ -10820,25 +10871,25 @@ const RelicSystem = {
         { id: 'r6', name: "Sovraccarico Cinetico", desc: "Mentre lo Scudo Cinetico è attivo, la tua Velocità d'Attacco aumenta del +30%.", rarity: "rare", image: "icona_sovraccarico_cinetico.png", icon: "fa-bolt", apply: (p) => { p.modifiers.shieldAtkSpeedBonus = 0.30; } },
         { id: 'c3', name: "Piuma Spettrale", desc: "Dopo uno Scatto ottieni 0.4s di invulnerabilità e +15% Velocità di movimento per 2s.", rarity: "rare", image: "icona_piuma.png", icon: "fa-feather", apply: (p) => { p.modifiers.dashInvul = true; p.modifiers.dashSpeedBuff = true; } },
 
-        { id: 'r2', name: "Calzari di Mercurio", desc: "Cooldown dello Scatto ridotto del -20%. Per 3s dopo lo scatto subisci -15% danni.", rarity: "epic", image: "icona_mercurio.png", icon: "fa-shoe-prints", apply: (p) => { p.modifiers.dashCooldownMult -= 0.20; p.modifiers.dashResist = true; } },
+        { id: 'r2', name: "Calzari di Mercurio", desc: "Cooldown dello Scatto -20%. Per 3s dopo lo scatto ottieni +10 Armatura.", rarity: "epic", image: "icona_mercurio.png", icon: "fa-shoe-prints", apply: (p) => { p.modifiers.dashCooldownMult -= 0.20; p.modifiers.dashResist = true; } },
         { id: 'e1', name: "Ritmo di Battaglia", desc: "La Combo sale di +2 a colpo e dura +1.5s prima di decadere.", rarity: "epic", image: "icona_ritmo_di_battaglia.png", icon: "fa-drum", apply: (p) => { p.modifiers.comboStep += 1; p.modifiers.comboDecayAdd += 1.5; } },
-        { id: 'e4', name: "Sovraccarico Etereo", desc: "Durante l'Ascensione (Ultimate), ogni 10 nemici uccisi estende la durata dell'Ultimate di +0.5s.", rarity: "epic", image: "icona_sovraccarico.png", icon: "fa-bolt-lightning", apply: (p) => { p.modifiers.ultDurationPerKill = true; } },
+        { id: 'e4', name: "Sovraccarico Etereo", desc: "Durante l'Ascensione, ogni 5 kill (+0.5s) o ogni 10 critici sul Boss (+0.25s) estende la durata dell'Ultimate.", rarity: "epic", image: "icona_sovraccarico.png", icon: "fa-bolt-lightning", apply: (p) => { p.modifiers.ultDurationPerKill = true; } },
         { id: 'e5', name: "Sovraccarico Sismico", desc: "Attivare lo Scudo Cinetico genera un'onda d'urto immediata che respinge i nemici e li stordisce per 1s.", rarity: "epic", image: "icona_zanna_del_vampiro.png", icon: "fa-wifi", apply: (p) => { p.modifiers.seismicShield = true; } },
         { id: 'e9', name: "Gemelli Cinetici", desc: "Mentre lo Scudo Cinetico è attivo, spari 2 proiettili paralleli (ciascuno infligge il 65% del danno).", rarity: "epic", image: "icona_gemelli_cinetici.png", icon: "fa-clone", apply: (p) => { p.modifiers.twinKinetic = true; } },
-        { id: 'e7', name: "Lama del Vento", desc: "Subito dopo uno Scatto, i tuoi prossimi 2 attacchi sono Colpi Critici garantiti.", rarity: "epic", image: "icona_lama_vento.png", icon: "fa-wind", apply: (p) => { p.modifiers.dashCritsEnabled = true; } },
-        { id: 'l3', name: "Patto Ascetico", desc: "La Ultimate si ricarica passivamente da sola (+2% al sec), ma la sua durata è ridotta del -30%.", rarity: "epic", image: "icona_patto_ascetico.png", icon: "fa-link", apply: (p) => { p.modifiers.passiveUltCharge = true; p.modifiers.ultDurationPenalty = 0.70; } },
+        { id: 'e7', name: "Lama del Vento", desc: "Subito dopo uno Scatto, i prossimi 3 attacchi sono Critici garantiti con +20% Danno Critico bonus.", rarity: "epic", image: "icona_lama_vento.png", icon: "fa-wind", apply: (p) => { p.modifiers.dashCritsEnabled = true; } },
+        { id: 'l3', name: "Patto Ascetico", desc: "La Ultimate si ricarica passivamente da sola (+2.5% al sec), ma la sua durata è ridotta del -15%.", rarity: "epic", image: "icona_patto_ascetico.png", icon: "fa-link", apply: (p) => { p.modifiers.passiveUltCharge = true; p.modifiers.ultDurationPenalty = 0.85; } },
         { id: 'r3', name: "Scudo dell'Egidio", desc: "Lo Scudo Cinetico si attiva automaticamente gratis ogni 15 secondi.", rarity: "epic", image: "icona_scudo_dell_egidio.png", icon: "fa-shield-halved", apply: (p) => { p.modifiers.shieldActive = true; } },
 
-        { id: 'e2', name: "Riciclo Magico", desc: "Combo/Overdrive non consumano l'ultima essenza e lanciano 2 dardi a ricerca (75% Danno).", rarity: "legendary", image: "icona_riciclo_magico.png", icon: "fa-recycle", apply: (p) => { p.modifiers.keepEssenceOnCombo = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-       { id: 'l1', name: "Follia Omicida", desc: "Danni Critici 2.25x e +15% Prob. Critico, ma Velocità d'Attacco ridotta del -12%.", rarity: "legendary", image: "icona_follia_omicida.png", icon: "fa-skull", apply: (p) => { p.modifiers.critDmgMult = 2.25; p.modifiers.bonusCritChance += 0.15; p.modifiers.atkSpeedPenalty = 0.88; p.modifiers.homicidalFrenzy = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-        { id: 'l5', name: "Maestria del Flow", desc: "Cap Combo 200. Se >=50: +25% danni, perforazione +1 e +12% danni subiti. Se <50: -12% danni subiti.", rarity: "legendary", image: "icona_maestria_del_flow.png", icon: "fa-infinity", apply: (p) => { p.modifiers.flowMastery = true; p.modifiers.comboDecayRate *= 0.5; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'e2', name: "Riciclo Magico", desc: "Combo e Overdrive conservano l'ultima essenza e lanciano 3 dardi a ricerca (150% Danno).", rarity: "legendary", image: "icona_riciclo_magico.png", icon: "fa-recycle", apply: (p) => { p.modifiers.keepEssenceOnCombo = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'l1', name: "Follia Omicida", desc: "Danni Critici +0.75x e +15% Prob. Critico, ma Velocità d'Attacco ridotta del -12%.", rarity: "legendary", image: "icona_follia_omicida.png", icon: "fa-skull", apply: (p) => { p.modifiers.critDmgMult += 0.75; p.modifiers.bonusCritChance += 0.15; p.modifiers.atkSpeedPenalty = 0.88; p.modifiers.homicidalFrenzy = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'l5', name: "Maestria del Flow", desc: "Cap Combo 200. Se >=50: +25% danni, perforazione +1 e -8 Armatura. Se <50: +8 Armatura.", rarity: "legendary", image: "icona_maestria_del_flow.png", icon: "fa-infinity", apply: (p) => { p.modifiers.flowMastery = true; p.modifiers.comboDecayRate *= 0.5; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
         { id: 'e6', name: "Batteria a Ioni", desc: "Lo Scudo dura +1s, riduce i danni del 65% e folgora i nemici vicini.", rarity: "legendary", image: "icona_batteria_ioni.png", icon: "fa-battery-full", apply: (p) => { p.modifiers.shieldDurationAdd += 1.0; p.modifiers.ionBattery = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-        { id: 'e8', name: "Patto dell'Avaro", desc: "Le monete non spariscono e donano +4% Vel. Mov/Atk e +3% Danno per 3s (max 5 stack).", rarity: "legendary", image: "icona_patto_avaro.png", icon: "fa-sack-dollar", apply: (p) => { p.modifiers.miserPact = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-       { id: 'l2', name: "Lama del Giudizio", desc: "[Mietitore d'Anime] +75% danni ai nemici sotto il 30% HP (+25% ai Boss <20% HP) e penetra il 50% degli scudi.", rarity: "legendary", image: "icona_lama_del_giudizio.png", icon: "fa-gavel", apply: (p) => { p.modifiers.executioner = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-        { id: 'l4', name: "Sete di Sangue Eterna", desc: "[Esplosione Cremisi] Ogni kill cura 1% HP (cd 0,5s, fino a +8% Scudo Sangue a vita piena), ma -15% HP Massimi.", rarity: "legendary", image: "icona_sete_di_sangue_eterna.png", icon: "fa-droplet", apply: (p) => { p.modifiers.bloodthirst = true; p.stats.maxHp = Math.floor(p.stats.maxHp * 0.85); if (p.stats.hp > p.stats.maxHp) p.stats.hp = p.stats.maxHp; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-        { id: 'e3', name: "Passo Infernale", desc: "Lo scatto lascia fuoco che brucia i nemici (+20% danni subiti). Atterraggio meteorico a inizio piano.", rarity: "legendary", image: "icona_passo_infernale.png", icon: "fa-fire-flame-curved", apply: (p) => { p.modifiers.fireTrail = true; p.modifiers.fireTrailDebuff = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-        { id: 'l7', name: "Impatto Tonante", desc: "Lo scatto scatena 3 fulmini che danneggiano e stordiscono i nemici. Atterraggio elettrico a inizio piano.", rarity: "legendary", image: "icona_impatto_tonante.png", icon: "fa-bolt", apply: (p) => { p.modifiers.dashLightning = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-        { id: 'l6', name: "Aegis del Guardiano", desc: "Lo Scudo esplode al termine in una Nova Arcana (max 12 stack, fino a 2.5x Danno Base).", rarity: "legendary", image: "fa_shieldx.png", icon: "fa-shield", apply: (p) => { p.modifiers.explosiveShield = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } }
+        { id: 'e8', name: "Patto dell'Avaro", desc: "Le monete non spariscono (+4% Vel/Atk e +3% Danno per 3s, max 5x) e danno +3% Danno ogni 25 monete (max +30%).", rarity: "legendary", image: "icona_patto_avaro.png", icon: "fa-sack-dollar", apply: (p) => { p.modifiers.miserPact = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'l2', name: "Lama del Giudizio", desc: "[Mietitore d'Anime] +75% danni ai nemici sotto il 30% HP (+25% ai Boss <20% HP) e penetra il 50% degli scudi.", rarity: "legendary", image: "icona_lama_del_giudizio.png", icon: "fa-gavel", apply: (p) => { p.modifiers.executioner = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'l4', name: "Sete di Sangue Eterna", desc: "[Esplosione Cremisi] Ogni kill cura 1.5% HP (cd 0.5s, fino a +15% Scudo Sangue a vita piena), ma -15% HP Massimi.", rarity: "legendary", image: "icona_sete_di_sangue_eterna.png", icon: "fa-droplet", apply: (p) => { p.modifiers.bloodthirst = true; p.stats.maxHp = Math.floor(p.stats.maxHp * 0.85); if (p.stats.hp > p.stats.maxHp) p.stats.hp = p.stats.maxHp; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'e3', name: "Passo Infernale", desc: "La scia dello scatto scala col Danno, brucia i nemici e infligge loro +20% danni da ogni fonte. Atterraggio meteorico.", rarity: "legendary", image: "icona_passo_infernale.png", icon: "fa-fire-flame-curved", apply: (p) => { p.modifiers.fireTrail = true; p.modifiers.fireTrailDebuff = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'l7', name: "Impatto Tonante", desc: "Lo scatto scatena 3 fulmini (100% Danno) che stordiscono i nemici. Atterraggio elettrico a inizio piano.", rarity: "legendary", image: "icona_impatto_tonante.png", icon: "fa-bolt", apply: (p) => { p.modifiers.dashLightning = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
+        { id: 'l6', name: "Aegis del Guardiano", desc: "A fine Scudo esplode in una Nova Arcana (da 1.75x a 4.0x Danno, max 12 stack) e cura l'1.5% HP per colpo assorbito.", rarity: "legendary", image: "fa_shieldx.png", icon: "fa-shield", apply: (p) => { p.modifiers.explosiveShield = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } }
     ],
     getRandomRarity() {
         let r = Math.random() * 100;
@@ -11193,11 +11244,11 @@ const RelicSystem = {
                     let box = document.getElementById(`reforge-choice-${j}`);
                     if (box) {
                         if (j === index) {
-                            box.classList.remove('opacity-40', 'scale-95');
-                            box.classList.add('scale-105', 'border-white', 'shadow-[0_0_15px_rgba(168,85,247,0.9)]');
+                            box.classList.remove('opacity-40');
+                            box.classList.add('border-white', 'shadow-[0_0_15px_rgba(168,85,247,0.9)]');
                         } else {
-                            box.classList.remove('scale-105', 'border-white', 'shadow-[0_0_15px_rgba(168,85,247,0.9)]');
-                            box.classList.add('opacity-40', 'scale-95');
+                            box.classList.remove('border-white', 'shadow-[0_0_15px_rgba(168,85,247,0.9)]');
+                            box.classList.add('opacity-40');
                         }
                     }
                 });
@@ -15427,6 +15478,12 @@ class Hazard {
                     let innerRad = Math.max(0, this.radius - e.radius - 15);
 
                     if (distSq <= outerRad * outerRad && distSq >= innerRad * innerRad) {
+                        if (this.type === 'nova_ring' && this.damage > 0 && Game.player && Game.player.modifiers.fireTrailDebuff && this.ringMat && this.ringMat.color && this.ringMat.color.getHex() === 0xff3300) {
+                            e.fireDebuffTimer = 3.0;
+                            let baseAtk = ((Game.player.stats.minDmg + Game.player.stats.maxDmg) * 0.5) * Game.player.modifiers.dmgMult;
+                            e.obeliskBurnDps = baseAtk / 5.0;
+                            e.obeliskBurnTimer = 4.0;
+                        }
                         e.takeDamage(this.damage, Game.player, true, true);
                         e.slowedTimer = 2.0;
                         if (this.type === 'seismic_nova_ring') e.frozenTimer = 1.0;
@@ -15493,16 +15550,16 @@ class Hazard {
                             let dx = this.x - e.x; let dy = this.y - e.y;
                             let radSum = this.radius + e.radius;
                             if ((dx*dx + dy*dy) < (radSum * radSum)) {
-                                // FIX EXPLOIT: Passiamo 'hazard' invece di Game.player per i danni Over-Time!
-                                // Questo impedisce alle pozze velenose/infuocate di aumentare il contatore delle Combo in modo passivo.
-                                e.takeDamage(this.damage, 'hazard', false, false);
-                                if(this.type === 'poison') e.slowedTimer = 2.0;
                                 if(this.type === 'fire' && Game.player && Game.player.modifiers.fireTrailDebuff) {
                                     e.fireDebuffTimer = 3.0;
                                     let baseAtk = ((Game.player.stats.minDmg + Game.player.stats.maxDmg) * 0.5) * Game.player.modifiers.dmgMult;
                                     e.obeliskBurnDps = baseAtk / 5.0;
                                     e.obeliskBurnTimer = 4.0;
                                 }
+                                // FIX EXPLOIT: Passiamo 'hazard' invece di Game.player per i danni Over-Time!
+                                // Questo impedisce alle pozze velenose/infuocate di aumentare il contatore delle Combo in modo passivo.
+                                e.takeDamage(this.damage, 'hazard', false, false);
+                                if(this.type === 'poison') e.slowedTimer = 2.0;
                                 this.hitCooldown.set(e.id, Game.playTime + 0.5);
                             }
                         }
@@ -24466,11 +24523,11 @@ class Entity {
 
             if (this !== Game.player && Game.player && Game.player.modifiers.bloodthirst) {
                 let p = Game.player;
-                if (!p._lastBloodHealTime || Game.playTime - p._lastBloodHealTime >= 0.6) {
+                if (!p._lastBloodHealTime || Game.playTime - p._lastBloodHealTime >= 0.5) {
                     p._lastBloodHealTime = Game.playTime;
                     p._bloodHaloPulse = 0.30;
-                   let heal = p.stats.maxHp * 0.01 * Game.getHealScale();
-                    let maxBloodShield = p.stats.maxHp * 0.08;
+                   let heal = p.stats.maxHp * 0.015 * Game.getHealScale();
+                    let maxBloodShield = p.stats.maxHp * 0.15;
                     let missingHp = p.stats.maxHp - p.stats.hp;
                     if (missingHp > 0) {
                         let actualHeal = Math.min(missingHp, heal);
@@ -24923,9 +24980,9 @@ class Player extends Entity {
 
     fireGrimoireBolts() {
         if (!this.modifiers.keepEssenceOnCombo) return;
-        let baseDmg = ((this.stats.minDmg + this.stats.maxDmg) * 0.5) * 0.75 * this.modifiers.dmgMult;
-        for (let i = 0; i < 2; i++) {
-            let a = this.angle + (i === 0 ? -0.35 : 0.35);
+        let baseDmg = ((this.stats.minDmg + this.stats.maxDmg) * 0.5) * 1.50 * this.modifiers.dmgMult;
+        for (let i = 0; i < 3; i++) {
+            let a = this.angle + (i - 1) * 0.35;
             let p = Game.getProjectile();
             p.spawn(this.x, this.y, a, 750, baseDmg, 'player', 'homing_arrow', false, false);
             p.canInfect = false;
@@ -25748,9 +25805,14 @@ class Player extends Entity {
 
                 if (this.modifiers.explosiveShield) {
                     let stacks = Math.min(this.shieldAbsorbed, 12);
-                    let mult = 1.0 + (stacks / 12) * 1.5;
+                    let mult = 1.75 + (stacks / 12) * 2.25;
                     let totalDmg = this.stats.maxDmg * mult * this.modifiers.dmgMult;
                     let totalRadius = Math.min(160 + stacks * 18, 376);
+
+                    if (stacks > 0) {
+                        let aegisHeal = this.stats.maxHp * (0.015 * stacks) * Game.getHealScale();
+                        this.stats.hp = Math.min(this.stats.maxHp, this.stats.hp + aegisHeal);
+                    }
 
                     Game.getHazard().spawn(this.x, this.y, totalRadius, 0.5, totalDmg, 0xc084fc, 'nova_ring');
                     let n1 = Game.getParticle(); n1.spawn(this.x, 20, this.y, SharedMat.spritePink, 'nova'); n1.baseSize = totalRadius * 0.8;
@@ -25815,7 +25877,7 @@ class Player extends Entity {
             }
         }
 
-        if (this.modifiers.passiveUltCharge && !Game.ultimateActive) { Game.addUltimateCharge(2.0 * dt); }
+        if (this.modifiers.passiveUltCharge && !Game.ultimateActive) { Game.addUltimateCharge(2.5 * dt); }
 
         if (this.shieldHoTTickTimer === undefined) this.shieldHoTTickTimer = 0;
 
@@ -26511,8 +26573,8 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             let squash = 1.0 - (stretchCurve * 0.4);
             this.mesh.scale.set(squash * massScale, squash * massScale, stretch * massScale);
 
-            if (this.essence === 'red' && Game.frameCount % 8 === 0) Game.getHazard().spawn(this.x, this.y, 25 * massScale, 3.0, this.stats.maxDmg * 0.5, ESSENCE_COLORS.red, 'fire');
-            if (this.modifiers.fireTrail && Game.frameCount % 5 === 0) Game.getHazard().spawn(this.x, this.y, 24 * massScale, 2.0, this.stats.maxDmg * 0.8, 0xffaa00, 'fire');
+            if (this.essence === 'red' && Game.frameCount % 8 === 0) Game.getHazard().spawn(this.x, this.y, 25 * massScale, 3.0, this.stats.maxDmg * 0.5 * this.modifiers.dmgMult, ESSENCE_COLORS.red, 'fire');
+            if (this.modifiers.fireTrail && Game.frameCount % 5 === 0) Game.getHazard().spawn(this.x, this.y, 24 * massScale, 2.0, this.stats.maxDmg * 0.8 * this.modifiers.dmgMult, 0xffaa00, 'fire');
             this.move(Math.cos(this.dashAngle), Math.sin(this.dashAngle), dt * 4.0);
             this.updatePitRipplesUniform(dt, true, Math.cos(this.dashAngle), Math.sin(this.dashAngle), inPit, isIce);
             if (inPit) {
@@ -26590,7 +26652,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
                         for (let j = 0; j < nearby.length; j++) {
                             let e = nearby[j];
                             if (!e.dead && MathUtils.distanceSq(pt, e) < 120*120) {
-                                e.takeDamage(this.stats.maxDmg * 0.50 * this.modifiers.dmgMult, this, false, false);
+                                e.takeDamage(this.stats.maxDmg * 1.0 * this.modifiers.dmgMult, this, false, false);
                                 e.frozenTimer = 1.8;
                                 Game.getParticle().spawn(e.x, 30, e.y, SharedMat.spriteBlue, 'nova');
                             }
@@ -26861,7 +26923,8 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
 
        let shockAtkSpeed = this.shockSpeedTimer > 0 ? 1.30 : 1.0;
         let miserAtkSpeedBonus = 1.0 + ((this.miserBuffStacks || 0) * 0.04);
-        let miserDmgBonus = 1.0 + ((this.miserBuffStacks || 0) * 0.03);
+        let miserHoardBonus = this.modifiers.miserPact ? Math.min(0.30, Math.floor((Game.coins || 0) / 25) * 0.03) : 0;
+        let miserDmgBonus = (1.0 + ((this.miserBuffStacks || 0) * 0.03)) * (1.0 + miserHoardBonus);
 
         let aura = Game.getAuraAt(this.x, this.y);
         let auraAtkSpd = (aura === 'blue') ? 0.6 : (aura === 'red' ? 1.2 : 1.0);
@@ -26876,7 +26939,13 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
 
         let critChance = this.modifiers.critChance + this.modifiers.bonusCritChance + Math.min(Game.combo * 0.003, 0.15 * flowCapMult);
         let isCrit = Math.random() < critChance;
-        if (this.modifiers.dashCritsStacks > 0) { isCrit = true; this.modifiers.dashCritsStacks--; }
+        let isWindBladeCrit = false;
+        if (this.modifiers.dashCritsStacks > 0) {
+            isCrit = true;
+            isWindBladeCrit = true;
+            this.modifiers.dashCritsStacks--;
+        }
+        let overcapCritBonus = critChance > 1.0 ? (critChance - 1.0) * 1.75 : 0;
 
         let baseDmg = MathUtils.randomRange(this.stats.minDmg, this.stats.maxDmg) * (1 + Math.min(Game.combo * 0.02, 1.0 * flowCapMult)) * this.modifiers.dmgMult * miserDmgBonus;
         if (this.obeliskDmgTimer > 0) baseDmg *= this.obeliskDmgVal;
@@ -26890,14 +26959,15 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         if (aura === 'corrupted') baseDmg *= 1.2;
 
         if (this.modifiers.flowMastery && Game.combo >= 50) {
-            baseDmg *= 1.15;
+            baseDmg *= 1.25;
         }
 
         if (Game.ultimateActive) baseDmg *= 2.0;
         if (isCrit) {
 
             let comboCritBonus = (typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('crit', 1)) ? (Math.min(Game.combo, 100 * flowCapMult) * 0.005) : 0;
-            baseDmg *= (this.modifiers.critDmgMult + comboCritBonus);
+            baseDmg *= (this.modifiers.critDmgMult + comboCritBonus + overcapCritBonus);
+            if (isWindBladeCrit) baseDmg *= 1.20;
             if (this.modifiers.homicidalFrenzy && this.relicPetMeshes && this.relicPetMeshes.skull) {
                 this._skullCritPop = 0.22;
                 let sNova = Game.getParticle();
@@ -26913,8 +26983,8 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         if (this.essence === 'green') projType = 'homing_arrow';
         let piercing = (this.overdrive && this.essence === 'blue');
 
-        let bonusPierce = ((this.modifiers.flowMastery && Game.combo > 50 && projType === 'player_arrow') ? 1 : 0)
-                        + ((typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('dmg', 2) && projType === 'player_arrow') ? 1 : 0);
+        let bonusPierce = ((this.modifiers.flowMastery && Game.combo >= 50) ? 1 : 0)
+                        + ((typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('dmg', 2)) ? 1 : 0);
 
         this.rhythmShotCount = (this.rhythmShotCount || 0) + 1;
         let isRapidTrigger = (typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('atkSpeed', 1)) && (this.rhythmShotCount % 5 === 0);
@@ -26948,14 +27018,16 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             let p1 = Game.getProjectile(); p1.spawn(this.x, this.y, this.angle - 0.15, projSpeed, twinDmg, 'player', projType, piercing, isCrit); p1.canInfect = true; p1.pierceCount = bonusPierce;
             let p2 = Game.getProjectile(); p2.spawn(this.x, this.y, this.angle + 0.15, projSpeed, twinDmg, 'player', projType, piercing, isCrit); p2.canInfect = true; p2.pierceCount = bonusPierce;
             if (isDoubleBarrel) {
-                let p3 = Game.getProjectile(); p3.spawn(this.x, this.y, this.angle - 0.08, projSpeed, baseDmg * 0.50, 'player', projType, piercing, isCrit); p3.canInfect = true; p3.pierceCount = bonusPierce;
-                let p4 = Game.getProjectile(); p4.spawn(this.x, this.y, this.angle + 0.08, projSpeed, baseDmg * 0.50, 'player', projType, piercing, isCrit); p4.canInfect = true; p4.pierceCount = bonusPierce;
+                for (let k = 1; k < 5; k++) {
+                    let a = this.angle + (Math.PI * 2 / 5) * k;
+                    let pk = Game.getProjectile(); pk.spawn(this.x, this.y, a, projSpeed, baseDmg, 'player', projType, piercing, isCrit); pk.canInfect = true; pk.pierceCount = bonusPierce;
+                }
             }
         } else if (isDoubleBarrel) {
-            let p1 = Game.getProjectile(); p1.spawn(this.x, this.y, this.angle, projSpeed, baseDmg, 'player', projType, piercing, isCrit); p1.canInfect = true; p1.pierceCount = bonusPierce;
-            let p2 = Game.getProjectile(); p2.spawn(this.x, this.y, this.angle - 0.14, projSpeed, baseDmg * 0.50, 'player', projType, piercing, isCrit); p2.canInfect = true; p2.pierceCount = bonusPierce;
-            let p3 = Game.getProjectile(); p3.spawn(this.x, this.y, this.angle + 0.14, projSpeed, baseDmg * 0.50, 'player', projType, piercing, isCrit); p3.canInfect = true; p3.pierceCount = bonusPierce;
-
+            for (let k = 0; k < 5; k++) {
+                let a = this.angle + (Math.PI * 2 / 5) * k;
+                let pk = Game.getProjectile(); pk.spawn(this.x, this.y, a, projSpeed, baseDmg, 'player', projType, piercing, isCrit); pk.canInfect = true; pk.pierceCount = bonusPierce;
+            }
         } else {
             let p1 = Game.getProjectile(); p1.spawn(this.x, this.y, this.angle, projSpeed, baseDmg, 'player', projType, piercing, isCrit); p1.canInfect = true; p1.pierceCount = bonusPierce;
         }
@@ -27103,7 +27175,7 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         this.lastDashTime = Game.playTime;
         this.dashCooldown = perfectDodge ? 0.5 : 2.0 * this.modifiers.dashCooldownMult;
         Haptics.onDash(perfectDodge);
-        if (this.modifiers.dashCritsEnabled) this.modifiers.dashCritsStacks = 2;
+        if (this.modifiers.dashCritsEnabled) this.modifiers.dashCritsStacks = 3;
         if (typeof UI !== 'undefined' && UI.triggerPulseClass && UI.els.btnDash) {
             UI.triggerPulseClass(UI.els.btnDash, 'anim-hud-pop');
         }
@@ -27242,6 +27314,15 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         }
     }
 
+    getEffectiveArmor() {
+        let armor = (typeof ShopSystem !== 'undefined' && ShopSystem.levels) ? Math.min(10, ShopSystem.levels.hp || 0) : 0;
+        if (this.dashResistTimer > 0) armor += 10;
+        if (this.modifiers && this.modifiers.flowMastery) {
+            armor += (typeof Game !== 'undefined' && Game.combo >= 50) ? -8 : 8;
+        }
+        return armor;
+    }
+
     takeDamage(amount, source) {
         if (this.dead || this.invincibilityTimer > 0) return;
 
@@ -27275,19 +27356,14 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
             }
         }
 
-        if (this.dashResistTimer > 0) {
-            amount *= 0.85;
-        }
-
         if (Game.ultimateActive) {
             amount *= 0.75;
         }
 
         amount *= this.modifiers.dmgTakenMult;
 
-        if (this.modifiers.flowMastery) {
-            amount *= (Game.combo >= 50) ? 1.12 : 0.88;
-        }
+        let armorPts = this.getEffectiveArmor ? this.getEffectiveArmor() : 0;
+        amount *= Math.max(0.20, 1.0 - (armorPts * 0.015));
 
         amount = Math.max(0, amount);
 
@@ -27314,6 +27390,13 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
         super.takeDamage(amount, source);
         this.invincibilityTimer = 0.2;
       this.outOfCombatTimer = 5.0;
+        let attacker = (source && source.sourceEntity) ? source.sourceEntity : source;
+        if (attacker && attacker.consecutiveHitsFromPlayer) {
+            attacker.consecutiveHitsFromPlayer = 0;
+        }
+        if (this._focusTarget === attacker) {
+            this._focusTarget = null;
+        }
         AudioEngine.playHit('player');
        Haptics.onPlayerHit(this.stats.hp <= 0);
       // La combo si spezza sempre quando vieni colpito
@@ -27327,25 +27410,31 @@ if (Game.ultimateActive) currentSpeed *= 1.35; currentSpeed = Math.min(currentSp
                 this.dead = false;
                 this.stats.hp = Math.floor(this.stats.maxHp * 0.50);
                 this.invincibilityTimer = 1.5;
+                this.dashCooldown = 0;
+                this.activeShieldCooldown = 0;
 
                 Game.hitStop = 0.15;
                 Game.addTrauma(1.5);
                 AudioEngine.playLevelUp();
                 AudioEngine.playShoot('explosive_arrow');
-                Game.spawnLightFlash(this.x, this.y, 0x22c55e, 10.0, 600, 0.4);
+                Game.spawnLightFlash(this.x, this.y, 0xff5500, 10.0, 600, 0.4);
 
                 let pNova = Game.getParticle();
-                pNova.spawn(this.x, 20, this.y, SharedMat.spriteGreen, 'nova');
+                pNova.spawn(this.x, 20, this.y, SharedMat.spriteRed, 'nova');
                 pNova.baseSize = 320;
+                Game.getHazard().spawn(this.x, this.y, 260, 0.45, 0, 0xff4400, 'nova_ring');
 
+                let phoenixDmg = this.stats.maxDmg * 3.0 * this.modifiers.dmgMult;
                 let nearby = Game.enemyGrid.findNearby(this, 260);
                 for (let i = 0; i < nearby.length; i++) {
                     let e = nearby[i];
                     if (!e.dead && e.type !== 'crystal') {
-                        let ang = Math.atan2(e.y - this.y, this.x - e.x);
-                        let pushAng = Math.atan2(e.y - this.y, e.x - this.x);
-                        e.push(Math.cos(pushAng), Math.sin(pushAng), 220);
-                        if (!e.isBoss) e.frozenTimer = Math.max(e.frozenTimer || 0, 1.0);
+                        e.takeDamage(phoenixDmg, this, false, false);
+                        if (!e.dead) {
+                            let pushAng = Math.atan2(e.y - this.y, e.x - this.x);
+                            e.push(Math.cos(pushAng), Math.sin(pushAng), 220);
+                            if (!e.isBoss) e.frozenTimer = Math.max(e.frozenTimer || 0, 1.0);
+                        }
                     }
                 }
                 Game.getFloatingText().spawn(this.x, this.y + 30, "CORAZZA DELLA FENICE (+50% HP)!", '#22c55e', 36, true);
@@ -27742,6 +27831,7 @@ class Enemy extends Entity {
         this.slowedTimer = 0;
         this.slowMult = undefined;
         this.permafrostTimer = 0;
+        this.consecutiveHitsFromPlayer = 0;
         this.infected = false;
         this.isBerserk = false;
         this._lastAuraType = null;
@@ -28393,6 +28483,7 @@ class Enemy extends Entity {
             this.frozenTimer = 0;
             this.slowedTimer = 0;
             this.permafrostTimer = 0;
+        this.consecutiveHitsFromPlayer = 0;
 
             this.fireDebuffTimer = 0;
             this.infected = false;
@@ -28967,12 +29058,10 @@ class Enemy extends Entity {
         }
         if (this.permafrostTimer > 0) {
             this.permafrostTimer -= dt;
-            if (this.slowedTimer <= 0) {
-                this.speed *= 0.80;
-                this._wasPermafrost = true;
-                if (!this.isProphetBuffed && this.flashTimer <= 0) {
-                    for (let i = 0; i < this.flashMats.length; i++) this.flashMats[i].emissive.setHex(0x003366);
-                }
+            this.speed *= 0.80;
+            this._wasPermafrost = true;
+            if (this.slowedTimer <= 0 && !this.isProphetBuffed && this.flashTimer <= 0) {
+                for (let i = 0; i < this.flashMats.length; i++) this.flashMats[i].emissive.setHex(0x003366);
             }
             if (Game.frameCount % 8 === 0 && !AppSettings.useMobileLimits) {
                 Game.getParticle().spawn(this.x, 4, this.y, SharedMat.spriteBlue, 'dust');
@@ -29824,7 +29913,7 @@ class Enemy extends Entity {
         if (this.state === 'roller_roll') {
             let bs = this.baseModelSize || 15;
 
-            let maxRollSpd = 325 * (this.isProphetBuffed ? 1.20 : 1.0) * (aura === 'blue' ? 0.65 : 1.0) * (this.slowedTimer > 0 ? 0.65 : 1.0);
+            let maxRollSpd = 325 * (this.isProphetBuffed ? 1.20 : 1.0) * (aura === 'blue' ? 0.65 : 1.0) * (this.slowedTimer > 0 ? 0.65 : 1.0) * (this.permafrostTimer > 0 ? 0.80 : 1.0);
             this.rollSpeed = Math.min(maxRollSpd, (this.rollSpeed || 175) + 180 * dt);
 
             // 2. Angolo di sterzata molto ampio (0.48 rad/s = ~27°/s): non può fare curve strette!
@@ -30551,6 +30640,18 @@ if (this.type === 'trapper') {
 
         let shieldBreaker = (source === Game.player && typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('dmg', 1)) ? 1.35 : 1.0;
 
+        if (source === Game.player && Game.player && this.type !== 'crystal' && typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('dmg', 2)) {
+            if (Game.player._focusTarget !== this) {
+                if (Game.player._focusTarget) Game.player._focusTarget.consecutiveHitsFromPlayer = 0;
+                Game.player._focusTarget = this;
+                this.consecutiveHitsFromPlayer = 0;
+            }
+            if (this.consecutiveHitsFromPlayer > 0) {
+                amount *= (1.0 + this.consecutiveHitsFromPlayer * 0.01);
+            }
+            this.consecutiveHitsFromPlayer = (this.consecutiveHitsFromPlayer || 0) + 1;
+        }
+
         let executionTriggered = false;
         if (hasJudgment) {
             let hpRatio = this.stats.hp / this.stats.maxHp;
@@ -30643,6 +30744,16 @@ if (this.type === 'roller') {
             }
         }
 
+        if (isCrit && source === Game.player && this.isBoss && Game.ultimateActive && Game.player.modifiers.ultDurationPerKill) {
+            Game.player.modifiers.ultBossCritCount = (Game.player.modifiers.ultBossCritCount || 0) + 1;
+            if (Game.player.modifiers.ultBossCritCount >= 10) {
+                Game.player.modifiers.ultBossCritCount = 0;
+                Game.ultimateTimer += 0.25;
+                Game.player.modifiers.ascensionDurationAdd += 0.25;
+                Game.getFloatingText().spawn(Game.player.x, Game.player.y + 30, "+0.25s ASCENSIONE!", '#00DDFF', 25, true);
+            }
+        }
+
         if (isCrit && source === Game.player && Game.player.modifiers.critGold && Math.random() < 0.30) {
             if (!Game.player._lastCritGoldTime || Game.playTime - Game.player._lastCritGoldTime >= 1.0) {
                 Game.player._lastCritGoldTime = Game.playTime;
@@ -30653,6 +30764,7 @@ if (this.type === 'roller') {
         }
 
         if (this.fireDebuffTimer > 0 && Game.player && Game.player.modifiers.fireTrailDebuff) amount *= 1.20;
+        if (this.permafrostTimer > 0) amount *= 1.10;
         if (source === Game.player && Game.matchStats) Game.matchStats.dmgDealt += amount;
 
         let wasVulnerableFireDemon = (this.type === 'fire_demon' && ((this.telegraphTimer || 0) > 0 || (this.coreExposedTimer || 0) > 0));
@@ -30697,9 +30809,9 @@ if (this.type === 'roller') {
 
         if (isCrit && source === Game.player && typeof ShopSystem !== 'undefined' && ShopSystem.hasMastery('crit', 2) && !Game._inCritEcho) {
             Game._inCritEcho = true;
-            let echoDmg = amount * 0.30;
-            let echoRadSq = 65 * 65;
-            let nearby = Game.enemyGrid.findNearby(this, 65);
+            let echoDmg = amount * 0.40;
+            let echoRadSq = 100 * 100;
+            let nearby = Game.enemyGrid.findNearby(this, 100);
             for (let i = 0; i < nearby.length; i++) {
                 let other = nearby[i];
                 if (other !== this && !other.dead && MathUtils.distanceSq(this, other) <= echoRadSq) {
@@ -30708,7 +30820,7 @@ if (this.type === 'roller') {
             }
             let echoNova = Game.getParticle();
             echoNova.spawn(this.x, 18, this.y, SharedMat.spritePink, 'nova');
-            echoNova.baseSize = 95;
+            echoNova.baseSize = 130;
             echoNova.life = 0.14; echoNova.maxLife = 0.14;
             Game._inCritEcho = false;
         }
@@ -30854,7 +30966,7 @@ if (this.type === 'roller') {
 
         if (Game.player.modifiers.ultDurationPerKill && Game.ultimateActive) {
             Game.player.modifiers.ultKillCount++;
-            if (Game.player.modifiers.ultKillCount >= 10) {
+            if (Game.player.modifiers.ultKillCount >= 5) {
                 Game.player.modifiers.ultKillCount = 0;
                 Game.ultimateTimer += 0.5;
                 Game.player.modifiers.ascensionDurationAdd += 0.5;
@@ -32343,7 +32455,7 @@ if (type === 'arrow' || type === 'homing_arrow') {
         if (this.type === 'homing_arrow') {
 
             if (this.owner === 'player') {
-                if (!this.target || this.target.dead || (Game.frameCount + this.updateOffset) % 15 === 0) {
+                if (!this.target || this.target.dead || this.hitEnemies.has(this.target.id) || (Game.frameCount + this.updateOffset) % 15 === 0) {
                     let closest = null; let minDistSq = 400*400;
                     let nearby = Game.enemyGrid.findNearby(this, 400);
                     for(let i=0, len=nearby.length; i<len; i++) {
@@ -32486,7 +32598,7 @@ if (type === 'arrow' || type === 'homing_arrow') {
                             returnAngle = Math.atan2(this.sourceEntity.y - this.y, this.sourceEntity.x - this.x);
                         }
                         let p = Game.getProjectile();
-                        p.spawn(this.x, this.y, returnAngle, 800, Game.player.stats.maxDmg * 1.5, 'player', 'explosive_arrow');
+                        p.spawn(this.x, this.y, returnAngle, 800, Game.player.stats.maxDmg * 1.5 * Game.player.modifiers.dmgMult, 'player', 'explosive_arrow');
                         p.radius = 8; p.mesh.scale.setScalar(8);
                         p.canInfect = false;
                         AudioEngine.playShoot('flame');
@@ -32546,6 +32658,26 @@ if (type === 'arrow' || type === 'homing_arrow') {
         }
        if (this.pierceCount > 0) {
             this.pierceCount--;
+            if (this.type === 'homing_arrow') {
+                this.target = null;
+            } else if (this.type === 'explosive_arrow') {
+                Game.addTrauma(0.3);
+                Game.pushDebris(this.x, this.y, 160, 350);
+                let nearby = Game.enemyGrid.findNearby(this, 120);
+                for (let i = 0, len = nearby.length; i < len; i++) {
+                    let e = nearby[i];
+                    if (e !== target && !e.dead && MathUtils.distanceSq(this, e) < 120 * 120) {
+                        e.takeDamage(this.damage * 1.5, Game.player, false, false);
+                    }
+                }
+                let pCount = AppSettings.isLow ? 4 : (AppSettings.useMobileLimits ? 8 : 15);
+                for (let i = 0; i < pCount; i++) {
+                    let a = (Math.PI * 2 / pCount) * i;
+                    Game.getParticle().spawn(this.x, 15, this.y, SharedMat.spriteRed, 'flame', a);
+                }
+                Game.getParticle().spawn(this.x, 15, this.y, SharedMat.spriteWhite, 'nova');
+                Game.spawnLightFlash(this.x, this.y, 0xff3300, 8.0, 500);
+            }
             return;
         }
         if (!this.piercing) this.destroy();
@@ -33368,6 +33500,18 @@ function respawnPlayer() {
     });
 }
 
+window.lockMainMenuBriefly = function(ms = 450) {
+    window._mainMenuLockedUntil = performance.now() + ms;
+    const card = document.getElementById('menu-actions-card');
+    if (card) {
+        card.style.pointerEvents = 'none';
+        if (window._mainMenuLockTid) clearTimeout(window._mainMenuLockTid);
+        window._mainMenuLockTid = setTimeout(() => {
+            card.style.pointerEvents = 'auto';
+        }, ms);
+    }
+};
+
 function goToMainMenu(skipSave = false) {
     AudioEngine.playClick();
     if (!skipSave && Game.state !== 'MENU' && Game.state !== 'DEAD' && Game.player && !Game.player.dead && Game.lives > 0) {
@@ -33401,6 +33545,7 @@ function goToMainMenu(skipSave = false) {
         document.getElementById('mainMenu').querySelector('.pointer-events-auto').classList.remove('opacity-0');
         document.querySelector('.title-3d-text').classList.remove('opacity-0');
         document.getElementById('mainMenu').classList.remove('hidden');
+        window.lockMainMenuBriefly(450);
 
         clearScene();
         if (Game.player) {
@@ -33424,6 +33569,7 @@ function goToMainMenu(skipSave = false) {
 }
 
 function startGameFromMenu() {
+    if (Game.state === 'MENU' && performance.now() < (window._mainMenuLockedUntil || 0)) return;
     if (Game.state === 'WARPING_IN' || (typeof TitleSystem !== 'undefined' && TitleSystem.isExploding)) return;
 
     AudioEngine.playClick();
@@ -33481,6 +33627,7 @@ function submitScore() {
 }
 
 function showHighScores() {
+    if (typeof Game !== 'undefined' && Game.state === 'MENU' && performance.now() < (window._mainMenuLockedUntil || 0)) return;
     AudioEngine.playClick();
     const container = document.getElementById('highScoresList');
     container.innerHTML = '';
@@ -33873,36 +34020,36 @@ const ShopSystem = {
             name: 'Vitalità', short: 'VITA', icon: 'fa-heart',
             color: '#22c55e', dark: '#15803d', border: 'rgba(34, 197, 94, 0.55)', glow: 'rgba(34, 197, 94, 0.25)',
             bgTop: 'rgba(20, 83, 45, 0.55)', bgBot: 'rgba(5, 46, 22, 0.85)', btnTop: 'rgba(22, 101, 52, 0.85)', tailwind: 'green',
-            tier1: { name: 'Barriera d\'Ingresso', icon: 'fa-shield-heart', desc: 'Inizi ogni piano con uno Scudo pari al 10% HP Max e ricevi +15% Cure.' },
-            tier2: { name: 'Corazza della Fenice', icon: 'fa-fire-flame-curved', desc: '-5% danno max per colpo. 1 volta a piano rinasci col 50% HP respingendo i nemici.' }
+            tier1: { name: 'Barriera d\'Ingresso', icon: 'fa-shield-heart', desc: 'Inizi ogni piano con Scudo 10% HP Max e +15% Cure. Ogni livello Vita dà +1 Armatura.' },
+            tier2: { name: 'Corazza della Fenice', icon: 'fa-fire-flame-curved', desc: '-5% danno max/colpo. 1 volta a piano rinasci col 50% HP: esplosione ignea (3x Danno) e ricarichi Scatto e Scudo.' }
         },
         dmg: {
             name: 'Danno', short: 'DANNO', icon: 'fa-fire',
             color: '#ef4444', dark: '#b91c1c', border: 'rgba(239, 68, 68, 0.55)', glow: 'rgba(239, 68, 68, 0.25)',
             bgTop: 'rgba(127, 29, 29, 0.55)', bgBot: 'rgba(69, 10, 10, 0.85)', btnTop: 'rgba(153, 27, 27, 0.85)', tailwind: 'red',
-            tier1: { name: 'Impatto Frantumante', icon: 'fa-hammer', desc: 'Infliggi +35% danni alle difese/scudi nemici e li respingi con più forza.' },
-            tier2: { name: 'Dardo Perforante', icon: 'fa-angles-right', desc: 'I tuoi proiettili base trapassano il primo nemico colpito (+1 Perforazione).' }
+            tier1: { name: 'Impatto Frantumante', icon: 'fa-hammer', desc: '+35% danni alle difese/scudi nemici e spinta aumentata.' },
+            tier2: { name: 'Dardo Perforante', icon: 'fa-angles-right', desc: '+1 Perforazione su tutti i colpi e +1% danno per ogni colpo consecutivo sullo stesso bersaglio.' }
         },
         speed: {
             name: 'Movimento', short: 'VELOCITÀ', icon: 'fa-shoe-prints',
             color: '#3b82f6', dark: '#1d4ed8', border: 'rgba(59, 130, 246, 0.55)', glow: 'rgba(59, 130, 246, 0.25)',
             bgTop: 'rgba(30, 58, 138, 0.55)', bgBot: 'rgba(23, 37, 84, 0.85)', btnTop: 'rgba(29, 78, 216, 0.85)', tailwind: 'blue',
-            tier1: { name: 'Ritorno Cinetico', icon: 'fa-bolt', desc: 'Effettuare uno Scatto riduce istantaneamente di 0.5s la ricarica dello Scudo Cinetico.' },
-            tier2: { name: 'Permafrost', icon: 'fa-snowflake', desc: 'Attacchi rallentano la velocità di movimento dei nemici del 20%, ogni terzo scatto emetti una nova gelida che danneggia i nemici vicini e li rallenta.' }
+            tier1: { name: 'Ritorno Cinetico', icon: 'fa-bolt', desc: 'Ogni Scatto riduce di 0.5s la ricarica dello Scudo Cinetico.' },
+            tier2: { name: 'Permafrost', icon: 'fa-snowflake', desc: 'Rallenta i nemici del 20% (cumulabile) e infligge loro +10% danni. Ogni 3° scatto emetti una Nova Gelida.' }
         },
         atkSpeed: {
             name: 'Ritmo', short: 'RITMO', icon: 'fa-bolt',
             color: '#f59e0b', dark: '#b45309', border: 'rgba(245, 158, 11, 0.55)', glow: 'rgba(245, 158, 11, 0.25)',
             bgTop: 'rgba(120, 53, 15, 0.55)', bgBot: 'rgba(69, 26, 3, 0.85)', btnTop: 'rgba(180, 83, 9, 0.85)', tailwind: 'amber',
-            tier1: { name: 'Innesco Rapido', icon: 'fa-forward-fast', desc: 'Ogni 5 attacchi, il colpo successivo genera +1 Punto Combo extra e viaggia al +40% di velocità.' },
-            tier2: { name: 'Tripla Canna', icon: 'fa-burst', desc: 'Ogni 5 attacchi, spari gratuitamente due proiettili addizionali che infliggono il 50% del danno ciascuno.' }
+            tier1: { name: 'Innesco Rapido', icon: 'fa-forward-fast', desc: 'Ogni 5 attacchi il colpo successivo dà +1 Combo e +40% velocità proiettile.' },
+            tier2: { name: 'Fuoco a Tappeto', icon: 'fa-burst', desc: 'Il 5° attacco spara 5 proiettili (100% danno ciascuno) in tutte le direzioni.' }
         },
         crit: {
             name: 'Precisione', short: 'CRITICO', icon: 'fa-crosshairs',
             color: '#a855f7', dark: '#7e22ce', border: 'rgba(168, 85, 247, 0.55)', glow: 'rgba(168, 85, 247, 0.25)',
             bgTop: 'rgba(88, 28, 135, 0.55)', bgBot: 'rgba(59, 7, 100, 0.85)', btnTop: 'rgba(126, 34, 206, 0.85)', tailwind: 'purple',
-            tier1: { name: 'Punto Vitale', icon: 'fa-bolt-lightning', desc: 'La Combo aumenta il moltiplicatore di Danno Critico (fino a +0.50x a 100 Combo).' },
-            tier2: { name: 'Eco Letale', icon: 'fa-burst', desc: 'I colpi critici scatenano un\'esplosione cinetica che infligge il 30% di danno ad area.' }
+            tier1: { name: 'Punto Vitale', icon: 'fa-bolt-lightning', desc: 'La Combo aumenta il Danno Critico (fino a +0.50x a 100 Combo).' },
+            tier2: { name: 'Eco Letale', icon: 'fa-burst', desc: 'I colpi critici generano un\'esplosione cinetica (raggio 100) che infligge il 40% di danno ad area.' }
         }
     },
 
@@ -34471,16 +34618,19 @@ history.pushState(null, null, document.URL);
 
     UIManager.updateInfoModal();
 
-   const handleInit = () => {
+   const handleInit = (e) => {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        if (initScreen.classList.contains('hidden')) return;
         AudioEngine.init();
         if (AudioEngine.ctx && AudioEngine.ctx.state === 'suspended' && (!AudioEngine.musicMuted || !AudioEngine.sfxMuted)) {
             AudioEngine.ctx.resume();
         }
         initScreen.classList.add('hidden');
         mainMenu.classList.remove('hidden');
+        window.lockMainMenuBriefly(450);
         if (typeof TitleSystem !== 'undefined' && TitleSystem.initialized) TitleSystem.resize();
     };
-    initScreen.addEventListener('click', handleInit);
+    initScreen.addEventListener('click', handleInit, { once: true });
     initScreen.addEventListener('pointerdown', handleInit, { once: true });
 };
 </script>
