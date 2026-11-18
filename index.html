@@ -4649,6 +4649,10 @@ const AppSettings = {
                         }
                     }
                 }
+                if (Preloader.textures.coin && Preloader.textures.coin.anisotropy !== targetAniso) {
+                    Preloader.textures.coin.anisotropy = targetAniso;
+                    Preloader.textures.coin.needsUpdate = true;
+                }
             }
 
             let showFakeShadows = this.showContactShadows;
@@ -7530,10 +7534,10 @@ const SkinSystem = {
     composer: null, bloomPass: null, ultraPostPass: null, useComposer: false,
     worldGroup: null, boxGroup: null, cubeHitMesh: null, heroGroup: null, heroParts: null,
     altarGroup: null, altarMat: null, cliffRockMat: null,
-    waterMesh: null, waterMat: null, waterGlowMat: null, runeMesh: null, obeliskMat: null, obeliskOrbGlow: null,
+    runeMesh: null, obeliskMat: null, obeliskOrbGlow: null,
     groundGrassMat: null, groundDirtMat: null, menuGrassMat: null, menuCanopyMat: null,
     grassInst: null, totalGrassSpawned: 0, meshTrees: null, meshCanopy: null, meshTreeShadows: null,
-    rimRockMat: null, skyDomeMat: null, voidEnergyMat: null, mistRingMat: null, mistRingMesh: null,
+    skyDomeMat: null, voidEnergyMat: null, mistRingMat: null, mistRingMesh: null,
     rayGroup: null, rayMat: null, crystalMat: null, isletRockMat: null, isletTopMat: null,
     gpuParticles: null, gpuPartMat: null, totalGpuParticles: 0,
     wireMat: null, mainLight: null, heroLight: null, rimLight: null, hemiLight: null, heroShadow: null,
@@ -7564,23 +7568,23 @@ const SkinSystem = {
             voidDeep: 0x1e063a, voidGlow: 0x9b4dff, mist: 0x7c3aed,
             dirt: 0x7b8570, grass: 0x86ad72, rock: 0x5d6b57,
             foliage: 0x0f270b, canopy: 0x112a0c,
-            water: 0x38bdf8, elem: 0x22FF44,
+            elem: 0x22FF44,
             sprite: 'spriteGreen', suffix: ''
         },
         {
             fog: 0x12040a, skyTop: 0x0c0206, skyHorizon: 0x340c12,
-            voidDeep: 0x320506, voidGlow: 0xff5a1f, mist: 0xea580c,
+            voidDeep: 0x1e063a, voidGlow: 0x9b4dff, mist: 0x7c3aed,
             dirt: 0x8a5d52, grass: 0xa65a48, rock: 0x5c3c36,
             foliage: 0x341008, canopy: 0x2e0d06,
-            water: 0xff4500, elem: 0xFF1838,
+            elem: 0xFF1838,
             sprite: 'spriteRed', suffix: '_lava'
         },
         {
             fog: 0x060a1c, skyTop: 0x030816, skyHorizon: 0x0c274d,
-            voidDeep: 0x061b3e, voidGlow: 0x38bdf8, mist: 0x0ea5e9,
+            voidDeep: 0x1e063a, voidGlow: 0x9b4dff, mist: 0x7c3aed,
             dirt: 0x5882a6, grass: 0x6f9ec2, rock: 0x466685,
             foliage: 0x1d4763, canopy: 0x1b445e,
-            water: 0x286f9e, elem: 0x00CCFF,
+            elem: 0x00CCFF,
             sprite: 'spriteBlue', suffix: '_ice'
         }
     ],
@@ -7597,25 +7601,12 @@ const SkinSystem = {
         const rimT = Math.max(0, Math.min(1, (r - 190) / 36));
         const rimFade = 1.0 - rimT * rimT * (3.0 - 2.0 * rimT);
 
-        // Depressione naturale per il laghetto (76, 46) con argine rialzato attorno
-        const dLake = Math.hypot(x - 76, z - 46);
-        let lakeOffset = 0;
-        if (dLake < 41) {
-            const k = 1.0 - dLake / 41.0;
-            lakeOffset = -3.4 * Math.pow(k, 0.85);
-        } else if (dLake < 55) {
-            const p = (dLake - 41) / 14.0;
-            lakeOffset = Math.sin(p * Math.PI) * 1.45;
-        }
-
         // Centro pianeggiante per l'altare (r <= 52) e collinette organiche esterne
         const centerT = Math.max(0, Math.min(1, (r - 52) / 40));
         const centerFade = centerT * centerT * (3.0 - 2.0 * centerT);
-        const lakeFlatT = Math.max(0, Math.min(1, (dLake - 36) / 22));
-        const lakeSuppress = lakeFlatT * lakeFlatT * (3.0 - 2.0 * lakeFlatT);
 
-        const hills = (Math.sin(x * 0.024 + 0.5) * Math.cos(z * 0.022 - 0.3) * 2.1 + Math.sin((x + z) * 0.036) * 0.8) * centerFade * rimFade * lakeSuppress;
-        return hills + lakeOffset * rimFade;
+        const hills = (Math.sin(x * 0.024 + 0.5) * Math.cos(z * 0.022 - 0.3) * 2.1 + Math.sin((x + z) * 0.036) * 0.8) * centerFade * rimFade;
+        return hills;
     },
 
     createIslandGroundGeo(rad, rings = 16, segs = 64) {
@@ -8318,9 +8309,8 @@ const SkinSystem = {
         const tDirt = this.prepareMenuTex('dirt', 1, 1);
         const tGrass = this.prepareMenuTex('grass', 1, 1);
         const tRock = this.prepareMenuTex('rock', 1, 1);
-        const tWater = this.prepareMenuTex('water', 3.8, 3.8);
 
-        // 1A. Isola Principale scolpita (UV planari uniformi ~13.5x + rilievo organico con conca laghetto)
+        // 1A. Isola Principale scolpita (UV planari uniformi ~13.5x + rilievo organico)
         const ISLAND_RAD = 232;
         this.groundDirtMat = new THREE.MeshStandardMaterial({
             color: preset0.dirt, map: tDirt, roughness: 0.92, metalness: 0.03, envMapIntensity: 0.25
@@ -8446,50 +8436,6 @@ const SkinSystem = {
         this.runeMesh.renderOrder = 2;
         this.worldGroup.add(this.runeMesh);
 
-        // Laghetto adagiato nella conca scolpita (x=76, z=46)
-        const poolGroup = new THREE.Group();
-        poolGroup.position.set(76, 0, 46);
-        this.waterMat = new THREE.MeshStandardMaterial({
-            color: 0x38bdf8, emissive: 0x167bb8, emissiveIntensity: 0.45, roughness: 0.28, metalness: 0.02, envMapIntensity: 0.34,
-            map: tWater, transparent: true, opacity: 0.92
-        });
-        const poolGeo = new THREE.CircleGeometry(41, 28).rotateX(-Math.PI / 2);
-        this.waterMesh = new THREE.Mesh(poolGeo, this.waterMat);
-        this.waterMesh.position.y = -0.65;
-        this.waterMesh.receiveShadow = true;
-
-        this.waterGlowMat = new THREE.MeshBasicMaterial({
-            map: GLOW_TEX, color: 0x38bdf8, transparent: true, opacity: 0.36, blending: THREE.AdditiveBlending, depthWrite: false
-        });
-        const waterGlow = new THREE.Mesh(new THREE.PlaneGeometry(98, 98).rotateX(-Math.PI / 2), this.waterGlowMat);
-        waterGlow.position.y = -0.72;
-        poolGroup.add(waterGlow, this.waterMesh);
-
-        this.rimRockMat = new THREE.MeshStandardMaterial({ color: 0x7a8774, map: tRock, roughness: 0.85, flatShading: true });
-        for (let i = 0; i < 14; i++) {
-            const a = (Math.PI * 2 / 14) * i + (i % 2) * 0.15;
-            const rad = 39 + Math.sin(i * 2.3) * 3.0;
-            const rx = Math.cos(a) * rad, rz = Math.sin(a) * rad;
-            const gy = this.getTerrainHeight(76 + rx, 46 + rz);
-            const stone = new THREE.Mesh(SharedGeo.rockDebris, this.rimRockMat);
-            const sc = 2.4 + (i % 3) * 1.0;
-            stone.scale.set(sc * 1.3, sc * 0.65, sc);
-            stone.position.set(rx, gy + 0.5, rz);
-            stone.rotation.y = a;
-            stone.castShadow = true; stone.receiveShadow = true;
-            poolGroup.add(stone);
-        }
-        const padGeo = new THREE.CylinderGeometry(5.0, 4.6, 0.5, 8);
-        const padMat = new THREE.MeshStandardMaterial({ color: 0x2e8538, emissive: 0x0d2b12, roughness: 0.65, flatShading: true });
-        [[-12, -7, 1.0], [11, 12, 0.85], [-4, 15, 0.7]].forEach(p => {
-            const pad = new THREE.Mesh(padGeo, padMat);
-            pad.position.set(p[0], -0.45, p[1]);
-            pad.scale.setScalar(p[2]);
-            pad.receiveShadow = true;
-            poolGroup.add(pad);
-        });
-        this.worldGroup.add(poolGroup);
-
         // Erba 3D interattiva adagiata sul terreno reale
         this.menuGrassMat = this.createMenuFoliageMaterial(preset0.foliage, false);
         const maxGrass = isTouchDevice ? 640 : 1120;
@@ -8503,7 +8449,6 @@ const SkinSystem = {
             const dist = 46 + Math.pow(Math.random(), 0.82) * 165;
             const gx = Math.cos(ang) * dist;
             const gz = Math.sin(ang) * dist;
-            if (Math.hypot(gx - 76, gz - 46) < 47) continue;
             if (Math.hypot(gx + 84, gz + 52) < 28) continue;
 
             const gy = this.getTerrainHeight(gx, gz);
@@ -8709,7 +8654,6 @@ const SkinSystem = {
             rock: new THREE.Color(preset0.rock),
             foliage: new THREE.Color(preset0.foliage),
             canopy: new THREE.Color(preset0.canopy),
-            water: new THREE.Color(0x38bdf8),
             elem: new THREE.Color(preset0.elem)
         };
 
@@ -8821,15 +8765,6 @@ const SkinSystem = {
         this.themeCycle = (this.themeCycle + 1) % 3;
         const p = this.THEME_PRESETS[this.themeCycle];
 
-        if (this.waterMat) {
-            this.waterMat.roughness = this.themeCycle === 1 ? 0.94 : 0.28;
-            if ('metalness' in this.waterMat) {
-                this.waterMat.metalness = this.themeCycle === 1 ? 0.0 : 0.02;
-                this.waterMat.envMapIntensity = this.themeCycle === 1 ? 0.03 : 0.34;
-            }
-            if ('shininess' in this.waterMat) this.waterMat.shininess = this.themeCycle === 1 ? 4 : 32;
-        }
-
         if (typeof Preloader !== 'undefined' && Preloader.textures) {
             const tDirtSwap = this.prepareMenuTex('dirt' + p.suffix, 1, 1);
             if (this.groundDirtMat && Preloader.textures['dirt' + p.suffix]) {
@@ -8843,14 +8778,9 @@ const SkinSystem = {
             }
             const tRockSwap = this.prepareMenuTex('rock' + p.suffix, 1, 1);
             if (Preloader.textures['rock' + p.suffix]) {
-                [this.cliffRockMat, this.rimRockMat, this.altarMat, this.isletRockMat].forEach(m => {
+                [this.cliffRockMat, this.altarMat, this.isletRockMat].forEach(m => {
                     if (m) { m.map = tRockSwap; m.needsUpdate = true; }
                 });
-            }
-            const waterKey = this.themeCycle === 1 ? 'waterLava' : (this.themeCycle === 2 && Preloader.textures.waterIce ? 'waterIce' : 'water');
-            if (this.waterMat && Preloader.textures[waterKey]) {
-                this.waterMat.map = this.prepareMenuTex(waterKey, 3.8, 3.8);
-                this.waterMat.needsUpdate = true;
             }
         }
 
@@ -8866,7 +8796,6 @@ const SkinSystem = {
             this.targetColors.rock.setHex(p.rock);
             this.targetColors.foliage.setHex(p.foliage);
             this.targetColors.canopy.setHex(p.canopy);
-            this.targetColors.water.setHex(p.water);
             this.targetColors.elem.setHex(p.elem);
         }
 
@@ -9012,7 +8941,6 @@ const SkinSystem = {
             if (this.groundDirtMat) this.groundDirtMat.color.lerp(this.targetColors.dirt, lerpSpd);
             if (this.groundGrassMat) this.groundGrassMat.color.lerp(this.targetColors.grass, lerpSpd);
             if (this.cliffRockMat) this.cliffRockMat.color.lerp(this.targetColors.rock, lerpSpd);
-            if (this.rimRockMat) this.rimRockMat.color.lerp(this.targetColors.rock, lerpSpd);
             if (this.isletRockMat) this.isletRockMat.color.lerp(this.targetColors.rock, lerpSpd);
             if (this.isletTopMat) this.isletTopMat.color.lerp(this.targetColors.grass, lerpSpd);
             if (this.crystalMat) {
@@ -9021,15 +8949,10 @@ const SkinSystem = {
             }
             if (this.menuGrassMat) this.menuGrassMat.color.lerp(this.targetColors.foliage, lerpSpd);
             if (this.menuCanopyMat) this.menuCanopyMat.color.lerp(this.targetColors.canopy, lerpSpd);
-            if (this.waterMat) {
-                this.waterMat.color.lerp(this.targetColors.water, lerpSpd);
-                this.waterMat.emissive.lerp(this.targetColors.water, lerpSpd * 0.5);
-            }
             if (this.wireMat) this.wireMat.color.lerp(this.targetColors.elem, lerpSpd);
             if (this.mainLight) this.mainLight.color.lerp(this.targetColors.elem, lerpSpd);
             if (this.runeMesh) this.runeMesh.material.color.lerp(this.targetColors.elem, lerpSpd);
             if (this.obeliskMat) this.obeliskMat.emissive.lerp(this.targetColors.elem, lerpSpd);
-            if (this.waterGlowMat) this.waterGlowMat.color.lerp(this.targetColors.water, lerpSpd);
             if (this.rayMat && this.rayMat.color) this.rayMat.color.lerp(this.targetColors.elem, lerpSpd);
         }
 
@@ -9120,14 +9043,6 @@ const SkinSystem = {
             this.runeMesh.position.set(0, 2.42, 0);
             const runePulse = 1.0 + Math.sin(this.time * 2.2) * 0.035;
             this.runeMesh.scale.set(runePulse, 1, runePulse);
-        }
-        if (this.waterMesh) {
-            const wScale = 1.0 + Math.sin(this.time * 2.6) * 0.025;
-            this.waterMesh.scale.set(wScale, wScale, 1);
-            if (this.waterMat && this.waterMat.map) {
-                this.waterMat.map.offset.x = (this.time * 0.025) % 1;
-                this.waterMat.map.offset.y = (this.time * 0.038) % 1;
-            }
         }
 
         for (let i = 0; i < this.floatingIslets.length; i++) {
@@ -9344,15 +9259,11 @@ const SkinSystem = {
         this.altarGroup = null;
         this.altarMat = null;
         this.cliffRockMat = null;
-        this.waterMesh = null;
-        this.waterMat = null;
-        this.waterGlowMat = null;
         this.runeMesh = null;
         this.obeliskMat = null;
         this.obeliskOrbGlow = null;
         this.groundGrassMat = null;
         this.groundDirtMat = null;
-        this.rimRockMat = null;
         this.skyDomeMat = null;
         this.voidEnergyMat = null;
         this.mistRingMat = null;
@@ -10889,7 +10800,7 @@ const RelicSystem = {
         { id: 'l4', name: "Sete di Sangue Eterna", desc: "[Esplosione Cremisi] Ogni kill cura 1.5% HP (cd 0.5s, fino a +15% Scudo Sangue a vita piena), ma -15% HP Massimi.", rarity: "legendary", image: "icona_sete_di_sangue_eterna.png", icon: "fa-droplet", apply: (p) => { p.modifiers.bloodthirst = true; p.stats.maxHp = Math.floor(p.stats.maxHp * 0.85); if (p.stats.hp > p.stats.maxHp) p.stats.hp = p.stats.maxHp; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
         { id: 'e3', name: "Passo Infernale", desc: "La scia dello scatto scala col Danno, brucia i nemici e infligge loro +20% danni da ogni fonte. Atterraggio meteorico.", rarity: "legendary", image: "icona_passo_infernale.png", icon: "fa-fire-flame-curved", apply: (p) => { p.modifiers.fireTrail = true; p.modifiers.fireTrailDebuff = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
         { id: 'l7', name: "Impatto Tonante", desc: "Lo scatto scatena 3 fulmini (100% Danno) che stordiscono i nemici. Atterraggio elettrico a inizio piano.", rarity: "legendary", image: "icona_impatto_tonante.png", icon: "fa-bolt", apply: (p) => { p.modifiers.dashLightning = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } },
-        { id: 'l6', name: "Aegis del Guardiano", desc: "A fine Scudo esplode in una Nova Arcana (da 1.75x a 4.0x Danno, max 12 stack) e cura l'1.5% HP per colpo assorbito.", rarity: "legendary", image: "icona_aegis_del_guardiano.png", icon: "fa-shield", apply: (p) => { p.modifiers.explosiveShield = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } }
+        { id: 'l6', name: "Aegis del Guardiano", desc: "A fine Scudo esplode in una Nova Arcana (da 1.75x a 4.0x Danno, max 12 stack) e cura l'1.5% HP per colpo assorbito.", rarity: "legendary", image: "fa_shieldx.png", icon: "fa-shield", apply: (p) => { p.modifiers.explosiveShield = true; if(p.syncRelicVisuals) p.syncRelicVisuals(); } }
     ],
     getRandomRarity() {
         let r = Math.random() * 100;
@@ -12050,6 +11961,9 @@ const PcUltraGraphics = {
             if (SharedMat.coin) {
                 SharedMat.coin.envMapIntensity = isUltraPC ? 1.18 : 1.0;
             }
+            if (SharedMat.coinRim) {
+                SharedMat.coinRim.envMapIntensity = isUltraPC ? 1.18 : 1.0;
+            }
         }
 
         if (typeof Game !== 'undefined' && Game.enemies) {
@@ -12471,7 +12385,22 @@ const SharedGeo = {
     torus: new THREE.TorusGeometry(1, 0.1, (typeof isTouchDevice !== 'undefined' && !isTouchDevice) ? 12 : 8, (typeof isTouchDevice !== 'undefined' && !isTouchDevice) ? 36 : 24),
     tetrahedron: new THREE.TetrahedronGeometry(1, 0), bloodPlane: new THREE.PlaneGeometry(40, 40), rockDebris: new THREE.DodecahedronGeometry(1.5, 0),
     heart: (function(){ const shape = new THREE.Shape(); shape.moveTo(0, 1.5); shape.bezierCurveTo(2, 3.5, 4, 1.5, 0, -2.5); shape.bezierCurveTo(-4, 1.5, -2, 3.5, 0, 1.5); const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.5, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.2, bevelThickness: 0.2 }); geo.center(); return geo; })(),
-    coin: new THREE.CylinderGeometry(10, 10, 2, (typeof isTouchDevice !== 'undefined' && !isTouchDevice) ? 24 : 16),
+    coin: (function() {
+        const g = new THREE.CylinderGeometry(10, 10, 2, (typeof isTouchDevice !== 'undefined' && !isTouchDevice) ? 24 : 16);
+        const pos = g.attributes.position;
+        const nrm = g.attributes.normal;
+        const uv = g.attributes.uv;
+        for (let i = 0; i < pos.count; i++) {
+            const ny = nrm.getY(i);
+            if (ny > 0.5) {
+                uv.setXY(i, 0.5 + pos.getX(i) / 20, 0.5 - pos.getZ(i) / 20);
+            } else if (ny < -0.5) {
+                uv.setXY(i, 0.5 - pos.getX(i) / 20, 0.5 - pos.getZ(i) / 20);
+            }
+        }
+        uv.needsUpdate = true;
+        return g;
+    })(),
     energyOrb: (function() {
         const parts = [
             new THREE.IcosahedronGeometry(0.75, 1),
@@ -12830,7 +12759,7 @@ class Coin {
         this.active = false; this.collecting = false; this.collectTimer = 0;
         this.startX = 0; this.startY = 0; this.startZ = 15;
         this.group = new THREE.Group();
-        let core = new THREE.Mesh(SharedGeo.coin, SharedMat.coin);
+        let core = new THREE.Mesh(SharedGeo.coin, [SharedMat.coinRim, SharedMat.coin, SharedMat.coin]);
         core.rotation.x = Math.PI / 2;
         this.group.matrixAutoUpdate = false;
         core.matrixAutoUpdate = false; core.updateMatrix();
@@ -13248,7 +13177,20 @@ const GLOBAL_ALPHA_TEX = createOrganicAlphaMap();
     megaAuraDisc: new THREE.MeshBasicMaterial({ map: MEGA_AURA_TEX, color: 0xff1844, transparent: true, opacity: 0.78, blending: THREE.AdditiveBlending, depthWrite: false, alphaTest: 0.02 }),
     megaAuraRing: new THREE.MeshBasicMaterial({ color: 0xff2255, transparent: true, opacity: 0.88, blending: THREE.AdditiveBlending, depthWrite: false })
 };
-SharedMat.coin = new THREE.MeshStandardMaterial({color: 0xffd700, emissive: 0xaa6600, metalness: 1.0, roughness: 0.2});
+SharedMat.coin = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    emissive: 0xffd15c,
+    emissiveIntensity: 0.62,
+    metalness: 0.35,
+    roughness: 0.28
+});
+SharedMat.coinRim = new THREE.MeshStandardMaterial({
+    color: 0xffd700,
+    emissive: 0xaa6600,
+    emissiveIntensity: 0.72,
+    metalness: 0.85,
+    roughness: 0.22
+});
 
 SharedGeo.crate = new THREE.BoxGeometry(24, 24, 24);
 
@@ -33853,6 +33795,39 @@ const Preloader = {
         tex.encoding = THREE.sRGBEncoding;
         return tex;
     },
+    createCoinFallbackTexture() {
+        const size = 128;
+        const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f5b800';
+        ctx.fillRect(0, 0, size, size);
+        ctx.beginPath();
+        ctx.arc(64, 64, 58, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffd700';
+        ctx.fill();
+        ctx.lineWidth = 6;
+        ctx.strokeStyle = '#5a2e00';
+        ctx.stroke();
+        // Corna stilizzate e sorriso demoniaco di fallback
+        ctx.fillStyle = '#5a2e00';
+        ctx.beginPath();
+        ctx.moveTo(42, 46); ctx.lineTo(30, 24); ctx.lineTo(50, 38); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(86, 46); ctx.lineTo(98, 24); ctx.lineTo(78, 38); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(40, 56); ctx.lineTo(56, 62); ctx.lineTo(44, 68); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(88, 56); ctx.lineTo(72, 62); ctx.lineTo(84, 68); ctx.closePath(); ctx.fill();
+        ctx.beginPath();
+        ctx.arc(64, 72, 22, 0.2, Math.PI - 0.2);
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = THREE.ClampToEdgeWrapping;
+        tex.wrapT = THREE.ClampToEdgeWrapping;
+        tex.encoding = THREE.sRGBEncoding;
+        return tex;
+    },
     init(onComplete) {
         const loadingText = document.getElementById('loadingText');
         const loadingProgress = document.getElementById('loadingProgress');
@@ -33975,6 +33950,14 @@ const Preloader = {
         };
 
         this.textures.smoke = this.createSmokeTexture();
+        this.textures.coin = loadTerrainTex('coin.png', () => this.createCoinFallbackTexture());
+        this.textures.coin.wrapS = THREE.ClampToEdgeWrapping;
+        this.textures.coin.wrapT = THREE.ClampToEdgeWrapping;
+        if (typeof SharedMat !== 'undefined' && SharedMat.coin) {
+            SharedMat.coin.map = this.textures.coin;
+            SharedMat.coin.emissiveMap = this.textures.coin;
+            SharedMat.coin.needsUpdate = true;
+        }
         this.textures.water = loadTerrainTex('forest_water.png', () => this.createLiquidTexture('water'));
         this.textures.waterLava = loadTerrainTex('lava_water.png', () => this.createLiquidTexture('lava'));
         this.textures.waterIce = loadTerrainTex('ice_water.png', () => this.createCanvasNoise('#062c4d', '#38bdf8', 320));
