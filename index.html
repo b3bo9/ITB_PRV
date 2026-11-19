@@ -4600,7 +4600,7 @@ const AppSettings = {
             if (Game.mistMat1) {
                 const tMist = Game.currentThemeIndex;
                 Game.mistMat1.opacity = isTouchDevice
-                    ? (this.isUltra ? (tMist === 2 ? 0.18 : (tMist === 1 ? 0.21 : 0.24)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
+                    ? (this.isUltra ? (tMist === 2 ? 0.16 : (tMist === 1 ? 0.18 : 0.21)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
                     : (this.isUltraPC ? (tMist === 2 ? 0.21 : (tMist === 1 ? 0.23 : 0.26)) : (tMist === 2 ? 0.27 : (tMist === 1 ? 0.29 : 0.33)));
             }
         }
@@ -4707,20 +4707,6 @@ const AppSettings = {
                     if (bankMat.bumpMap !== wantBankBump) {
                         bankMat.bumpMap = wantBankBump;
                         bankMat.needsUpdate = true;
-                    }
-                }
-                if (!this.useMobileLimits) {
-                    if (Game.map.meshPitFloor && Game.map.meshPitFloor.material && Game.map.meshPitFloor.material.isMeshPhongMaterial && !Game.map.meshPitFloor.material._ultraSpecCalibrated) {
-                        const pm = Game.map.meshPitFloor.material;
-                        pm._ultraSpecCalibrated = true;
-                        if (pm.specular) pm.specular.multiplyScalar(0.55);
-                        if (pm.shininess > 26) pm.shininess = 26;
-                    }
-                    if (Game.map.meshIceFloor && Game.map.meshIceFloor.material && Game.map.meshIceFloor.material.isMeshPhongMaterial && !Game.map.meshIceFloor.material._ultraSpecCalibrated) {
-                        const im = Game.map.meshIceFloor.material;
-                        im._ultraSpecCalibrated = true;
-                        if (im.specular) im.specular.setHex(0x121e28);
-                        im.shininess = 48;
                     }
                 }
                 if (Game.map.raysMesh) {
@@ -7396,8 +7382,8 @@ const UVAtlasMapper = {
                 slot = (parts && m === parts.body) ? 'body' : 'head';
             } else if (type === 'leaper') {
                 if (parts && m === parts.torso) slot = 'body';
-                else if (parts && isDescendant(m, parts.head)) slot = 'head';
-                else slot = 'weapon';
+                else if (typeof SharedMat !== 'undefined' && m.material === SharedMat.leaperTeeth) slot = 'weapon';
+                else slot = 'head';
             } else if (type === 'crystal') {
                 if (parts && isDescendant(m, parts.gem)) slot = 'body';
                 else if (m === (parts && parts.ring)) slot = 'weapon';
@@ -9314,23 +9300,17 @@ const SkinSystem = {
         const h = Math.max(1, vp.height);
 
         const renderScene = new THREE.RenderPass(this.scene, this.camera);
-        const hdrInfo = (typeof PcUltraGraphics !== 'undefined' && PcUltraGraphics.createComposerRenderTarget)
-            ? PcUltraGraphics.createComposerRenderTarget(this.renderer, w, h)
-            : { rt: null, isHdr: false };
-        this._hdrComposer = !!hdrInfo.isHdr;
-        this.composer = hdrInfo.rt ? new THREE.EffectComposer(this.renderer, hdrInfo.rt) : new THREE.EffectComposer(this.renderer);
+        this.composer = new THREE.EffectComposer(this.renderer);
         if (this.composer.setPixelRatio) this.composer.setPixelRatio(this.getMenuPixelRatio());
-        this.composer.setSize(w, h);
         this.composer.addPass(renderScene);
 
         if (typeof THREE.UnrealBloomPass !== 'undefined') {
             const bloomDiv = 2;
-            const bStr = this._hdrComposer ? (isTouchDevice ? 0.11 : 0.145) : (isTouchDevice ? 0.15 : 0.19);
-            const bRad = isTouchDevice ? 0.20 : 0.25;
-            const bThr = this._hdrComposer ? (isTouchDevice ? 1.00 : 0.96) : (isTouchDevice ? 0.89 : 0.86);
             this.bloomPass = new THREE.UnrealBloomPass(
                 new THREE.Vector2(Math.max(1, Math.floor(w / bloomDiv)), Math.max(1, Math.floor(h / bloomDiv))),
-                bStr, bRad, bThr
+                isTouchDevice ? 0.15 : 0.19,
+                isTouchDevice ? 0.20 : 0.25,
+                isTouchDevice ? 0.89 : 0.86
             );
             this.composer.addPass(this.bloomPass);
         }
@@ -13002,76 +12982,8 @@ const PcUltraGraphics = {
         return tex;
     },
 
-    createComposerRenderTarget(renderer, width, height) {
-        if (!renderer || typeof THREE.WebGLRenderTarget === 'undefined' || typeof THREE.HalfFloatType === 'undefined') {
-            return { rt: null, isHdr: false };
-        }
-        const gl = renderer.getContext ? renderer.getContext() : null;
-        const isWebGL2 = !!(renderer.capabilities && renderer.capabilities.isWebGL2);
-        let canHalfFloat = false;
-        let halfFloatExt = null;
-        if (gl) {
-            if (isWebGL2) {
-                canHalfFloat = !!(gl.getExtension('EXT_color_buffer_float') || gl.getExtension('EXT_color_buffer_half_float'));
-            } else {
-                halfFloatExt = gl.getExtension('OES_texture_half_float');
-                canHalfFloat = !!(
-                    halfFloatExt &&
-                    gl.getExtension('OES_texture_half_float_linear') &&
-                    gl.getExtension('EXT_color_buffer_half_float')
-                );
-            }
-        }
-        if (!canHalfFloat) return { rt: null, isHdr: false };
-
-        // Verifica reale completezza FBO HalfFloat su 2x2 per garantire 0 schermi neri su qualsiasi GPU mobile
-        let fb = null, tex = null;
-        try {
-            fb = gl.createFramebuffer();
-            tex = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, tex);
-            const internalFmt = isWebGL2 ? gl.RGBA16F : gl.RGBA;
-            const halfType = isWebGL2 ? gl.HALF_FLOAT : halfFloatExt.HALF_FLOAT_OES;
-            gl.texImage2D(gl.TEXTURE_2D, 0, internalFmt, 2, 2, 0, gl.RGBA, halfType, null);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-            const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-            gl.bindTexture(gl.TEXTURE_2D, null);
-            gl.deleteFramebuffer(fb);
-            gl.deleteTexture(tex);
-            if (renderer.state && renderer.state.reset) renderer.state.reset();
-            if (status !== gl.FRAMEBUFFER_COMPLETE) return { rt: null, isHdr: false };
-        } catch (e) {
-            try {
-                if (fb) gl.deleteFramebuffer(fb);
-                if (tex) gl.deleteTexture(tex);
-                if (renderer.state && renderer.state.reset) renderer.state.reset();
-            } catch (_) {}
-            return { rt: null, isHdr: false };
-        }
-
-        const pr = renderer.getPixelRatio ? renderer.getPixelRatio() : 1;
-        const rtW = Math.max(1, Math.floor((width || 1) * pr));
-        const rtH = Math.max(1, Math.floor((height || 1) * pr));
-        const rt = new THREE.WebGLRenderTarget(rtW, rtH, {
-            minFilter: THREE.LinearFilter,
-            magFilter: THREE.LinearFilter,
-            format: THREE.RGBAFormat,
-            type: THREE.HalfFloatType,
-            encoding: THREE.LinearEncoding,
-            depthBuffer: true,
-            stencilBuffer: false
-        });
-        rt.texture.name = 'EffectComposer.rt1.HDR';
-        return { rt, isHdr: true };
-    },
-
     createPostPass() {
         if (typeof THREE.ShaderPass === 'undefined') return null;
-        const isWideP3 = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(color-gamut: p3)').matches) ? 1.0 : 0.0;
         const shader = {
             uniforms: {
                 tDiffuse: { value: null },
@@ -13079,8 +12991,7 @@ const PcUltraGraphics = {
                 uBiomeId: PcUltraGraphics.uBiomeId,
                 uTrauma: PcUltraGraphics.uTrauma,
                 uUltra: PcUltraGraphics.uUltra,
-                uIsMobile: { value: (typeof isTouchDevice !== 'undefined' && isTouchDevice) ? 1.0 : 0.0 },
-                uIsWideGamut: { value: isWideP3 }
+                uIsMobile: { value: (typeof isTouchDevice !== 'undefined' && isTouchDevice) ? 1.0 : 0.0 }
             },
             vertexShader: `
                 varying vec2 vUv;
@@ -13096,7 +13007,6 @@ const PcUltraGraphics = {
                 uniform float uTrauma;
                 uniform float uUltra;
                 uniform float uIsMobile;
-                uniform float uIsWideGamut;
                 varying vec2 vUv;
 
                 float getLuma(vec3 c) {
@@ -13105,14 +13015,7 @@ const PcUltraGraphics = {
 
                 void main() {
                     if (uUltra < 0.5) {
-                        vec4 raw = texture2D(tDiffuse, vUv);
-                        vec3 c = max(raw.rgb, vec3(0.0));
-                        float m = max(c.r, max(c.g, c.b));
-                        if (m > 0.88) {
-                            float over = m - 0.88;
-                            c *= (0.88 + (0.12 * over) / (0.12 + over)) / m;
-                        }
-                        gl_FragColor = vec4(clamp(c, 0.0, 1.0), raw.a);
+                        gl_FragColor = texture2D(tDiffuse, vUv);
                         #include <encodings_fragment>
                         return;
                     }
@@ -13156,12 +13059,10 @@ const PcUltraGraphics = {
                         col = (lumaB < lumaMin || lumaB > lumaMax) ? rgbA : rgbB;
                     }
 
-                    // 2. Contrast-Adaptive Sharpen zero-extra-tap HDR-safe (evita aloni/ringing su alte luci HDR e pixel mobile)
+                    // 2. Contrast-Adaptive Sharpen zero-extra-tap: riusa i 4 campioni diagonali già in memoria
                     vec3 blur4 = (rgbNW + rgbNE + rgbSW + rgbSE) * 0.25;
                     float sharpAmt = mix(0.11, 0.03, smoothstep(0.08, 0.45, edgeContrast));
-                    sharpAmt *= mix(1.0, 0.68, uIsMobile) * (1.0 - smoothstep(0.85, 1.55, lumaMax) * 0.70);
-                    vec3 sharpDelta = clamp(col - blur4, vec3(-0.35), vec3(0.35));
-                    col = clamp(col + sharpDelta * sharpAmt, 0.0, 6.0);
+                    col = clamp(col + (col - blur4) * sharpAmt, 0.0, 4.0);
 
                     // 3. Aberrazione cromatica radiale sugli impatti pesanti (trauma)
                     if (uTrauma > 0.08) {
@@ -13172,47 +13073,39 @@ const PcUltraGraphics = {
                         col.b = mix(col.b, texture2D(tDiffuse, vUv - shift).b, 0.65);
                     }
 
-                    // 4. Tone-Mapping HDR a preservazione cromatica + spalla filmica morbida (parità PC Ultra / Smartphone OLED)
+                    // 4. Bilanciamento Esposizione, Contrasto S-Curve e Tone-Mapping a preservazione cromatica (calibrato per Smartphone Ultra e Bioma Ghiaccio)
                     float isIceBiome = smoothstep(1.5, 1.8, uBiomeId);
-                    col = max(col, vec3(0.0)) * mix(0.92, mix(0.90, 0.91, isIceBiome), uIsMobile);
+                    col = max(col, vec3(0.0)) * mix(0.92, mix(0.85, 0.91, isIceBiome), uIsMobile);
                     float linY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                     float rawMax = max(col.r, max(col.g, col.b));
                     float peakMetric = mix(linY, rawMax, 0.70);
                     if (peakMetric > 0.0001) {
                         float percP = sqrt(peakMetric);
-                        float sAmp = mix(0.034, 0.022, uIsMobile);
-                        float sCurve = -sAmp * sin(min(1.0, percP / 0.86) * 6.2831853) * (1.0 - smoothstep(0.62, 0.98, percP));
+                        float sCurve = -0.034 * sin(min(1.0, percP / 0.86) * 6.2831853) * (1.0 - smoothstep(0.62, 0.98, percP));
                         float percMapped = max(0.0, percP + sCurve);
                         float targetP = percMapped * percMapped;
-                        float kneeStart = mix(0.54, 0.52, uIsMobile);
-                        float kneeHead  = mix(0.36, 0.35, uIsMobile);
+                        float kneeStart = mix(0.54, mix(0.48, 0.52, isIceBiome), uIsMobile);
+                        float kneeHead  = mix(0.34, mix(0.28, 0.32, isIceBiome), uIsMobile);
                         if (targetP > kneeStart) {
                             float overP = targetP - kneeStart;
                             targetP = kneeStart + (kneeHead * overP) / (kneeHead + overP);
                         }
                         col *= (targetP / peakMetric);
-                        // Path-to-white filmico solo sui picchi HDR > 0.88: elimina l'effetto neon/bruciato preservando intatto il terreno
-                        float hiDesat = smoothstep(0.88, 2.50, peakMetric) * mix(0.20, 0.28, uIsMobile);
-                        if (hiDesat > 0.001) {
-                            float hiRef = max(col.r, max(col.g, col.b));
-                            col = mix(col, vec3(hiRef), hiDesat);
-                        }
                     }
-
                     float gradedY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                     float maxCh = max(col.r, max(col.g, col.b));
                     float minCh = min(col.r, min(col.g, col.b));
                     float satEst = maxCh > 0.0001 ? (maxCh - minCh) / maxCh : 0.0;
                     float isFireBiome = smoothstep(0.5, 0.8, uBiomeId) * (1.0 - isIceBiome);
-                    float baseVib = mix(mix(0.11, 0.04, uIsMobile), mix(0.08, 0.02, uIsMobile), isFireBiome);
-                    baseVib = mix(baseVib, mix(0.05, 0.00, uIsMobile), isIceBiome);
+                    float baseVib = mix(mix(0.11, 0.12, uIsMobile), mix(0.08, 0.07, uIsMobile), isFireBiome);
+                    baseVib = mix(baseVib, mix(0.05, 0.02, uIsMobile), isIceBiome);
                     float vibAmt = baseVib * (1.0 - satEst * 0.60) * smoothstep(0.02, 0.14, gradedY);
                     col = max(vec3(0.0), vec3(gradedY) + (col - vec3(gradedY)) * (1.0 + vibAmt));
 
                     // Roll-off selettivo dell'eccesso di azzurro nel bioma Ghiaccio (preserva al 100% rossi, ori, verdi e incantesimi)
                     if (isIceBiome > 0.01) {
                         float blueExcess = max(0.0, col.b - max(col.r, col.g));
-                        float desatIce = clamp(blueExcess * mix(0.45, 0.56, uIsMobile), 0.0, 0.22) * isIceBiome;
+                        float desatIce = clamp(blueExcess * mix(0.45, 0.72, uIsMobile), 0.0, 0.24) * isIceBiome;
                         float iceY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                         col = mix(col, vec3(iceY), desatIce);
                     }
@@ -13221,16 +13114,16 @@ const PcUltraGraphics = {
                         float firePeak = max(col.r, max(col.g, col.b));
                         float midRedWeight = 1.0 - smoothstep(0.42, 0.85, firePeak);
                         float redExcess = max(0.0, col.r - max(col.g, col.b));
-                        float desatFire = clamp(redExcess * mix(0.22, 0.26, uIsMobile), 0.0, 0.11) * isFireBiome * midRedWeight;
+                        float desatFire = clamp(redExcess * mix(0.22, 0.34, uIsMobile), 0.0, 0.12) * isFireBiome * midRedWeight;
                         float fireY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                         col = mix(col, vec3(fireY), desatFire);
                     }
 
                     // Soft-ceiling a rapporto RGB costante: impedisce il clipping del singolo canale prima di LinearToSRGB
                     float curMax = max(col.r, max(col.g, col.b));
-                    float ceilKnee = mix(0.84, 0.82, uIsMobile);
+                    float ceilKnee = mix(0.84, 0.78, uIsMobile);
                     if (curMax > ceilKnee) {
-                        float ceilHead = mix(0.15, 0.16, uIsMobile);
+                        float ceilHead = mix(0.14, 0.16, uIsMobile);
                         float overC = curMax - ceilKnee;
                         float compMax = ceilKnee + (ceilHead * overC) / (ceilHead + overC);
                         col *= (compMax / curMax);
@@ -13239,17 +13132,6 @@ const PcUltraGraphics = {
                     vec3 shadowTint = uBiomeId > 1.5 ? vec3(0.985, 0.995, 1.01) : (uBiomeId > 0.5 ? vec3(1.015, 0.99, 0.985) : vec3(0.98, 1.02, 0.99));
                     float lum = getLuma(col);
                     col *= mix(shadowTint, vec3(0.99, 0.99, 0.99), smoothstep(0.20, 0.85, lum));
-
-                    // Compensazione gamut OLED Wide-Gamut (matrice lineare sRGB -> Display P3 W3C, somma righe = 1.0: punto bianco intatto)
-                    if (uIsMobile > 0.5) {
-                        vec3 p3Col = vec3(
-                            dot(col, vec3(0.8225, 0.1774, 0.0001)),
-                            dot(col, vec3(0.0332, 0.9668, 0.0000)),
-                            dot(col, vec3(0.0171, 0.0724, 0.9105))
-                        );
-                        float gamutAmt = mix(0.18, 0.52, uIsWideGamut);
-                        col = mix(col, p3Col, gamutAmt);
-                    }
 
                     gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
                     #include <encodings_fragment>
@@ -13280,7 +13162,7 @@ const PcUltraGraphics = {
 
         if (typeof Game !== 'undefined') {
             if (Game.rimLight) {
-                Game.rimLight.intensity = (isUltraPC && !isDarkness && !Game.arenaEvolution) ? (isTouchDevice ? 0.16 : 0.18) : 0.0;
+                Game.rimLight.intensity = (isUltraPC && !isDarkness && !Game.arenaEvolution) ? (isTouchDevice ? 0.12 : 0.18) : 0.0;
                 const rimHex = themeIdx === 2 ? 0xaad4f0 : (themeIdx === 1 ? 0xf2b078 : 0x66cc99);
                 Game.rimLight.color.setHex(rimHex);
             }
@@ -13957,13 +13839,7 @@ const ModelTextureFactory = {
                 sashCol: isProphet ? 'rgba(255,115,35,0.42)' : 'rgba(168,85,247,0.36)',
                 pattern: 'stars'
             }, false, rand);
-            this._paintHeadSlot(ctx, slots.head, sz, {
-                headType: 'sphereFace',
-                headBase: isProphet ? '#f7f0ec' : '#f2eeff',
-                faceShadow: isProphet ? 'rgba(36,8,6,0.78)' : 'rgba(18,8,38,0.78)',
-                eyeCol: isProphet ? '#ffaa22' : '#d8b4fe',
-                browMark: isProphet ? '#ff5500' : '#c084fc'
-            }, true, rand);
+            this._paintRegionBase(ctx, hR, isProphet ? '#fff4ea' : '#f2f6ff', isProphet ? 'rgba(58,14,6,0.28)' : 'rgba(18,24,64,0.28)', 'rgba(255,255,255,0.34)', rand, 5);
             this._paintRegionBase(ctx, aR, '#ece6ee', 'rgba(18,12,28,0.32)', 'rgba(255,255,255,0.18)', rand, 4);
             this._paintRegionBase(ctx, wR, '#ffffff', isProphet ? 'rgba(140,40,10,0.22)' : 'rgba(60,20,120,0.20)', 'rgba(255,255,255,0.40)', rand, 4);
             drawCracks(wR, isProphet ? 'rgba(255,165,45,0.55)' : 'rgba(255,255,255,0.55)', 6, 1.4);
@@ -15946,51 +15822,28 @@ const ModelFactory = {
             parts.chargeGlow = chargeGlow;
         }
         else if (type === 'slime' || type === 'slime_mini') {
-            // Base gelatinosa aderente al terreno + cupola sfaccettata low-poly
-            let puddle = new THREE.Mesh(SharedGeo.cylinder, mat);
-            puddle.scale.set(size * 1.56, size * 0.16, size * 1.56);
-            puddle.position.y = size * 0.08;
-
-            let body = new THREE.Mesh(SharedGeo.icosahedron, mat);
+            // Classica cupola gelatinosa morbida con occhi scuri ancorati al corpo (rimbalzano insieme alla gelatina!)
+            let body = new THREE.Mesh(SharedGeo.sphere, mat);
             body.scale.set(size * 1.5, size * 0.8, size * 1.5);
-            body.position.y = size * 0.78;
+            body.position.y = size * 0.8;
 
-            // Occhi espressivi, pupille luminose, sopracciglia e bolle figli di body: rimbalzano insieme alla gelatina!
             let eyeL = new THREE.Mesh(SharedGeo.sphere, darkMat);
-            eyeL.scale.set(0.18, 0.34, 0.14);
-            eyeL.position.set(-0.36, 0.24, 0.80);
+            eyeL.scale.set(0.20, 0.375, 0.135);
+            eyeL.position.set(-0.40, 0.375, 0.86);
 
             let eyeR = new THREE.Mesh(SharedGeo.sphere, darkMat);
-            eyeR.scale.set(0.18, 0.34, 0.14);
-            eyeR.position.set(0.36, 0.24, 0.80);
+            eyeR.scale.set(0.20, 0.375, 0.135);
+            eyeR.position.set(0.40, 0.375, 0.86);
 
             let glintL = new THREE.Mesh(SharedGeo.box, SharedMat.leaperTeeth);
-            glintL.scale.set(0.08, 0.14, 0.06);
-            glintL.position.set(-0.32, 0.34, 0.90);
+            glintL.scale.set(0.06, 0.11, 0.05);
+            glintL.position.set(-0.34, 0.50, 0.985);
 
             let glintR = new THREE.Mesh(SharedGeo.box, SharedMat.leaperTeeth);
-            glintR.scale.set(0.08, 0.14, 0.06);
-            glintR.position.set(0.40, 0.34, 0.90);
+            glintR.scale.set(0.06, 0.11, 0.05);
+            glintR.position.set(0.46, 0.50, 0.985);
 
-            let browL = new THREE.Mesh(SharedGeo.box, darkMat);
-            browL.scale.set(0.28, 0.10, 0.10);
-            browL.position.set(-0.36, 0.50, 0.80);
-            browL.rotation.z = -0.26;
-
-            let browR = new THREE.Mesh(SharedGeo.box, darkMat);
-            browR.scale.set(0.28, 0.10, 0.10);
-            browR.position.set(0.36, 0.50, 0.80);
-            browR.rotation.z = 0.26;
-
-            let bubbleA = new THREE.Mesh(SharedGeo.icosahedron, mat);
-            bubbleA.scale.set(0.24, 0.42, 0.24);
-            bubbleA.position.set(-0.56, 0.56, -0.22);
-
-            let bubbleB = new THREE.Mesh(SharedGeo.icosahedron, mat);
-            bubbleB.scale.set(0.17, 0.30, 0.17);
-            bubbleB.position.set(0.52, 0.64, -0.32);
-
-            body.add(eyeL, eyeR, glintL, glintR, browL, browR, bubbleA, bubbleB);
+            body.add(eyeL, eyeR, glintL, glintR);
 
             if (!SharedMat.spritePurple) {
                 SharedMat.spritePurple = new THREE.SpriteMaterial({color: 0xaa00ff, map: GLOW_TEX, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false});
@@ -15999,7 +15852,7 @@ const ModelFactory = {
             glow.scale.set(size * 5, size * 5, 1);
             glow.position.y = size * 0.8;
 
-            group.add(puddle, body, glow);
+            group.add(body, glow);
             parts.body = body;
         } else if (type === 'orc') {
             // Gambe tozze da bruto con stivali corazzati
@@ -16492,108 +16345,75 @@ const ModelFactory = {
             parts.fireShield = fireShield;
         } else if (type === 'mage' || type === 'dark_prophet') {
             const isProphet = (type === 'dark_prophet');
-            // Veste occulta con mantellina sulle spalle e maniche tese in incantesimo
-            let robe = new THREE.Mesh(SharedGeo.cone, mat);
-            robe.scale.set(size * 1.24, size * 3.15, size * 1.24);
-            robe.position.y = size * 1.58;
+            // Classica veste scura slanciata con collare colorato e testa sferica luminosa (coerente col Mago Oscuro)
+            let robe = new THREE.Mesh(SharedGeo.cone, darkMat);
+            robe.scale.set(size * 1.22, size * 3.55, size * 1.22);
+            robe.position.y = size * 1.78;
 
-            let mantle = new THREE.Mesh(SharedGeo.cone, darkMat);
-            mantle.scale.set(size * 1.18, size * 1.05, size * 1.12);
-            mantle.position.set(0, size * 2.28, -size * 0.04);
+            let collar = new THREE.Mesh(SharedGeo.torus, mat);
+            collar.scale.set(size * 0.52, size * 0.52, size * 0.24);
+            collar.rotation.x = Math.PI / 2;
+            collar.position.y = size * 2.38;
 
-            let sleeveL = new THREE.Mesh(SharedGeo.cone, darkMat);
-            sleeveL.scale.set(size * 0.30, size * 1.05, size * 0.30);
-            sleeveL.position.set(-size * 0.80, size * 1.98, size * 0.42);
-            sleeveL.rotation.set(1.05, 0, 0.34);
+            let hood = new THREE.Mesh(SharedGeo.sphere, mat);
+            hood.scale.set(size * 0.78, size * 0.78, size * 0.78);
+            hood.position.y = size * 2.86;
 
-            let sleeveR = new THREE.Mesh(SharedGeo.cone, darkMat);
-            sleeveR.scale.set(size * 0.30, size * 1.05, size * 0.30);
-            sleeveR.position.set(size * 0.80, size * 1.98, size * 0.42);
-            sleeveR.rotation.set(1.05, 0, -0.34);
-
-            // Testa incappucciata nell'ombra con occhi luminosi penetranti
-            let headGroup = new THREE.Group();
-            headGroup.position.set(0, size * 2.92, size * 0.04);
-
-            let faceShadow = new THREE.Mesh(SharedGeo.sphere, darkMat);
-            faceShadow.scale.set(size * 0.56, size * 0.58, size * 0.56);
-
-            let cowl = new THREE.Mesh(SharedGeo.cone, mat);
-            cowl.scale.set(size * 0.84, size * 1.38, size * 0.88);
-            cowl.position.set(0, size * 0.34, -size * 0.24);
-            cowl.rotation.x = -0.68;
+            let hoodCap = new THREE.Mesh(SharedGeo.cone, darkMat);
+            hoodCap.scale.set(size * 0.72, size * 1.05, size * 0.72);
+            hoodCap.position.set(0, size * 3.38, -size * 0.22);
+            hoodCap.rotation.x = -0.45;
 
             let eyeMat = isProphet ? SharedMat.prophetGem : SharedMat.enemyEye;
             let mEyeL = new THREE.Mesh(SharedGeo.box, eyeMat);
-            mEyeL.scale.set(size * 0.16, size * 0.09, size * 0.08);
-            mEyeL.position.set(-size * 0.19, size * 0.04, size * 0.52);
-            mEyeL.rotation.z = -0.22;
+            mEyeL.scale.set(size * 0.18, size * 0.10, size * 0.10);
+            mEyeL.position.set(-size * 0.26, size * 2.84, size * 0.73);
+            mEyeL.rotation.z = -0.18;
 
             let mEyeR = new THREE.Mesh(SharedGeo.box, eyeMat);
-            mEyeR.scale.set(size * 0.16, size * 0.09, size * 0.08);
-            mEyeR.position.set(size * 0.19, size * 0.04, size * 0.52);
-            mEyeR.rotation.z = 0.22;
-
-            headGroup.add(faceShadow, cowl, mEyeL, mEyeR);
-
-            if (isProphet) {
-                // Corona bicornuta da Profeta Oscuro
-                let pHornL = new THREE.Mesh(SharedGeo.cone, SharedMat.prophetGem);
-                pHornL.scale.set(size * 0.14, size * 0.78, size * 0.14);
-                pHornL.position.set(-size * 0.46, size * 0.72, size * 0.06);
-                pHornL.rotation.set(0.18, 0, 0.46);
-                let pHornR = new THREE.Mesh(SharedGeo.cone, SharedMat.prophetGem);
-                pHornR.scale.set(size * 0.14, size * 0.78, size * 0.14);
-                pHornR.position.set(size * 0.46, size * 0.72, size * 0.06);
-                pHornR.rotation.set(0.18, 0, -0.46);
-                headGroup.add(pHornL, pHornR);
-            }
+            mEyeR.scale.set(size * 0.18, size * 0.10, size * 0.10);
+            mEyeR.position.set(size * 0.26, size * 2.84, size * 0.73);
+            mEyeR.rotation.z = 0.18;
 
             let crystals = new THREE.Group();
-            crystals.position.y = size * 1.65;
+            crystals.position.y = size * 1.5;
 
             if (isProphet) {
                 let staffGroup = new THREE.Group();
-                staffGroup.position.set(-size * 1.15, size * 1.10, size * 0.45);
-                staffGroup.rotation.x = Math.PI / 5;
+                staffGroup.position.set(-size, size * 1.5, size * 0.5);
+                staffGroup.rotation.x = Math.PI / 4;
 
                 let staff = new THREE.Mesh(SharedGeo.cylinder, darkMat);
-                staff.scale.set(size * 0.17, size * 3.0, size * 0.17);
+                staff.scale.set(size * 0.18, size * 3.0, size * 0.18);
 
-                let prongL = new THREE.Mesh(SharedGeo.cone, darkMat);
-                prongL.scale.set(size * 0.11, size * 0.62, size * 0.11);
-                prongL.position.set(-size * 0.24, size * 1.48, 0);
-                prongL.rotation.z = 0.42;
-
-                let prongR = new THREE.Mesh(SharedGeo.cone, darkMat);
-                prongR.scale.set(size * 0.11, size * 0.62, size * 0.11);
-                prongR.position.set(size * 0.24, size * 1.48, 0);
-                prongR.rotation.z = -0.42;
+                let staffRing = new THREE.Mesh(SharedGeo.torus, darkMat);
+                staffRing.scale.set(size * 0.26, size * 0.26, size * 0.12);
+                staffRing.rotation.x = Math.PI / 2;
+                staffRing.position.set(0, size * 1.32, 0);
 
                 let staffGem = new THREE.Mesh(SharedGeo.icosahedron, SharedMat.prophetGem);
-                staffGem.scale.setScalar(size * 0.36);
-                staffGem.position.set(0, size * 1.64, 0);
+                staffGem.scale.set(size * 0.36, size * 0.36, size * 0.36);
+                staffGem.position.set(0, size * 1.55, 0);
 
                 let staffGlow = new THREE.Sprite(SharedMat.prophetSpriteGlow);
-                staffGlow.scale.set(size * 2.6, size * 2.6, 1);
-                staffGlow.position.set(0, size * 1.64, 0);
+                staffGlow.scale.set(size * 2.5, size * 2.5, 1);
+                staffGlow.position.set(0, size * 1.55, 0);
 
-                staffGroup.add(staff, prongL, prongR, staffGem, staffGlow);
+                staffGroup.add(staff, staffRing, staffGem, staffGlow);
 
-                // Grimorio aperto a V orbitante con pagine luminose
+                // Grimorio orbitante fedele alla silhouette originale con dorso scuro e pagine luminose
                 let bookGroup = new THREE.Group();
-                bookGroup.position.set(size * 1.12, size * 1.15, size * 0.68);
-                bookGroup.rotation.set(0.32, -0.45, 0.22);
-                let bCovL = new THREE.Mesh(SharedGeo.box, darkMat);
-                bCovL.scale.set(size * 0.54, size * 0.10, size * 0.72);
-                bCovL.position.set(-size * 0.24, 0, 0); bCovL.rotation.z = 0.38;
-                let bCovR = new THREE.Mesh(SharedGeo.box, darkMat);
-                bCovR.scale.set(size * 0.54, size * 0.10, size * 0.72);
-                bCovR.position.set(size * 0.24, 0, 0); bCovR.rotation.z = -0.38;
-                let bPages = new THREE.Mesh(SharedGeo.box, SharedMat.prophetGem);
-                bPages.scale.set(size * 0.82, size * 0.09, size * 0.62);
-                bPages.position.set(0, size * 0.08, 0);
-                bookGroup.add(bCovL, bCovR, bPages);
+                bookGroup.position.set(size, size * 1.5, size * 0.8);
+                bookGroup.rotation.z = Math.PI / 4;
+                let bookCover = new THREE.Mesh(SharedGeo.box, mat);
+                bookCover.scale.set(size * 0.82, size * 0.22, size * 0.62);
+                let bookSpine = new THREE.Mesh(SharedGeo.box, darkMat);
+                bookSpine.scale.set(size * 0.14, size * 0.24, size * 0.64);
+                bookSpine.position.set(-size * 0.38, 0, 0);
+                let bookPages = new THREE.Mesh(SharedGeo.box, SharedMat.prophetGem);
+                bookPages.scale.set(size * 0.76, size * 0.10, size * 0.54);
+                bookPages.position.set(size * 0.04, 0, 0);
+                bookGroup.add(bookCover, bookSpine, bookPages);
 
                 crystals.add(staffGroup, bookGroup);
 
@@ -16602,120 +16422,65 @@ const ModelFactory = {
                 selfGlow.position.y = size * 1.5;
                 group.add(selfGlow);
             } else {
-                // 3 schegge cristalline bifacciali affilate orbitanti
                 for (let i = 0; i < 3; i++) {
-                    let a = (i * Math.PI * 2) / 3;
-                    let shard = new THREE.Group();
-                    shard.position.set(Math.cos(a) * size * 1.52, Math.sin(i * 2.1) * size * 0.22, Math.sin(a) * size * 1.52);
-                    let topS = new THREE.Mesh(SharedGeo.cone, mat);
-                    topS.scale.set(size * 0.28, size * 0.62, size * 0.28);
-                    topS.position.y = size * 0.30;
-                    let botS = new THREE.Mesh(SharedGeo.cone, mat);
-                    botS.scale.set(size * 0.28, size * 0.46, size * 0.28);
-                    botS.rotation.x = Math.PI;
-                    botS.position.y = -size * 0.22;
-                    shard.add(topS, botS);
-                    crystals.add(shard);
+                    let c = new THREE.Mesh(SharedGeo.icosahedron, mat);
+                    c.scale.set(size * 0.42, size * 0.66, size * 0.42);
+                    c.position.set(Math.cos(i * Math.PI * 2 / 3) * size * 1.5, 0, Math.sin(i * Math.PI * 2 / 3) * size * 1.5);
+                    crystals.add(c);
                 }
             }
-            group.add(robe, mantle, sleeveL, sleeveR, headGroup, crystals);
+            group.add(robe, collar, hood, hoodCap, mEyeL, mEyeR, crystals);
             parts.torso = robe;
-            parts.head = headGroup;
+            parts.head = hood;
             parts.crystals = crystals;
         } else if (type === 'leaper') {
-            // Segugio-Imp predatore accucciato pronto al balzo: zampe molleggiate, fauci con 3 zanne, orecchie e coda uncinata
-            let body = new THREE.Mesh(SharedGeo.icosahedron, mat);
-            body.scale.set(size * 1.05, size * 0.84, size * 1.38);
-            body.position.set(0, size * 1.08, -size * 0.08);
+            // Classica sfera-ariete cornuta da scatto, rifinita con occhi feroci, sopracciglio, zanne laterali e alette aerodinamiche
+            let body = new THREE.Mesh(SharedGeo.sphere, mat);
+            body.scale.set(size * 1.2, size * 1.15, size * 1.25);
+            body.position.y = size * 1.2;
 
-            // Cresta dorsale seghettata
-            for (let s = 0; s < 3; s++) {
-                let spine = new THREE.Mesh(SharedGeo.cone, darkMat);
-                spine.scale.set(size * 0.16, size * (0.58 - s * 0.10), size * 0.24);
-                spine.position.set(0, size * (1.84 - s * 0.10), size * (0.34 - s * 0.48));
-                spine.rotation.x = -0.68;
-                group.add(spine);
-            }
+            let horn = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+            horn.scale.set(size * 0.74, size * 2.85, size * 0.74);
+            horn.position.set(0, size * 1.18, size * 1.05);
+            horn.rotation.x = Math.PI / 2;
 
-            // 4 zampe angolari pronte allo scatto con artigli
-            const buildPounceLimb = (sx, sz, hScale, tiltX) => {
-                let lg = new THREE.Group();
-                lg.position.set(sx, size * 0.86, sz);
-                let upper = new THREE.Mesh(SharedGeo.box, darkMat);
-                upper.scale.set(size * 0.34, size * hScale, size * 0.40);
-                upper.position.set(0, -size * hScale * 0.42, 0);
-                upper.rotation.x = tiltX;
-                let paw = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
-                paw.scale.set(size * 0.20, size * 0.42, size * 0.20);
-                paw.rotation.x = Math.PI / 2;
-                paw.position.set(0, -size * 0.72, size * 0.26);
-                lg.add(upper, paw);
-                return lg;
-            };
-            let legFL = buildPounceLimb(-size * 0.86, size * 0.58, 0.82, -0.32);
-            let legFR = buildPounceLimb(size * 0.86, size * 0.58, 0.82, -0.32);
-            let legBL = buildPounceLimb(-size * 0.96, -size * 0.74, 0.96, 0.45);
-            let legBR = buildPounceLimb(size * 0.96, -size * 0.74, 0.96, 0.45);
+            let tuskL = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+            tuskL.scale.set(size * 0.24, size * 0.95, size * 0.24);
+            tuskL.position.set(-size * 0.56, size * 0.96, size * 0.96);
+            tuskL.rotation.set(Math.PI / 2 + 0.08, -0.22, 0);
 
-            // Testa feroce, muso spalancato, 3 zanne affilate, occhi rossi obliqui e orecchie lunghe
-            let headGroup = new THREE.Group();
-            headGroup.position.set(0, size * 1.24, size * 1.05);
-
-            let snout = new THREE.Mesh(SharedGeo.box, mat);
-            snout.scale.set(size * 1.04, size * 0.62, size * 0.96);
-            snout.position.set(0, size * 0.14, size * 0.16);
+            let tuskR = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+            tuskR.scale.set(size * 0.24, size * 0.95, size * 0.24);
+            tuskR.position.set(size * 0.56, size * 0.96, size * 0.96);
+            tuskR.rotation.set(Math.PI / 2 + 0.08, 0.22, 0);
 
             let brow = new THREE.Mesh(SharedGeo.box, darkMat);
-            brow.scale.set(size * 1.12, size * 0.22, size * 0.88);
-            brow.position.set(0, size * 0.48, size * 0.14);
-            brow.rotation.x = 0.22;
-
-            let lowerJaw = new THREE.Mesh(SharedGeo.box, darkMat);
-            lowerJaw.scale.set(size * 0.92, size * 0.22, size * 0.82);
-            lowerJaw.position.set(0, -size * 0.28, size * 0.24);
-            lowerJaw.rotation.x = 0.22;
+            brow.scale.set(size * 1.18, size * 0.20, size * 0.60);
+            brow.position.set(0, size * 1.78, size * 0.66);
+            brow.rotation.x = 0.28;
 
             let eyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
-            eyeL.scale.set(size * 0.24, size * 0.12, size * 0.14);
-            eyeL.position.set(-size * 0.34, size * 0.28, size * 0.64);
-            eyeL.rotation.z = -0.30;
+            eyeL.scale.set(size * 0.28, size * 0.14, size * 0.14);
+            eyeL.position.set(-size * 0.50, size * 1.54, size * 1.06);
+            eyeL.rotation.z = -0.28;
 
             let eyeR = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
-            eyeR.scale.set(size * 0.24, size * 0.12, size * 0.14);
-            eyeR.position.set(size * 0.34, size * 0.28, size * 0.64);
-            eyeR.rotation.z = 0.30;
+            eyeR.scale.set(size * 0.28, size * 0.14, size * 0.14);
+            eyeR.position.set(size * 0.50, size * 1.54, size * 1.06);
+            eyeR.rotation.z = 0.28;
 
-            // 3 zanne bianche affilate
-            for (let f = -1; f <= 1; f++) {
-                let fang = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
-                let fH = (f === 0) ? size * 0.42 : size * 0.56;
-                fang.scale.set(size * 0.12, fH, size * 0.12);
-                fang.position.set(f * size * 0.30, -size * 0.08, size * 0.64);
-                fang.rotation.x = Math.PI + 0.18;
-                headGroup.add(fang);
-            }
+            let finL = new THREE.Mesh(SharedGeo.cone, darkMat);
+            finL.scale.set(size * 0.22, size * 0.82, size * 0.24);
+            finL.position.set(-size * 0.68, size * 1.88, -size * 0.26);
+            finL.rotation.set(-0.82, 0, 0.45);
 
-            let earL = new THREE.Mesh(SharedGeo.cone, mat);
-            earL.scale.set(size * 0.20, size * 0.92, size * 0.24);
-            earL.position.set(-size * 0.56, size * 0.68, -size * 0.22);
-            earL.rotation.set(-0.78, 0, 0.48);
+            let finR = new THREE.Mesh(SharedGeo.cone, darkMat);
+            finR.scale.set(size * 0.22, size * 0.82, size * 0.24);
+            finR.position.set(size * 0.68, size * 1.88, -size * 0.26);
+            finR.rotation.set(-0.82, 0, -0.45);
 
-            let earR = new THREE.Mesh(SharedGeo.cone, mat);
-            earR.scale.set(size * 0.20, size * 0.92, size * 0.24);
-            earR.position.set(size * 0.56, size * 0.68, -size * 0.22);
-            earR.rotation.set(-0.78, 0, -0.48);
-
-            headGroup.add(snout, brow, lowerJaw, eyeL, eyeR, earL, earR);
-
-            // Coda frusta uncinata
-            let tail = new THREE.Mesh(SharedGeo.cone, darkMat);
-            tail.scale.set(size * 0.20, size * 1.45, size * 0.20);
-            tail.position.set(0, size * 1.18, -size * 1.56);
-            tail.rotation.x = -1.12;
-
-            group.add(body, legFL, legFR, legBL, legBR, headGroup, tail);
+            group.add(body, horn, tuskL, tuskR, brow, eyeL, eyeR, finL, finR);
             parts.torso = body;
-            parts.head = headGroup;
        } else if (type === 'fire_demon') {
 
             let pelvis = new THREE.Mesh(SharedGeo.cylinder, darkMat);
@@ -19388,7 +19153,7 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
         this.scene.add(this.dirLight.target);
         this.updateShadowConfig();
 
-        this.rimLight = new THREE.DirectionalLight(0x88bbff, AppSettings.isUltraPC ? (isTouchDevice ? 0.16 : 0.18) : 0.0);
+        this.rimLight = new THREE.DirectionalLight(0x88bbff, AppSettings.isUltraPC ? (isTouchDevice ? 0.12 : 0.18) : 0.0);
         this.rimLight.position.set(420, 460, 420);
         this.rimLight.castShadow = false;
         this.scene.add(this.rimLight);
@@ -19727,20 +19492,19 @@ prewarmShaders() {
     },
     getBloomSpec(themeIdx) {
         const isIce = (themeIdx === 2);
-        const isHdr = !!this._hdrComposer;
         if (isTouchDevice) {
             return {
-                strength: isHdr ? (isIce ? 0.068 : 0.082) : (isIce ? 0.085 : 0.105),
+                strength: isIce ? 0.085 : 0.105,
                 radius: isIce ? 0.10 : 0.12,
-                threshold: isHdr ? (isIce ? 1.04 : 0.98) : (isIce ? 0.92 : 0.89)
+                threshold: isIce ? 0.92 : 0.89
             };
         }
         return {
-            strength: isHdr
-                ? (isIce ? (AppSettings.isUltraPC ? 0.080 : 0.10) : (AppSettings.isUltraPC ? 0.098 : 0.125))
-                : (isIce ? (AppSettings.isUltraPC ? 0.095 : 0.12) : (AppSettings.isUltraPC ? 0.12 : 0.16)),
+            strength: isIce
+                ? (AppSettings.isUltraPC ? 0.095 : 0.12)
+                : (AppSettings.isUltraPC ? 0.12 : 0.16),
             radius: isIce ? 0.12 : 0.15,
-            threshold: isHdr ? (isIce ? 1.02 : 0.96) : (isIce ? 0.90 : 0.87)
+            threshold: isIce ? 0.90 : 0.87
         };
     },
     applyBloomSpec(themeIdx = this.currentThemeIndex) {
@@ -19757,16 +19521,11 @@ prewarmShaders() {
     ensureComposer() {
         if (this.composer || !this.renderer || !this.scene || !this.camera || AppSettings.useMobileLimits) return;
         const renderScene = new THREE.RenderPass(this.scene, this.camera);
-        const hdrInfo = (typeof PcUltraGraphics !== 'undefined' && PcUltraGraphics.createComposerRenderTarget)
-            ? PcUltraGraphics.createComposerRenderTarget(this.renderer, this.width, this.height)
-            : { rt: null, isHdr: false };
-        this._hdrComposer = !!hdrInfo.isHdr;
         const bSpec = this.getBloomSpec(this.currentThemeIndex);
         const bloomDiv = 2;
         this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(Math.max(1, Math.floor(this.width / bloomDiv)), Math.max(1, Math.floor(this.height / bloomDiv))), bSpec.strength, bSpec.radius, bSpec.threshold);
-        this.composer = hdrInfo.rt ? new THREE.EffectComposer(this.renderer, hdrInfo.rt) : new THREE.EffectComposer(this.renderer);
+        this.composer = new THREE.EffectComposer(this.renderer);
         if (this.composer.setPixelRatio) this.composer.setPixelRatio(AppSettings.getTargetPixelRatio());
-        this.composer.setSize(this.width, this.height);
         this.composer.addPass(renderScene);
         this.composer.addPass(this.bloomPass);
         this.ultraPostPass = PcUltraGraphics.createPostPass();
@@ -20653,7 +20412,7 @@ if (this.floor >= 3 && type !== 'dark_prophet' && Math.random() < (this.floor <=
                 this.dirLight.color.lerp(Game._colorDawnLight, dt * 1.4);
             }
             if (this.rimLight) {
-                const targetRim = (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? (isTouchDevice ? 0.16 : 0.18) : 0.0;
+                const targetRim = (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? (isTouchDevice ? 0.12 : 0.18) : 0.0;
                 this.rimLight.intensity += (targetRim - this.rimLight.intensity) * Math.min(1, dt * 1.4);
             }
             if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && AppSettings.isUltraPC && this.scene && !this.scene.environment) {
@@ -21170,7 +20929,7 @@ loop(timestamp) {
                 }
                 const tMist = this.currentThemeIndex;
                 this.mistMat1.opacity = isTouchDevice
-                    ? (AppSettings.isUltra ? (tMist === 2 ? 0.18 : (tMist === 1 ? 0.21 : 0.24)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
+                    ? (AppSettings.isUltra ? (tMist === 2 ? 0.16 : (tMist === 1 ? 0.18 : 0.21)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
                     : (AppSettings.isUltraPC ? (tMist === 2 ? 0.21 : (tMist === 1 ? 0.23 : 0.26)) : (tMist === 2 ? 0.27 : (tMist === 1 ? 0.29 : 0.33)));
             }
         }
@@ -21656,7 +21415,7 @@ startGame(diffMult) {
         if (this.mistMat1) {
             const tMist = targetThemeIdx;
             this.mistMat1.opacity = isTouchDevice
-                ? (AppSettings.isUltra ? (tMist === 2 ? 0.18 : (tMist === 1 ? 0.21 : 0.24)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
+                ? (AppSettings.isUltra ? (tMist === 2 ? 0.16 : (tMist === 1 ? 0.18 : 0.21)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
                 : (AppSettings.isUltraPC ? (tMist === 2 ? 0.21 : (tMist === 1 ? 0.23 : 0.26)) : (tMist === 2 ? 0.27 : (tMist === 1 ? 0.29 : 0.33)));
         }
 
