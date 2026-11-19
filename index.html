@@ -4600,7 +4600,7 @@ const AppSettings = {
             if (Game.mistMat1) {
                 const tMist = Game.currentThemeIndex;
                 Game.mistMat1.opacity = isTouchDevice
-                    ? (this.isUltra ? (tMist === 2 ? 0.16 : (tMist === 1 ? 0.18 : 0.21)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
+                    ? (this.isUltra ? (tMist === 2 ? 0.18 : (tMist === 1 ? 0.21 : 0.24)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
                     : (this.isUltraPC ? (tMist === 2 ? 0.21 : (tMist === 1 ? 0.23 : 0.26)) : (tMist === 2 ? 0.27 : (tMist === 1 ? 0.29 : 0.33)));
             }
         }
@@ -4634,9 +4634,11 @@ const AppSettings = {
                 SharedMat.enemyDark.bumpMap = wantDarkArmorBump;
                 SharedMat.enemyDark.needsUpdate = true;
             }
-            if (SharedMat.deadObelisk && (SharedMat.deadObelisk.bumpMap !== wantDesktopBump || SharedMat.deadObelisk.map !== wantCharTex)) {
-                SharedMat.deadObelisk.map = wantCharTex;
-                SharedMat.deadObelisk.bumpMap = wantDesktopBump;
+            const obTex = (typeof ModelTextureFactory !== 'undefined') ? ModelTextureFactory.getUtility('obelisk') : wantCharTex;
+            const wantObBump = !this.useMobileLimits ? obTex : null;
+            if (SharedMat.deadObelisk && (SharedMat.deadObelisk.bumpMap !== wantObBump || SharedMat.deadObelisk.map !== obTex)) {
+                SharedMat.deadObelisk.map = obTex;
+                SharedMat.deadObelisk.bumpMap = wantObBump;
                 SharedMat.deadObelisk.needsUpdate = true;
             }
         }
@@ -4705,6 +4707,20 @@ const AppSettings = {
                     if (bankMat.bumpMap !== wantBankBump) {
                         bankMat.bumpMap = wantBankBump;
                         bankMat.needsUpdate = true;
+                    }
+                }
+                if (!this.useMobileLimits) {
+                    if (Game.map.meshPitFloor && Game.map.meshPitFloor.material && Game.map.meshPitFloor.material.isMeshPhongMaterial && !Game.map.meshPitFloor.material._ultraSpecCalibrated) {
+                        const pm = Game.map.meshPitFloor.material;
+                        pm._ultraSpecCalibrated = true;
+                        if (pm.specular) pm.specular.multiplyScalar(0.55);
+                        if (pm.shininess > 26) pm.shininess = 26;
+                    }
+                    if (Game.map.meshIceFloor && Game.map.meshIceFloor.material && Game.map.meshIceFloor.material.isMeshPhongMaterial && !Game.map.meshIceFloor.material._ultraSpecCalibrated) {
+                        const im = Game.map.meshIceFloor.material;
+                        im._ultraSpecCalibrated = true;
+                        if (im.specular) im.specular.setHex(0x121e28);
+                        im.shininess = 48;
                     }
                 }
                 if (Game.map.raysMesh) {
@@ -7373,13 +7389,17 @@ const UVAtlasMapper = {
             let slot = 'body';
 
             if (type === 'goblin') {
-                slot = 'body';
+                if (parts && isDescendant(m, parts.wings)) slot = 'weapon';
+                else if (typeof SharedMat !== 'undefined' && (m.material === SharedMat.enemyEye || m.material === SharedMat.enemyDark)) slot = 'head';
+                else slot = 'body';
             } else if (type === 'slime' || type === 'slime_mini') {
-                slot = (parts && m === parts.body) || i === 0 ? 'body' : 'head';
+                slot = (parts && m === parts.body) ? 'body' : 'head';
             } else if (type === 'leaper') {
-                slot = (i === 0) ? 'body' : 'head';
+                if (parts && m === parts.torso) slot = 'body';
+                else if (parts && isDescendant(m, parts.head)) slot = 'head';
+                else slot = 'weapon';
             } else if (type === 'crystal') {
-                if (m === (parts && parts.gem)) slot = 'body';
+                if (parts && isDescendant(m, parts.gem)) slot = 'body';
                 else if (m === (parts && parts.ring)) slot = 'weapon';
                 else slot = 'accent';
             } else if (type === 'roller') {
@@ -8161,36 +8181,62 @@ const PlayerGeometryBuilder = {
         let headAccentParts = [];
         let hatBandParts = [];
 
-       if (skinId === 'dark_mage') {
-            // COMUNE 1: Mago Oscuro — Sfera viso in headParts, Cappello a punta in headAccentParts (viola scuro)
-            headParts = [
-                this.part(sphere, 5.8, 5.8, 5.8, 0, 0, 0)
+        const robeVoid = prims.robeVoid;
+        if (skinId === 'dark_mage') {
+            // COMUNE 1: Mago Oscuro — Mantellina a spalle, sciarpa con coda svolazzante e cappello stregonesco piegato con tesa e fascia
+            bodyParts = [
+                this.part(robeFrustum, 1, 24, 1, 0, 0, 0),
+                this.part(cone, 8.8, 5.2, 8.6, 0, 9.2, -0.3)
             ];
-            headAccentParts = [
-                this.part(cone, 6.6, 11.0, 6.8, 0, 6.2, -1.0, -0.32, 0, 0)
-            ];
-            staffParts = [
-                this.part(cyl, 1.9, 35, 1.9, 0, 10, 0),
-                this.part(octa, 3.0, 2.2, 3.0, 0, 23.0, 0)
-            ];
-            gemParts = [this.part(icosa, 4.2, 4.2, 4.2, 0, 0, 0)];
-            haloParts = [this.part(torus, 5.4, 5.4, 4.5, 0, 0, 0, Math.PI / 2, 0, 0)];
-        }
-        else if (skinId === 'astral_arcanist') {
-            // COMUNE 2: Arcanista Astrale — Sfera viso in headParts, Cappello a tesa larga in headAccentParts (viola scuro)
-            bodyParts = [this.part(robeHex, 1, 24, 1, 0, 0, 0)];
             headParts = [
                 this.part(sphere, 5.8, 5.8, 5.8, 0, 0, 0)
             ];
             scarfParts = [
-                this.part(torus, 6.4, 6.4, 2.3, 0, 0, 0, Math.PI / 2, 0, 0)
+                this.part(torus, 6.4, 6.4, 2.3, 0, 0, 0, Math.PI / 2, 0, 0),
+                this.part(box, 3.8, 1.4, 7.6, -1.6, -1.8, -5.6, -0.42, -0.18, 0.14)
             ];
             hatBandParts = [
-                this.part(torus, 5.5, 5.5, 1.8, 0, 4.1, -0.2, Math.PI / 2 - 0.12, 0, 0)
+                this.part(torus, 5.8, 5.8, 1.6, 0, 4.0, -0.2, Math.PI / 2 - 0.14, 0, 0)
             ];
             headAccentParts = [
-                this.part(cyl, 11.5, 1.2, 11.5, 0, 3.8, 0),
-                this.part(cone, 6.0, 14.5, 6.0, 0, 11.0, -1.2, -0.22, 0, 0)
+                this.part(cyl, 9.4, 1.1, 9.4, 0, 3.4, -0.1, -0.10, 0, 0),
+                this.part(cone, 6.2, 9.2, 6.2, 0, 8.0, -0.8, -0.24, 0, 0),
+                this.part(cone, 3.0, 6.2, 3.0, 0.4, 13.0, -2.6, -0.78, 0, -0.14)
+            ];
+            staffParts = [
+                this.part(cyl, 1.85, 35, 1.85, 0, 10, 0),
+                this.part(octa, 3.2, 2.5, 3.2, 0, 23.0, 0),
+                this.part(cyl, 2.2, 2.6, 2.2, 0, -6.2, 0)
+            ];
+            gemParts = [this.part(icosa, 4.2, 4.2, 4.2, 0, 0, 0)];
+            haloParts = [this.part(torus, 5.5, 5.5, 4.5, 0, 0, 0, Math.PI / 2, 0, 0)];
+        }
+        else if (skinId === 'astral_arcanist') {
+            // COMUNE 2: Arcanista Astrale — Veste esagonale con mantellina celeste, doppio nastro sciarpa e cappello da astronomo a tesa larga
+            bodyParts = [
+                this.part(robeHex, 1, 24, 1, 0, 0, 0),
+                this.part(cone, 9.2, 4.8, 9.2, 0, 9.4, -0.2)
+            ];
+            headParts = [
+                this.part(sphere, 5.8, 5.8, 5.8, 0, 0, 0)
+            ];
+            scarfParts = [
+                this.part(torus, 6.4, 6.4, 2.3, 0, 0, 0, Math.PI / 2, 0, 0),
+                this.part(box, 2.4, 1.0, 8.0, -2.2, -1.6, -5.8, -0.38, -0.22, 0.12),
+                this.part(box, 2.4, 1.0, 7.2, 2.0, -1.8, -5.4, -0.44, 0.22, -0.12)
+            ];
+            hatBandParts = [
+                this.part(torus, 5.6, 5.6, 1.8, 0, 4.1, -0.2, Math.PI / 2 - 0.12, 0, 0)
+            ];
+            headAccentParts = [
+                this.part(cyl, 11.8, 1.2, 11.8, 0, 3.7, 0, -0.06, 0, 0),
+                this.part(cone, 5.9, 10.5, 5.9, 0, 9.2, -0.9, -0.18, 0, 0),
+                this.part(cone, 2.6, 6.4, 2.6, -0.5, 14.8, -2.5, -0.68, 0, 0.18)
+            ];
+            staffParts = [
+                this.part(cyl, 1.85, 35, 1.85, 0, 10, 0),
+                this.part(torus, 3.8, 3.8, 1.8, 0, 23.6, 0, 0, 0, 0),
+                this.part(octa, 2.4, 2.2, 2.4, 0, -6.4, 0)
             ];
             gemParts = [
                 this.part(cone4, 4.0, 7.2, 4.0, 0, 3.6, 0),
@@ -8202,91 +8248,115 @@ const PlayerGeometryBuilder = {
             ];
         }
         else if (skinId === 'emerald_warden') {
-
+            // COMUNE 3: Custode Silvano — Spallacci muschiosi ben raccordati, corna di cervo ramificate e bastone druidico nodoso
             bodyParts = [
                 this.part(robeFrustum, 1, 24, 1, 0, 0, 0),
-                this.part(dodeca, 4.8, 3.6, 4.8, -9.4, 8.5, 0),
-                this.part(dodeca, 4.8, 3.6, 4.8, 9.4, 8.5, 0)
+                this.part(dodeca, 4.8, 3.5, 4.6, -8.4, 8.6, 0, 0, 0, 0.22),
+                this.part(dodeca, 4.8, 3.5, 4.6, 8.4, 8.6, 0, 0, 0, -0.22)
             ];
             headParts = [
                 this.part(sphere, 6.0, 6.0, 6.0, 0, 0, 0),
-                this.part(cone4, 1.6, 12.0, 1.6, -5.8, 7.8, 0, 0, 0, 0.58),
-                this.part(cone4, 1.2, 7.8, 1.2, -9.2, 11.2, 0.8, 0.22, 0, 0.18),
-                this.part(cone4, 1.6, 12.0, 1.6, 5.8, 7.8, 0, 0, 0, -0.58),
-                this.part(cone4, 1.2, 7.8, 1.2, 9.2, 11.2, 0.8, 0.22, 0, -0.18)
+                this.part(cone4, 1.6, 12.2, 1.6, -5.6, 7.4, -0.2, -0.10, 0, 0.56),
+                this.part(cone4, 1.15, 7.8, 1.15, -9.0, 11.0, 0.7, 0.22, 0, 0.16),
+                this.part(cone4, 0.9, 5.2, 0.9, -4.4, 11.4, 0.6, 0.20, 0, -0.22),
+                this.part(cone4, 1.6, 12.2, 1.6, 5.6, 7.4, -0.2, -0.10, 0, -0.56),
+                this.part(cone4, 1.15, 7.8, 1.15, 9.0, 11.0, 0.7, 0.22, 0, -0.16),
+                this.part(cone4, 0.9, 5.2, 0.9, 4.4, 11.4, 0.6, 0.20, 0, 0.22)
+            ];
+            scarfParts = [
+                this.part(torus, 6.4, 6.4, 2.4, 0, 0, 0, Math.PI / 2, 0, 0),
+                this.part(cone4, 4.4, 6.5, 2.2, 0, -2.8, -5.6, -0.45, 0, 0)
             ];
             headAccentParts = [
-                this.part(octa, 1.7, 3.2, 1.4, 0, 2.8, 5.5)
+                this.part(octa, 1.8, 3.4, 1.4, 0, 2.8, 5.6)
+            ];
+            staffParts = [
+                this.part(cyl, 2.0, 34, 2.0, 0, 9.5, 0),
+                this.part(cone4, 1.5, 6.5, 1.5, -2.4, 24.5, 0, 0, 0, 0.52),
+                this.part(cone4, 1.5, 6.5, 1.5, 2.4, 24.5, 0, 0, 0, -0.52)
             ];
             gemParts = [this.part(cone4, 3.5, 18.5, 2.6, 0, 6.5, 0)];
             haloParts = [this.part(box, 5.8, 1.8, 3.4, 0, -2.5, 0)];
         }
         else if (skinId === 'crimson_inquisitor') {
-
+            // RARA: Inquisitore Cremisi — Grande elmo da cavaliere con visiera a croce luminosa, spallacci appuntiti e alabarda
             bodyParts = [
                 this.part(robeHex, 1, 24, 1, 0, 0, 0),
-                this.part(cone4, 4.6, 9.2, 4.6, -10.5, 9.0, 0, 0, Math.PI / 4, 0.52),
-                this.part(cone4, 4.6, 9.2, 4.6, 10.5, 9.0, 0, 0, Math.PI / 4, -0.52)
+                this.part(cone4, 4.8, 9.0, 4.8, -9.6, 9.0, 0, 0, Math.PI / 4, 0.56),
+                this.part(cone4, 4.8, 9.0, 4.8, 9.6, 9.0, 0, 0, Math.PI / 4, -0.56)
             ];
             headParts = [
                 this.part(cyl, 5.8, 7.6, 5.8, 0, 0.5, 0),
-                this.part(cone, 2.3, 14.5, 2.3, -6.8, 8.5, -0.8, 0.26, 0, 0.56),
-                this.part(cone, 2.3, 14.5, 2.3, 6.8, 8.5, -0.8, 0.26, 0, -0.56)
+                this.part(cone, 5.9, 3.0, 5.9, 0, 5.6, 0),
+                this.part(cone, 2.2, 14.5, 2.2, -6.5, 8.4, -0.8, 0.24, 0, 0.56),
+                this.part(cone, 2.2, 14.5, 2.2, 6.5, 8.4, -0.8, 0.24, 0, -0.56)
+            ];
+            scarfParts = [
+                this.part(torus, 6.6, 6.6, 2.4, 0, 0, 0, Math.PI / 2, 0, 0),
+                this.part(box, 5.6, 1.2, 7.8, 0, -2.0, -5.8, -0.40, 0, 0)
             ];
             headAccentParts = [
-                this.part(box, 7.6, 1.6, 2.5, 0, 0.6, 4.8)
+                this.part(box, 7.6, 1.5, 2.2, 0, 1.0, 4.9),
+                this.part(box, 1.6, 5.2, 2.2, 0, -0.2, 4.9)
             ];
             staffParts = [
                 this.part(cyl, 2.0, 38, 2.0, 0, 11, 0),
-                this.part(box, 3.8, 3.8, 4.8, 0, 28, 0)
+                this.part(box, 3.8, 4.4, 5.2, 0, 27.6, 0),
+                this.part(cone4, 1.8, 5.2, 1.8, 0, -9.6, 0, Math.PI, 0, 0)
             ];
             gemParts = [this.part(cone4, 2.8, 20.5, 1.6, 0, 0.4, 10.2, Math.PI / 2 + 0.24, 0, 0)];
             haloParts = [this.part(box, 4.2, 1.6, 5.4, 0, 0, 0)];
         }
         else if (skinId === 'void_walker') {
-
+            // EPICA: Viandante del Vuoto — Mantello levitante rastremato, testa cristallina, aureola del vuoto e frammenti orbitanti
             bodyParts = [
-                this.part(robeHex, 0.96, 24, 0.96, 0, 0, 0),
-                this.part(cone4, 3.4, 9.2, 3.4, -11.2, 9.5, 0, 0, 0, 0.24),
-                this.part(cone4, 3.4, 9.2, 3.4, 11.2, 9.5, 0, 0, 0, -0.24)
+                this.part(robeVoid, 1.08, 21.5, 1.08, 0, 1.8, 0),
+                this.part(cone4, 5.8, 7.5, 5.8, 0, -10.8, 0, Math.PI, Math.PI / 4, 0),
+                this.part(cone4, 3.4, 9.2, 3.4, -10.4, 9.6, 0, 0, 0, 0.28),
+                this.part(cone4, 3.4, 9.2, 3.4, 10.4, 9.6, 0, 0, 0, -0.28)
             ];
             headParts = [this.part(icosa, 6.0, 7.2, 6.0, 0, 0.5, 0)];
             headAccentParts = [
-                this.part(torus, 4.6, 4.6, 1.6, 0, 7.6, 0, Math.PI / 2, 0, 0)
+                this.part(torus, 4.8, 4.8, 1.6, 0, 7.8, 0, Math.PI / 2 - 0.16, 0, 0),
+                this.part(octa, 1.5, 2.6, 1.2, 0, 1.0, 5.8)
             ];
             for (let i = 0; i < 3; i++) {
                 let a = (i * Math.PI * 2) / 3;
-                accentParts.push(this.part(icosa, 2.8, 5.2, 2.8, Math.cos(a) * 15.8, 6.2, Math.sin(a) * 15.8));
+                accentParts.push(this.part(icosa, 2.8, 5.4, 2.8, Math.cos(a) * 15.8, 6.2, Math.sin(a) * 15.8));
             }
             staffParts = [
                 this.part(cyl, 2.0, 16, 2.0, 0, 14, 0, 0.45, 0, 0),
-                this.part(box, 3.4, 2.4, 3.6, 0, 14, 0, 0.45, 0, 0)
+                this.part(octa, 3.6, 3.2, 3.6, 0, 14, 0, 0.45, 0, 0)
             ];
             gemParts = [this.part(cone4, 3.2, 17.0, 2.2, 0, 13.8, 6.6, 0.45, 0, 0)];
             haloParts = [this.part(cone4, 3.2, 17.0, 2.2, 0, -13.8, -6.6, Math.PI + 0.45, 0, 0)];
         }
         else if (skinId === 'solar_archon') {
-
+            // LEGGENDARIA 1: Arconte Solare — Spallacci dorati, corona raggiante a 5 punte, ali di luce e tridente solare
             bodyParts = [
                 this.part(robeHex, 1.02, 24, 1.02, 0, 0, 0),
-                this.part(box, 5.4, 3.0, 4.8, -10.0, 9.0, 0, 0, 0, 0.30),
-                this.part(box, 5.4, 3.0, 4.8, 10.0, 9.0, 0, 0, 0, -0.30)
+                this.part(box, 5.4, 3.0, 5.0, -9.4, 9.2, 0, 0, 0, 0.30),
+                this.part(box, 5.4, 3.0, 5.0, 9.4, 9.2, 0, 0, 0, -0.30)
             ];
             headAccentParts = [
-                this.part(torus, 4.8, 4.8, 1.6, 0, 7.5, 0, Math.PI / 2, 0, 0),
-                this.part(cone4, 1.3, 6.8, 1.0, 0, 8.6, 3.5, 0.2, 0, 0),
-                this.part(cone4, 1.0, 5.6, 1.0, -4.0, 7.6, 2.5, 0.2, 0, 0.45),
-                this.part(cone4, 1.0, 5.6, 1.0, 4.0, 7.6, 2.5, 0.2, 0, -0.45)
+                this.part(box, 6.6, 1.3, 1.8, 0, 0.8, 5.2),
+                this.part(torus, 4.9, 4.9, 1.6, 0, 7.6, 0, Math.PI / 2, 0, 0),
+                this.part(cone4, 1.35, 7.2, 1.0, 0, 9.0, 3.4, 0.22, 0, 0),
+                this.part(cone4, 1.05, 5.8, 1.0, -4.0, 7.8, 2.5, 0.20, 0, 0.46),
+                this.part(cone4, 1.05, 5.8, 1.0, 4.0, 7.8, 2.5, 0.20, 0, -0.46),
+                this.part(cone4, 0.90, 4.6, 0.9, -5.6, 6.6, -0.6, -0.10, 0, 0.78),
+                this.part(cone4, 0.90, 4.6, 0.9, 5.6, 6.6, -0.6, -0.10, 0, -0.78)
             ];
             accentParts = [
-                this.part(cone4, 2.8, 21.0, 1.0, -14.2, 13.2, -5.5, -0.15, 0, 0.75),
-                this.part(cone4, 2.8, 21.0, 1.0, 14.2, 13.2, -5.5, -0.15, 0, -0.75),
-                this.part(cone4, 2.3, 15.5, 1.0, -12.8, 6.0, -5.5, -0.10, 0, 1.25),
-                this.part(cone4, 2.3, 15.5, 1.0, 12.8, 6.0, -5.5, -0.10, 0, -1.25)
+                this.part(cone4, 2.8, 21.5, 1.0, -14.2, 13.4, -5.5, -0.15, 0, 0.75),
+                this.part(cone4, 2.8, 21.5, 1.0, 14.2, 13.4, -5.5, -0.15, 0, -0.75),
+                this.part(cone4, 2.3, 15.8, 1.0, -12.8, 6.0, -5.5, -0.10, 0, 1.25),
+                this.part(cone4, 2.3, 15.8, 1.0, 12.8, 6.0, -5.5, -0.10, 0, -1.25)
             ];
             staffParts = [
                 this.part(cyl, 2.0, 36, 2.0, 0, 10, 0),
-                this.part(box, 14.2, 2.3, 2.5, 0, 26.5, 0)
+                this.part(box, 14.4, 2.3, 2.5, 0, 26.5, 0),
+                this.part(octa, 2.4, 2.8, 2.4, 0, -8.2, 0)
             ];
             gemParts = [this.part(cone4, 2.7, 17.5, 2.6, 0, 6.6, 0)];
             haloParts = [
@@ -8295,29 +8365,30 @@ const PlayerGeometryBuilder = {
             ];
         }
         else if (skinId === 'cyber_phantom') {
-
+            // LEGGENDARIA 2: Spettro Cibernetico — Cappotto stealth piramidale, kasa ronin con anello neon, ali olografiche e rail-rifle
             bodyParts = [
                 this.part(robePyramid, 1, 24, 1, 0, 0, 0, 0, Math.PI / 4, 0),
-                this.part(box, 4.4, 7.6, 6.5, -10.0, 8.5, -2.0, 0.25, 0, 0.22),
-                this.part(box, 4.4, 7.6, 6.5, 10.0, 8.5, -2.0, 0.25, 0, -0.22)
+                this.part(box, 4.4, 7.6, 6.4, -9.4, 8.6, -1.8, 0.25, 0, 0.22),
+                this.part(box, 4.4, 7.6, 6.4, 9.4, 8.6, -1.8, 0.25, 0, -0.22)
             ];
             headParts = [
                 this.part(box, 5.8, 5.8, 5.8, 0, 0, 0),
-                this.part(cone, 12.4, 3.6, 12.4, 0, 4.8, 0)
+                this.part(cone, 12.6, 3.8, 12.6, 0, 4.8, 0)
             ];
             headAccentParts = [
                 this.part(box, 7.8, 1.8, 2.8, 0, 0.5, 4.2),
-                this.part(torus, 7.0, 7.0, 1.5, 0, 3.8, 0, Math.PI / 2, 0, 0)
+                this.part(torus, 7.4, 7.4, 1.5, 0, 3.6, 0, Math.PI / 2, 0, 0)
             ];
             accentParts = [
-                this.part(box, 14.5, 1.9, 1.0, -13.2, 12.0, -5.8, 0, 0, -0.45),
-                this.part(box, 14.5, 1.9, 1.0, 13.2, 12.0, -5.8, 0, 0, 0.45),
+                this.part(box, 14.8, 1.9, 1.0, -13.2, 12.0, -5.8, 0, 0, -0.45),
+                this.part(box, 14.8, 1.9, 1.0, 13.2, 12.0, -5.8, 0, 0, 0.45),
                 this.part(box, 12.2, 1.6, 1.0, -11.5, 5.0, -5.8, 0, 0, 0.45),
                 this.part(box, 12.2, 1.6, 1.0, 11.5, 5.0, -5.8, 0, 0, -0.45)
             ];
             staffParts = [
-                this.part(box, 3.2, 4.6, 13.2, 0, 0.5, -2.0),
-                this.part(box, 2.4, 3.0, 18.2, 0, 1.2, 13.0)
+                this.part(box, 3.2, 4.8, 13.4, 0, 0.5, -2.0),
+                this.part(box, 2.4, 3.0, 18.6, 0, 1.2, 13.2),
+                this.part(box, 2.0, 4.2, 3.2, 0, -2.2, 2.0, 0.28, 0, 0)
             ];
             gemParts = [this.part(box, 1.4, 1.3, 19.2, 0, 1.2, -9.0)];
             haloParts = [this.part(box, 2.6, 2.3, 2.5, 0, 0, 0)];
@@ -9241,17 +9312,23 @@ const SkinSystem = {
         const h = Math.max(1, vp.height);
 
         const renderScene = new THREE.RenderPass(this.scene, this.camera);
-        this.composer = new THREE.EffectComposer(this.renderer);
+        const hdrInfo = (typeof PcUltraGraphics !== 'undefined' && PcUltraGraphics.createComposerRenderTarget)
+            ? PcUltraGraphics.createComposerRenderTarget(this.renderer, w, h)
+            : { rt: null, isHdr: false };
+        this._hdrComposer = !!hdrInfo.isHdr;
+        this.composer = hdrInfo.rt ? new THREE.EffectComposer(this.renderer, hdrInfo.rt) : new THREE.EffectComposer(this.renderer);
         if (this.composer.setPixelRatio) this.composer.setPixelRatio(this.getMenuPixelRatio());
+        this.composer.setSize(w, h);
         this.composer.addPass(renderScene);
 
         if (typeof THREE.UnrealBloomPass !== 'undefined') {
             const bloomDiv = 2;
+            const bStr = this._hdrComposer ? (isTouchDevice ? 0.11 : 0.145) : (isTouchDevice ? 0.15 : 0.19);
+            const bRad = isTouchDevice ? 0.20 : 0.25;
+            const bThr = this._hdrComposer ? (isTouchDevice ? 1.00 : 0.96) : (isTouchDevice ? 0.89 : 0.86);
             this.bloomPass = new THREE.UnrealBloomPass(
                 new THREE.Vector2(Math.max(1, Math.floor(w / bloomDiv)), Math.max(1, Math.floor(h / bloomDiv))),
-                isTouchDevice ? 0.15 : 0.19,
-                isTouchDevice ? 0.20 : 0.25,
-                isTouchDevice ? 0.89 : 0.86
+                bStr, bRad, bThr
             );
             this.composer.addPass(this.bloomPass);
         }
@@ -12461,36 +12538,51 @@ const BLOOD_TEX = createPatternTexture('blood'); const GLOW_TEX = createGlowText
 const NOVA_TEX = createNovaTexture();
 
 function createCharacterTexture() {
+    const size = 128;
     const canvas = document.createElement('canvas');
-    canvas.width = 128; canvas.height = 128;
+    canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // Sfondo BIANCO PURO: così i colori base dei modelli non si scuriscono artificialmente
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 128, 128);
+    // Superficie pittorica ad alta chiave senza rumore pixelato: mantiene vividi i colori dei materiali
+    ctx.fillStyle = '#f6f6f7';
+    ctx.fillRect(0, 0, size, size);
 
-    for (let i = 0; i < 800; i++) {
-        ctx.fillStyle = Math.random() > 0.3 ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.9)';
-        let size = Math.random() * 3 + 1;
-        ctx.fillRect(Math.random() * 128, Math.random() * 128, size, size);
+    let seed = 9187;
+    const rand = () => { seed = (seed * 1664525 + 1013904223) | 0; return ((seed >>> 0) / 4294967296); };
+
+    // Pennellate morbide tileable (disegnate con wrap ai bordi per 0 cuciture)
+    for (let i = 0; i < 75; i++) {
+        const cx = rand() * size, cy = rand() * size, r = 10 + rand() * 18;
+        const dark = rand() > 0.42;
+        const a = (0.04 + rand() * 0.05).toFixed(3);
+        const col = dark ? `rgba(28,32,42,${a})` : `rgba(255,255,255,${(Number(a) * 1.4).toFixed(3)})`;
+        for (let ox = -1; ox <= 1; ox++) {
+            for (let oy = -1; oy <= 1; oy++) {
+                const px = cx + ox * size, py = cy + oy * size;
+                if (px + r < 0 || px - r > size || py + r < 0 || py - r > size) continue;
+                const g = ctx.createRadialGradient(px, py, 1, px, py, r);
+                g.addColorStop(0, col);
+                g.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
+            }
+        }
     }
 
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 60; i++) {
-        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-        let x = Math.random() * 128; let y = Math.random() * 128;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + Math.random() * 15 - 7.5, y + Math.random() * 15 - 7.5);
-        ctx.stroke();
+    // Fine trama di pennello verticale morbida
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 90; i++) {
+        const x = rand() * size, y = rand() * size, len = 8 + rand() * 16;
+        ctx.strokeStyle = rand() > 0.5 ? 'rgba(22,26,34,0.08)' : 'rgba(255,255,255,0.14)';
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + (rand() - 0.5) * 3, y + len); ctx.stroke();
     }
 
     const tex = new THREE.CanvasTexture(canvas);
     tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
     tex.repeat.set(1, 1);
     tex.encoding = THREE.sRGBEncoding;
-
-    tex.magFilter = THREE.NearestFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
     return tex;
 }
 const CHAR_GRUNGE_TEX = createCharacterTexture();
@@ -12654,9 +12746,11 @@ const PcUltraGraphics = {
     },
 
     getSkinTex(skinId) {
-        if (skinId && typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures['skin_' + skinId]) {
-            return Preloader.textures['skin_' + skinId];
+        if (skinId && typeof Preloader !== 'undefined' && Preloader.textures) {
+            const pre = Preloader.textures['skin_' + skinId];
+            if (pre && pre._isExternalImg) return pre;
         }
+        if (typeof ModelTextureFactory !== 'undefined') return ModelTextureFactory.getSkinAtlas(skinId);
         return (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? this.getSkinHdTexture(skinId) : getSkinTexture(skinId);
     },
 
@@ -12905,8 +12999,76 @@ const PcUltraGraphics = {
         return tex;
     },
 
+    createComposerRenderTarget(renderer, width, height) {
+        if (!renderer || typeof THREE.WebGLRenderTarget === 'undefined' || typeof THREE.HalfFloatType === 'undefined') {
+            return { rt: null, isHdr: false };
+        }
+        const gl = renderer.getContext ? renderer.getContext() : null;
+        const isWebGL2 = !!(renderer.capabilities && renderer.capabilities.isWebGL2);
+        let canHalfFloat = false;
+        let halfFloatExt = null;
+        if (gl) {
+            if (isWebGL2) {
+                canHalfFloat = !!(gl.getExtension('EXT_color_buffer_float') || gl.getExtension('EXT_color_buffer_half_float'));
+            } else {
+                halfFloatExt = gl.getExtension('OES_texture_half_float');
+                canHalfFloat = !!(
+                    halfFloatExt &&
+                    gl.getExtension('OES_texture_half_float_linear') &&
+                    gl.getExtension('EXT_color_buffer_half_float')
+                );
+            }
+        }
+        if (!canHalfFloat) return { rt: null, isHdr: false };
+
+        // Verifica reale completezza FBO HalfFloat su 2x2 per garantire 0 schermi neri su qualsiasi GPU mobile
+        let fb = null, tex = null;
+        try {
+            fb = gl.createFramebuffer();
+            tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            const internalFmt = isWebGL2 ? gl.RGBA16F : gl.RGBA;
+            const halfType = isWebGL2 ? gl.HALF_FLOAT : halfFloatExt.HALF_FLOAT_OES;
+            gl.texImage2D(gl.TEXTURE_2D, 0, internalFmt, 2, 2, 0, gl.RGBA, halfType, null);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+            const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.deleteFramebuffer(fb);
+            gl.deleteTexture(tex);
+            if (renderer.state && renderer.state.reset) renderer.state.reset();
+            if (status !== gl.FRAMEBUFFER_COMPLETE) return { rt: null, isHdr: false };
+        } catch (e) {
+            try {
+                if (fb) gl.deleteFramebuffer(fb);
+                if (tex) gl.deleteTexture(tex);
+                if (renderer.state && renderer.state.reset) renderer.state.reset();
+            } catch (_) {}
+            return { rt: null, isHdr: false };
+        }
+
+        const pr = renderer.getPixelRatio ? renderer.getPixelRatio() : 1;
+        const rtW = Math.max(1, Math.floor((width || 1) * pr));
+        const rtH = Math.max(1, Math.floor((height || 1) * pr));
+        const rt = new THREE.WebGLRenderTarget(rtW, rtH, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.LinearFilter,
+            format: THREE.RGBAFormat,
+            type: THREE.HalfFloatType,
+            encoding: THREE.LinearEncoding,
+            depthBuffer: true,
+            stencilBuffer: false
+        });
+        rt.texture.name = 'EffectComposer.rt1.HDR';
+        return { rt, isHdr: true };
+    },
+
     createPostPass() {
         if (typeof THREE.ShaderPass === 'undefined') return null;
+        const isWideP3 = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(color-gamut: p3)').matches) ? 1.0 : 0.0;
         const shader = {
             uniforms: {
                 tDiffuse: { value: null },
@@ -12914,7 +13076,8 @@ const PcUltraGraphics = {
                 uBiomeId: PcUltraGraphics.uBiomeId,
                 uTrauma: PcUltraGraphics.uTrauma,
                 uUltra: PcUltraGraphics.uUltra,
-                uIsMobile: { value: (typeof isTouchDevice !== 'undefined' && isTouchDevice) ? 1.0 : 0.0 }
+                uIsMobile: { value: (typeof isTouchDevice !== 'undefined' && isTouchDevice) ? 1.0 : 0.0 },
+                uIsWideGamut: { value: isWideP3 }
             },
             vertexShader: `
                 varying vec2 vUv;
@@ -12930,6 +13093,7 @@ const PcUltraGraphics = {
                 uniform float uTrauma;
                 uniform float uUltra;
                 uniform float uIsMobile;
+                uniform float uIsWideGamut;
                 varying vec2 vUv;
 
                 float getLuma(vec3 c) {
@@ -12938,7 +13102,14 @@ const PcUltraGraphics = {
 
                 void main() {
                     if (uUltra < 0.5) {
-                        gl_FragColor = texture2D(tDiffuse, vUv);
+                        vec4 raw = texture2D(tDiffuse, vUv);
+                        vec3 c = max(raw.rgb, vec3(0.0));
+                        float m = max(c.r, max(c.g, c.b));
+                        if (m > 0.88) {
+                            float over = m - 0.88;
+                            c *= (0.88 + (0.12 * over) / (0.12 + over)) / m;
+                        }
+                        gl_FragColor = vec4(clamp(c, 0.0, 1.0), raw.a);
                         #include <encodings_fragment>
                         return;
                     }
@@ -12982,10 +13153,12 @@ const PcUltraGraphics = {
                         col = (lumaB < lumaMin || lumaB > lumaMax) ? rgbA : rgbB;
                     }
 
-                    // 2. Contrast-Adaptive Sharpen zero-extra-tap: riusa i 4 campioni diagonali già in memoria
+                    // 2. Contrast-Adaptive Sharpen zero-extra-tap HDR-safe (evita aloni/ringing su alte luci HDR e pixel mobile)
                     vec3 blur4 = (rgbNW + rgbNE + rgbSW + rgbSE) * 0.25;
                     float sharpAmt = mix(0.11, 0.03, smoothstep(0.08, 0.45, edgeContrast));
-                    col = clamp(col + (col - blur4) * sharpAmt, 0.0, 4.0);
+                    sharpAmt *= mix(1.0, 0.68, uIsMobile) * (1.0 - smoothstep(0.85, 1.55, lumaMax) * 0.70);
+                    vec3 sharpDelta = clamp(col - blur4, vec3(-0.35), vec3(0.35));
+                    col = clamp(col + sharpDelta * sharpAmt, 0.0, 6.0);
 
                     // 3. Aberrazione cromatica radiale sugli impatti pesanti (trauma)
                     if (uTrauma > 0.08) {
@@ -12996,39 +13169,47 @@ const PcUltraGraphics = {
                         col.b = mix(col.b, texture2D(tDiffuse, vUv - shift).b, 0.65);
                     }
 
-                    // 4. Bilanciamento Esposizione, Contrasto S-Curve e Tone-Mapping a preservazione cromatica (calibrato per Smartphone Ultra e Bioma Ghiaccio)
+                    // 4. Tone-Mapping HDR a preservazione cromatica + spalla filmica morbida (parità PC Ultra / Smartphone OLED)
                     float isIceBiome = smoothstep(1.5, 1.8, uBiomeId);
-                    col = max(col, vec3(0.0)) * mix(0.92, mix(0.85, 0.91, isIceBiome), uIsMobile);
+                    col = max(col, vec3(0.0)) * mix(0.92, mix(0.90, 0.91, isIceBiome), uIsMobile);
                     float linY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                     float rawMax = max(col.r, max(col.g, col.b));
                     float peakMetric = mix(linY, rawMax, 0.70);
                     if (peakMetric > 0.0001) {
                         float percP = sqrt(peakMetric);
-                        float sCurve = -0.034 * sin(min(1.0, percP / 0.86) * 6.2831853) * (1.0 - smoothstep(0.62, 0.98, percP));
+                        float sAmp = mix(0.034, 0.022, uIsMobile);
+                        float sCurve = -sAmp * sin(min(1.0, percP / 0.86) * 6.2831853) * (1.0 - smoothstep(0.62, 0.98, percP));
                         float percMapped = max(0.0, percP + sCurve);
                         float targetP = percMapped * percMapped;
-                        float kneeStart = mix(0.54, mix(0.48, 0.52, isIceBiome), uIsMobile);
-                        float kneeHead  = mix(0.34, mix(0.28, 0.32, isIceBiome), uIsMobile);
+                        float kneeStart = mix(0.54, 0.52, uIsMobile);
+                        float kneeHead  = mix(0.36, 0.35, uIsMobile);
                         if (targetP > kneeStart) {
                             float overP = targetP - kneeStart;
                             targetP = kneeStart + (kneeHead * overP) / (kneeHead + overP);
                         }
                         col *= (targetP / peakMetric);
+                        // Path-to-white filmico solo sui picchi HDR > 0.88: elimina l'effetto neon/bruciato preservando intatto il terreno
+                        float hiDesat = smoothstep(0.88, 2.50, peakMetric) * mix(0.20, 0.28, uIsMobile);
+                        if (hiDesat > 0.001) {
+                            float hiRef = max(col.r, max(col.g, col.b));
+                            col = mix(col, vec3(hiRef), hiDesat);
+                        }
                     }
+
                     float gradedY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                     float maxCh = max(col.r, max(col.g, col.b));
                     float minCh = min(col.r, min(col.g, col.b));
                     float satEst = maxCh > 0.0001 ? (maxCh - minCh) / maxCh : 0.0;
                     float isFireBiome = smoothstep(0.5, 0.8, uBiomeId) * (1.0 - isIceBiome);
-                    float baseVib = mix(mix(0.11, 0.12, uIsMobile), mix(0.08, 0.07, uIsMobile), isFireBiome);
-                    baseVib = mix(baseVib, mix(0.05, 0.02, uIsMobile), isIceBiome);
+                    float baseVib = mix(mix(0.11, 0.04, uIsMobile), mix(0.08, 0.02, uIsMobile), isFireBiome);
+                    baseVib = mix(baseVib, mix(0.05, 0.00, uIsMobile), isIceBiome);
                     float vibAmt = baseVib * (1.0 - satEst * 0.60) * smoothstep(0.02, 0.14, gradedY);
                     col = max(vec3(0.0), vec3(gradedY) + (col - vec3(gradedY)) * (1.0 + vibAmt));
 
                     // Roll-off selettivo dell'eccesso di azzurro nel bioma Ghiaccio (preserva al 100% rossi, ori, verdi e incantesimi)
                     if (isIceBiome > 0.01) {
                         float blueExcess = max(0.0, col.b - max(col.r, col.g));
-                        float desatIce = clamp(blueExcess * mix(0.45, 0.72, uIsMobile), 0.0, 0.24) * isIceBiome;
+                        float desatIce = clamp(blueExcess * mix(0.45, 0.56, uIsMobile), 0.0, 0.22) * isIceBiome;
                         float iceY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                         col = mix(col, vec3(iceY), desatIce);
                     }
@@ -13037,16 +13218,16 @@ const PcUltraGraphics = {
                         float firePeak = max(col.r, max(col.g, col.b));
                         float midRedWeight = 1.0 - smoothstep(0.42, 0.85, firePeak);
                         float redExcess = max(0.0, col.r - max(col.g, col.b));
-                        float desatFire = clamp(redExcess * mix(0.22, 0.34, uIsMobile), 0.0, 0.12) * isFireBiome * midRedWeight;
+                        float desatFire = clamp(redExcess * mix(0.22, 0.26, uIsMobile), 0.0, 0.11) * isFireBiome * midRedWeight;
                         float fireY = dot(col, vec3(0.2126, 0.7152, 0.0722));
                         col = mix(col, vec3(fireY), desatFire);
                     }
 
                     // Soft-ceiling a rapporto RGB costante: impedisce il clipping del singolo canale prima di LinearToSRGB
                     float curMax = max(col.r, max(col.g, col.b));
-                    float ceilKnee = mix(0.84, 0.78, uIsMobile);
+                    float ceilKnee = mix(0.84, 0.82, uIsMobile);
                     if (curMax > ceilKnee) {
-                        float ceilHead = mix(0.14, 0.16, uIsMobile);
+                        float ceilHead = mix(0.15, 0.16, uIsMobile);
                         float overC = curMax - ceilKnee;
                         float compMax = ceilKnee + (ceilHead * overC) / (ceilHead + overC);
                         col *= (compMax / curMax);
@@ -13055,6 +13236,17 @@ const PcUltraGraphics = {
                     vec3 shadowTint = uBiomeId > 1.5 ? vec3(0.985, 0.995, 1.01) : (uBiomeId > 0.5 ? vec3(1.015, 0.99, 0.985) : vec3(0.98, 1.02, 0.99));
                     float lum = getLuma(col);
                     col *= mix(shadowTint, vec3(0.99, 0.99, 0.99), smoothstep(0.20, 0.85, lum));
+
+                    // Compensazione gamut OLED Wide-Gamut (matrice lineare sRGB -> Display P3 W3C, somma righe = 1.0: punto bianco intatto)
+                    if (uIsMobile > 0.5) {
+                        vec3 p3Col = vec3(
+                            dot(col, vec3(0.8225, 0.1774, 0.0001)),
+                            dot(col, vec3(0.0332, 0.9668, 0.0000)),
+                            dot(col, vec3(0.0171, 0.0724, 0.9105))
+                        );
+                        float gamutAmt = mix(0.18, 0.52, uIsWideGamut);
+                        col = mix(col, p3Col, gamutAmt);
+                    }
 
                     gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
                     #include <encodings_fragment>
@@ -13085,7 +13277,7 @@ const PcUltraGraphics = {
 
         if (typeof Game !== 'undefined') {
             if (Game.rimLight) {
-                Game.rimLight.intensity = (isUltraPC && !isDarkness && !Game.arenaEvolution) ? (isTouchDevice ? 0.12 : 0.18) : 0.0;
+                Game.rimLight.intensity = (isUltraPC && !isDarkness && !Game.arenaEvolution) ? (isTouchDevice ? 0.16 : 0.18) : 0.0;
                 const rimHex = themeIdx === 2 ? 0xaad4f0 : (themeIdx === 1 ? 0xf2b078 : 0x66cc99);
                 Game.rimLight.color.setHex(rimHex);
             }
@@ -13174,110 +13366,1046 @@ const PcUltraGraphics = {
     }
 };
 
+const ModelTextureFactory = {
+    _skinCache: {},
+    _enemyCache: {},
+    _utilCache: {},
+
+    _makeRand(str) {
+        let seed = 2166136261;
+        for (let i = 0; i < str.length; i++) {
+            seed ^= str.charCodeAt(i);
+            seed = Math.imul(seed, 16777619);
+        }
+        return () => {
+            seed = (seed * 1664525 + 1013904223) | 0;
+            return ((seed >>> 0) / 4294967296);
+        };
+    },
+
+    _rectPx(rect, sz) {
+        return {
+            x: rect.u0 * sz,
+            y: (1.0 - rect.v1) * sz,
+            w: (rect.u1 - rect.u0) * sz,
+            h: (rect.v1 - rect.v0) * sz
+        };
+    },
+
+    _finalizeTex(canvas, repeatX = false, repeatY = false) {
+        const mob = (typeof isTouchDevice !== 'undefined' && isTouchDevice);
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.wrapS = repeatX ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+        tex.wrapT = repeatY ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+        tex.encoding = THREE.sRGBEncoding;
+        tex.magFilter = THREE.LinearFilter;
+        tex.minFilter = THREE.LinearMipmapLinearFilter;
+        tex.anisotropy = mob ? 4 : 8;
+        tex.needsUpdate = true;
+        return tex;
+    },
+
+    // Pennellate pittoriche morbide dentro un rettangolo UV (con bleed anti-mipmap)
+    _paintRegionBase(ctx, r, baseHex, shadeRgba, hiRgba, rand, bleed = 4) {
+        const bx = r.x - bleed, by = r.y - bleed, bw = r.w + bleed * 2, bh = r.h + bleed * 2;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(bx, by, bw, bh);
+        ctx.clip();
+
+        ctx.fillStyle = baseHex;
+        ctx.fillRect(bx, by, bw, bh);
+
+        const g = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
+        g.addColorStop(0.0, hiRgba);
+        g.addColorStop(0.55, 'rgba(255,255,255,0)');
+        g.addColorStop(1.0, shadeRgba);
+        ctx.fillStyle = g;
+        ctx.fillRect(bx, by, bw, bh);
+
+        for (let i = 0; i < 16; i++) {
+            const cx = r.x + rand() * r.w;
+            const cy = r.y + rand() * r.h;
+            const rad = (0.10 + rand() * 0.18) * Math.max(r.w, r.h);
+            const rg = ctx.createRadialGradient(cx, cy, 0.5, cx, cy, rad);
+            rg.addColorStop(0, rand() > 0.45 ? shadeRgba : hiRgba);
+            rg.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = rg;
+            ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+    },
+
+    // Disegna pieghe verticali, fascia centrale frontale (u=0.5) e bordo inferiore su vesti cilindriche
+    _paintRobeSlot(ctx, slotRect, sz, cfg, hasSecondary, rand) {
+        const full = this._rectPx(slotRect, sz);
+        this._paintRegionBase(ctx, full, cfg.robeBase || '#f5f5f7', cfg.robeShade || 'rgba(18,16,28,0.22)', cfg.robeHi || 'rgba(255,255,255,0.14)', rand, 5);
+
+        // Sotto-rettangolo primario della veste (se presenti spallacci secondari occupa il 62% superiore)
+        const primUv = hasSecondary
+            ? { u0: slotRect.u0, v0: slotRect.v1 - (slotRect.v1 - slotRect.v0) * 0.62, u1: slotRect.u1, v1: slotRect.v1 }
+            : slotRect;
+        // cylSideRect occupa u: 0.04..0.96, v: 0.04..0.76 dentro primUv
+        const sideUv = (typeof UVAtlasMapper !== 'undefined')
+            ? UVAtlasMapper.subRect(primUv, 0.04, 0.04, 0.96, 0.76)
+            : primUv;
+        const s = this._rectPx(sideUv, sz);
+
+        ctx.save();
+        ctx.beginPath(); ctx.rect(s.x - 2, s.y - 2, s.w + 4, s.h + 4); ctx.clip();
+
+        // Pieghe morbide verticali lungo la circonferenza del mantello
+        const folds = cfg.folds || 8;
+        for (let i = 0; i < folds; i++) {
+            const fx = s.x + ((i + 0.5) / folds) * s.w;
+            const fg = ctx.createLinearGradient(fx - s.w / (folds * 1.4), 0, fx + s.w / (folds * 1.4), 0);
+            fg.addColorStop(0.0, 'rgba(0,0,0,0)');
+            fg.addColorStop(0.5, cfg.foldCol || 'rgba(12,10,20,0.20)');
+            fg.addColorStop(1.0, 'rgba(0,0,0,0)');
+            ctx.fillStyle = fg;
+            ctx.fillRect(fx - s.w / folds, s.y, (s.w / folds) * 2, s.h);
+        }
+
+        // Ombra d'appoggio (AO) all'orlo inferiore della veste
+        const aoG = ctx.createLinearGradient(0, s.y + s.h * 0.68, 0, s.y + s.h);
+        aoG.addColorStop(0, 'rgba(0,0,0,0)');
+        aoG.addColorStop(1, 'rgba(8,8,14,0.34)');
+        ctx.fillStyle = aoG;
+        ctx.fillRect(s.x - 2, s.y + s.h * 0.68, s.w + 4, s.h * 0.34);
+
+        // Bordo decorativo all'orlo inferiore
+        if (cfg.hemCol) {
+            const hemY = s.y + s.h * 0.80;
+            const hemH = Math.max(2, s.h * 0.11);
+            ctx.fillStyle = cfg.hemCol;
+            ctx.fillRect(s.x - 2, hemY, s.w + 4, hemH);
+            if (cfg.trimCol) {
+                ctx.fillStyle = cfg.trimCol;
+                ctx.fillRect(s.x - 2, hemY, s.w + 4, Math.max(1, hemH * 0.24));
+                ctx.fillRect(s.x - 2, hemY + hemH - Math.max(1, hemH * 0.22), s.w + 4, Math.max(1, hemH * 0.22));
+            }
+        }
+
+        // Cintura / fascia in vita
+        if (cfg.beltCol) {
+            const by = s.y + s.h * 0.36;
+            const bh = Math.max(2, s.h * 0.10);
+            ctx.fillStyle = cfg.beltCol;
+            ctx.fillRect(s.x - 2, by, s.w + 4, bh);
+            if (cfg.buckleCol) {
+                const cx = s.x + s.w * 0.5;
+                ctx.fillStyle = cfg.buckleCol;
+                ctx.fillRect(cx - bh * 0.65, by - bh * 0.12, bh * 1.3, bh * 1.24);
+                ctx.fillStyle = 'rgba(18,14,22,0.45)';
+                ctx.fillRect(cx - bh * 0.30, by + bh * 0.18, bh * 0.60, bh * 0.64);
+            }
+        }
+
+        // Stola / fascia centrale frontale esattamente a u = 0.5 (+Z)
+        if (cfg.sashCol) {
+            const cx = s.x + s.w * 0.5;
+            const sw = Math.max(2.5, s.w * 0.11);
+            ctx.fillStyle = cfg.sashCol;
+            ctx.fillRect(cx - sw * 0.5, s.y + s.h * 0.04, sw, s.h * 0.86);
+            if (cfg.trimCol) {
+                ctx.fillStyle = cfg.trimCol;
+                ctx.fillRect(cx - sw * 0.5, s.y + s.h * 0.04, Math.max(1, sw * 0.14), s.h * 0.86);
+                ctx.fillRect(cx + sw * 0.5 - Math.max(1, sw * 0.14), s.y + s.h * 0.04, Math.max(1, sw * 0.14), s.h * 0.86);
+                // Piccoli rombi runici lungo la stola
+                for (let d = 0; d < 3; d++) {
+                    const dy = s.y + s.h * (0.24 + d * 0.22);
+                    const dr = sw * 0.24;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, dy - dr); ctx.lineTo(cx + dr, dy);
+                    ctx.lineTo(cx, dy + dr); ctx.lineTo(cx - dr, dy);
+                    ctx.closePath(); ctx.fill();
+                }
+            }
+        }
+
+        // Pattern extra per stile (stelle astrali, esagoni cyber, piastre forgiate)
+        if (cfg.pattern === 'stars') {
+            ctx.fillStyle = cfg.trimCol || 'rgba(255,255,255,0.75)';
+            for (let i = 0; i < 18; i++) {
+                const sx = s.x + rand() * s.w, sy = s.y + rand() * s.h * 0.85;
+                const sr = Math.max(1, sz * 0.0055 * (0.7 + rand() * 0.8));
+                ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+            }
+        } else if (cfg.pattern === 'cyber') {
+            ctx.strokeStyle = cfg.trimCol || 'rgba(120,235,255,0.45)';
+            ctx.lineWidth = Math.max(1, sz * 0.0045);
+            const step = Math.max(5, s.w / 10);
+            for (let x = s.x; x < s.x + s.w; x += step) {
+                ctx.beginPath(); ctx.moveTo(x, s.y); ctx.lineTo(x, s.y + s.h); ctx.stroke();
+            }
+            ctx.strokeStyle = 'rgba(20,220,255,0.55)';
+            ctx.beginPath();
+            ctx.moveTo(s.x, s.y + s.h * 0.72); ctx.lineTo(s.x + s.w, s.y + s.h * 0.72);
+            ctx.stroke();
+        } else if (cfg.pattern === 'plates') {
+            ctx.strokeStyle = 'rgba(15,10,12,0.34)';
+            ctx.lineWidth = Math.max(1, sz * 0.0055);
+            for (let r = 1; r <= 3; r++) {
+                const py = s.y + s.h * (r * 0.22);
+                ctx.beginPath(); ctx.moveTo(s.x, py); ctx.lineTo(s.x + s.w, py); ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            for (let c = 0; c < 6; c++) {
+                ctx.beginPath();
+                ctx.arc(s.x + (c + 0.5) * (s.w / 6), s.y + s.h * 0.26, Math.max(1, sz * 0.006), 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        ctx.restore();
+
+        // Se presenti parti secondarie (spallacci/bordo inferiore), aggiungi riflesso smussato nella fascia bassa
+        if (hasSecondary) {
+            const secY = full.y + full.h * 0.62;
+            const secH = full.h * 0.38;
+            const sg = ctx.createLinearGradient(0, secY, 0, secY + secH);
+            sg.addColorStop(0, 'rgba(255,255,255,0.22)');
+            sg.addColorStop(1, 'rgba(10,10,18,0.25)');
+            ctx.fillStyle = sg;
+            ctx.fillRect(full.x, secY, full.w, secH);
+            if (cfg.trimCol) {
+                ctx.strokeStyle = cfg.trimCol;
+                ctx.lineWidth = Math.max(1, sz * 0.005);
+                ctx.strokeRect(full.x + 2, secY + 2, full.w - 4, secH - 4);
+            }
+        }
+    },
+
+    // Disegna volto espressivo / elmo / maschera nello slot head (allineato a sphFront o box/cyl)
+    _paintHeadSlot(ctx, slotRect, sz, cfg, hasSecondary, rand) {
+        const full = this._rectPx(slotRect, sz);
+        this._paintRegionBase(ctx, full, cfg.headBase || '#f7f6f4', cfg.headShade || 'rgba(20,18,30,0.20)', 'rgba(255,255,255,0.20)', rand, 5);
+
+        const primUv = hasSecondary
+            ? { u0: slotRect.u0, v0: slotRect.v1 - (slotRect.v1 - slotRect.v0) * 0.62, u1: slotRect.u1, v1: slotRect.v1 }
+            : slotRect;
+        const p = this._rectPx(primUv, sz);
+
+        if (cfg.headType === 'sphereFace') {
+            // sphFront occupa la metà sinistra (u: 0.04..0.48, v: 0.06..0.94)
+            const fx = p.x + p.w * 0.04, fy = p.y + p.h * 0.06, fw = p.w * 0.44, fh = p.h * 0.88;
+            const cx = fx + fw * 0.5, cy = fy + fh * 0.52;
+            // Ombra cappuccio sulla fronte e guance
+            const maskG = ctx.createRadialGradient(cx, cy + fh * 0.06, fw * 0.12, cx, cy, fw * 0.56);
+            maskG.addColorStop(0, cfg.faceShadow || 'rgba(22,16,38,0.68)');
+            maskG.addColorStop(0.68, cfg.faceShadow || 'rgba(22,16,38,0.52)');
+            maskG.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = maskG;
+            ctx.fillRect(fx, fy, fw, fh);
+
+            // Occhi espressivi luminosi (stile mago low-poly carismatico)
+            if (cfg.eyeCol) {
+                const ew = Math.max(2, fw * 0.18), eh = Math.max(1.5, fh * 0.09);
+                const exOff = fw * 0.18, ey = cy - fh * 0.02;
+                ctx.fillStyle = cfg.eyeGlow || cfg.eyeCol;
+                ctx.fillRect(cx - exOff - ew * 0.5, ey - eh * 0.5, ew, eh);
+                ctx.fillRect(cx + exOff - ew * 0.5, ey - eh * 0.5, ew, eh);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(cx - exOff - ew * 0.25, ey - eh * 0.28, ew * 0.5, eh * 0.5);
+                ctx.fillRect(cx + exOff - ew * 0.25, ey - eh * 0.28, ew * 0.5, eh * 0.5);
+            }
+            if (cfg.browMark) {
+                ctx.fillStyle = cfg.browMark;
+                const r = Math.max(1.5, fw * 0.08);
+                ctx.beginPath();
+                ctx.moveTo(cx, cy - fh * 0.22 - r); ctx.lineTo(cx + r, cy - fh * 0.22);
+                ctx.lineTo(cx, cy - fh * 0.22 + r); ctx.lineTo(cx - r, cy - fh * 0.22);
+                ctx.closePath(); ctx.fill();
+            }
+        } else if (cfg.headType === 'helm') {
+            // Elmo metallico con linee di rivettatura e riflesso verticale
+            const hg = ctx.createLinearGradient(p.x, p.y, p.x + p.w, p.y);
+            hg.addColorStop(0.0, 'rgba(15,15,20,0.28)');
+            hg.addColorStop(0.5, 'rgba(255,255,255,0.24)');
+            hg.addColorStop(1.0, 'rgba(15,15,20,0.28)');
+            ctx.fillStyle = hg;
+            ctx.fillRect(p.x, p.y, p.w, p.h);
+            ctx.strokeStyle = 'rgba(15,12,18,0.38)';
+            ctx.lineWidth = Math.max(1, sz * 0.005);
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y + p.h * 0.34); ctx.lineTo(p.x + p.w, p.y + p.h * 0.34);
+            ctx.moveTo(p.x, p.y + p.h * 0.68); ctx.lineTo(p.x + p.w, p.y + p.h * 0.68);
+            ctx.stroke();
+        } else if (cfg.headType === 'crystal') {
+            ctx.strokeStyle = cfg.facetCol || 'rgba(255,255,255,0.48)';
+            ctx.lineWidth = Math.max(1, sz * 0.005);
+            for (let k = 0; k < 5; k++) {
+                ctx.beginPath();
+                ctx.moveTo(p.x + rand() * p.w, p.y);
+                ctx.lineTo(p.x + rand() * p.w, p.y + p.h);
+                ctx.stroke();
+            }
+        }
+    },
+
+    getSkinAtlas(skinId) {
+        const id = skinId || 'dark_mage';
+        if (this._skinCache[id]) return this._skinCache[id];
+
+        const mob = (typeof isTouchDevice !== 'undefined' && isTouchDevice);
+        const sz = mob ? 128 : 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = sz; canvas.height = sz;
+        const ctx = canvas.getContext('2d');
+        const rand = this._makeRand('skin_atlas_' + id);
+
+        ctx.fillStyle = '#f2f2f4';
+        ctx.fillRect(0, 0, sz, sz);
+
+        const slots = (typeof UVAtlasMapper !== 'undefined' && UVAtlasMapper.PLAYER_SLOTS)
+            ? UVAtlasMapper.PLAYER_SLOTS
+            : {
+                body: { u0: 0.02, v0: 0.52, u1: 0.48, v1: 0.98 },
+                head: { u0: 0.52, v0: 0.52, u1: 0.98, v1: 0.98 },
+                scarf: { u0: 0.02, v0: 0.36, u1: 0.48, v1: 0.48 },
+                headAccent: { u0: 0.02, v0: 0.16, u1: 0.48, v1: 0.34 },
+                hatBand: { u0: 0.02, v0: 0.02, u1: 0.24, v1: 0.14 },
+                accent: { u0: 0.26, v0: 0.02, u1: 0.48, v1: 0.14 },
+                staff: { u0: 0.52, v0: 0.22, u1: 0.98, v1: 0.48 },
+                gem: { u0: 0.52, v0: 0.02, u1: 0.74, v1: 0.20 },
+                halo: { u0: 0.76, v0: 0.02, u1: 0.98, v1: 0.20 }
+            };
+
+        const skinSpecs = {
+            dark_mage: {
+                bodySec: true, headSec: false,
+                robeBase: '#f4f0ff', robeShade: 'rgba(20,10,42,0.28)', foldCol: 'rgba(18,8,38,0.26)',
+                hemCol: 'rgba(198,162,255,0.48)', trimCol: 'rgba(255,222,120,0.82)',
+                beltCol: 'rgba(42,16,24,0.68)', buckleCol: '#facc15', sashCol: 'rgba(216,180,254,0.34)',
+                headType: 'sphereFace', headBase: '#f5f2ef', faceShadow: 'rgba(22,12,42,0.74)', eyeCol: '#ffd84a',
+                scarfBase: '#f8eeee', scarfTrim: 'rgba(255,214,102,0.72)',
+                hatPattern: 'stars', hatTrim: 'rgba(255,218,110,0.65)',
+                staffBase: '#e8e2de', staffBand: 'rgba(240,196,95,0.68)', staffGrip: 'rgba(65,30,22,0.55)'
+            },
+            astral_arcanist: {
+                bodySec: true, headSec: false,
+                robeBase: '#eef6ff', robeShade: 'rgba(10,28,64,0.26)', foldCol: 'rgba(12,30,68,0.22)',
+                hemCol: 'rgba(125,211,252,0.52)', trimCol: 'rgba(254,240,138,0.82)',
+                beltCol: 'rgba(12,74,110,0.62)', buckleCol: '#fde047', sashCol: 'rgba(186,230,253,0.40)',
+                pattern: 'stars',
+                headType: 'sphereFace', headBase: '#f4f8ff', faceShadow: 'rgba(12,26,58,0.66)', eyeCol: '#7dd3fc', browMark: '#fde047',
+                scarfBase: '#eef8ff', scarfTrim: 'rgba(254,240,138,0.78)',
+                hatPattern: 'stars', hatTrim: 'rgba(186,230,253,0.80)',
+                staffBase: '#eef4fa', staffBand: 'rgba(250,220,115,0.75)', staffGrip: 'rgba(18,52,92,0.48)'
+            },
+            emerald_warden: {
+                bodySec: true, headSec: true,
+                robeBase: '#eef8f1', robeShade: 'rgba(10,36,18,0.28)', foldCol: 'rgba(12,40,20,0.24)',
+                hemCol: 'rgba(110,231,183,0.42)', trimCol: 'rgba(217,156,74,0.78)',
+                beltCol: 'rgba(92,52,20,0.72)', buckleCol: '#34d399', sashCol: 'rgba(134,239,172,0.28)',
+                headType: 'sphereFace', headBase: '#f3fbf6', faceShadow: 'rgba(12,38,22,0.62)', eyeCol: '#6ee7b7', browMark: '#34d399',
+                scarfBase: '#f8efe6', scarfTrim: 'rgba(134,239,172,0.60)',
+                hatPattern: 'leaf', hatTrim: 'rgba(110,231,183,0.65)',
+                staffBase: '#e6dccf', staffBand: 'rgba(74,222,128,0.55)', staffGrip: 'rgba(72,42,18,0.62)'
+            },
+            crimson_inquisitor: {
+                bodySec: true, headSec: true,
+                robeBase: '#f8ecec', robeShade: 'rgba(38,8,12,0.32)', foldCol: 'rgba(28,6,10,0.26)',
+                hemCol: 'rgba(248,113,113,0.40)', trimCol: 'rgba(226,232,240,0.78)',
+                beltCol: 'rgba(28,24,28,0.75)', buckleCol: '#e2e8f0', sashCol: 'rgba(252,165,165,0.28)',
+                pattern: 'plates',
+                headType: 'helm', headBase: '#f0f2f5',
+                scarfBase: '#f6e8e8', scarfTrim: 'rgba(248,200,110,0.65)',
+                hatPattern: 'plates', hatTrim: 'rgba(255,220,120,0.75)',
+                staffBase: '#e4e6eb', staffBand: 'rgba(220,60,60,0.65)', staffGrip: 'rgba(38,14,16,0.65)'
+            },
+            void_walker: {
+                bodySec: true, headSec: false,
+                robeBase: '#f5eeff', robeShade: 'rgba(28,8,52,0.32)', foldCol: 'rgba(24,8,48,0.26)',
+                hemCol: 'rgba(216,180,254,0.55)', trimCol: 'rgba(233,213,255,0.85)',
+                sashCol: 'rgba(192,132,252,0.38)', pattern: 'stars',
+                headType: 'crystal', headBase: '#f6f0ff', facetCol: 'rgba(255,255,255,0.62)',
+                scarfBase: '#f2e8ff', scarfTrim: 'rgba(233,213,255,0.78)',
+                hatPattern: 'stars', hatTrim: 'rgba(233,213,255,0.80)',
+                staffBase: '#ece4f8', staffBand: 'rgba(216,180,254,0.80)', staffGrip: 'rgba(42,12,72,0.62)'
+            },
+            solar_archon: {
+                bodySec: true, headSec: false,
+                robeBase: '#fff8ec', robeShade: 'rgba(66,34,8,0.26)', foldCol: 'rgba(60,30,6,0.22)',
+                hemCol: 'rgba(253,224,71,0.58)', trimCol: 'rgba(254,249,195,0.92)',
+                beltCol: 'rgba(146,64,14,0.62)', buckleCol: '#fef08a', sashCol: 'rgba(253,224,71,0.44)',
+                pattern: 'plates',
+                headType: 'sphereFace', headBase: '#fffbf0', faceShadow: 'rgba(64,34,8,0.52)', eyeCol: '#fef08a', browMark: '#f59e0b',
+                scarfBase: '#fff5e0', scarfTrim: 'rgba(254,240,138,0.88)',
+                hatPattern: 'plates', hatTrim: 'rgba(254,240,138,0.88)',
+                staffBase: '#fff4da', staffBand: 'rgba(254,240,138,0.85)', staffGrip: 'rgba(110,50,12,0.58)'
+            },
+            cyber_phantom: {
+                bodySec: true, headSec: true,
+                robeBase: '#edf4f9', robeShade: 'rgba(10,22,38,0.30)', foldCol: 'rgba(12,26,44,0.24)',
+                hemCol: 'rgba(103,232,249,0.50)', trimCol: 'rgba(165,243,252,0.86)',
+                beltCol: 'rgba(15,23,42,0.74)', buckleCol: '#22d3ee', sashCol: 'rgba(103,232,249,0.34)',
+                pattern: 'cyber',
+                headType: 'helm', headBase: '#edf2f7',
+                scarfBase: '#e8eff5', scarfTrim: 'rgba(103,232,249,0.75)',
+                hatPattern: 'cyber', hatTrim: 'rgba(103,232,249,0.85)',
+                staffBase: '#e8eef4', staffBand: 'rgba(56,189,248,0.78)', staffGrip: 'rgba(15,23,42,0.68)'
+            }
+        };
+        const sp = skinSpecs[id] || skinSpecs.dark_mage;
+
+        // 1. Body (veste + spallacci)
+        this._paintRobeSlot(ctx, slots.body, sz, sp, sp.bodySec, rand);
+
+        // 2. Head (volto / elmo / cristallo)
+        this._paintHeadSlot(ctx, slots.head, sz, sp, sp.headSec, rand);
+
+        // 3. Scarf (tessuto sciarpa con bordi cuciti)
+        const scR = this._rectPx(slots.scarf, sz);
+        this._paintRegionBase(ctx, scR, sp.scarfBase, 'rgba(15,12,22,0.22)', 'rgba(255,255,255,0.20)', rand, 4);
+        ctx.fillStyle = sp.scarfTrim;
+        ctx.fillRect(scR.x - 2, scR.y + scR.h * 0.14, scR.w + 4, Math.max(1.5, scR.h * 0.14));
+        ctx.fillRect(scR.x - 2, scR.y + scR.h * 0.72, scR.w + 4, Math.max(1.5, scR.h * 0.14));
+
+        // 4. HeadAccent (cappello a punta / visiera / corona)
+        const haR = this._rectPx(slots.headAccent, sz);
+        this._paintRegionBase(ctx, haR, sp.robeBase, 'rgba(12,10,24,0.28)', 'rgba(255,255,255,0.18)', rand, 4);
+        ctx.fillStyle = sp.hatTrim;
+        ctx.fillRect(haR.x - 2, haR.y + haR.h * 0.74, haR.w + 4, Math.max(1.5, haR.h * 0.10));
+        if (sp.hatPattern === 'stars') {
+            for (let i = 0; i < 10; i++) {
+                ctx.beginPath();
+                ctx.arc(haR.x + rand() * haR.w, haR.y + rand() * haR.h * 0.72, Math.max(1, sz * 0.0055), 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 5. HatBand (fascia cappello con fibbia dorata centrata)
+        const hbR = this._rectPx(slots.hatBand, sz);
+        this._paintRegionBase(ctx, hbR, sp.scarfBase, 'rgba(18,10,16,0.24)', 'rgba(255,255,255,0.18)', rand, 4);
+        ctx.fillStyle = sp.buckleCol || '#facc15';
+        ctx.fillRect(hbR.x + hbR.w * 0.42, hbR.y + hbR.h * 0.18, hbR.w * 0.16, hbR.h * 0.64);
+
+        // 6. Accent (ali / frammenti runici)
+        const acR = this._rectPx(slots.accent, sz);
+        this._paintRegionBase(ctx, acR, '#ffffff', 'rgba(30,24,48,0.12)', 'rgba(255,255,255,0.35)', rand, 4);
+
+        // 7. Staff (bastone con impugnatura avvolta e fasce metalliche)
+        const stR = this._rectPx(slots.staff, sz);
+        this._paintRegionBase(ctx, stR, sp.staffBase, 'rgba(18,16,22,0.24)', 'rgba(255,255,255,0.24)', rand, 4);
+        // Impugnatura fasciata nella fascia centrale
+        ctx.fillStyle = sp.staffGrip;
+        ctx.fillRect(stR.x - 2, stR.y + stR.h * 0.42, stR.w + 4, stR.h * 0.24);
+        ctx.strokeStyle = 'rgba(255,255,255,0.24)';
+        ctx.lineWidth = Math.max(1, sz * 0.0045);
+        for (let g = 0; g < 4; g++) {
+            const gy = stR.y + stR.h * (0.45 + g * 0.055);
+            ctx.beginPath(); ctx.moveTo(stR.x, gy); ctx.lineTo(stR.x + stR.w, gy + stR.h * 0.03); ctx.stroke();
+        }
+        // Ghiere decorative in cima e base
+        ctx.fillStyle = sp.staffBand;
+        ctx.fillRect(stR.x - 2, stR.y + stR.h * 0.14, stR.w + 4, Math.max(2, stR.h * 0.10));
+        ctx.fillRect(stR.x - 2, stR.y + stR.h * 0.78, stR.w + 4, Math.max(2, stR.h * 0.08));
+
+        // 8. Gem & Halo (sfaccettature cristalline luminose)
+        const gmR = this._rectPx(slots.gem, sz);
+        const hlR = this._rectPx(slots.halo, sz);
+        this._paintRegionBase(ctx, gmR, '#ffffff', 'rgba(20,24,40,0.10)', 'rgba(255,255,255,0.40)', rand, 4);
+        this._paintRegionBase(ctx, hlR, '#ffffff', 'rgba(20,24,40,0.10)', 'rgba(255,255,255,0.40)', rand, 4);
+
+        const tex = this._finalizeTex(canvas, false, false);
+        this._skinCache[id] = tex;
+        return tex;
+    },
+
+    getEnemyAtlas(type, bossElement = null) {
+        const key = (type === 'boss') ? ('boss_' + (bossElement || 'red')) : (type || 'orc');
+        if (this._enemyCache[key]) return this._enemyCache[key];
+
+        const mob = (typeof isTouchDevice !== 'undefined' && isTouchDevice);
+        const sz = mob ? 128 : 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = sz; canvas.height = sz;
+        const ctx = canvas.getContext('2d');
+        const rand = this._makeRand('enemy_atlas_' + key);
+
+        ctx.fillStyle = '#f2f2f4';
+        ctx.fillRect(0, 0, sz, sz);
+
+        const slots = (typeof UVAtlasMapper !== 'undefined' && UVAtlasMapper.ENEMY_SLOTS)
+            ? UVAtlasMapper.ENEMY_SLOTS
+            : {
+                body:   { u0: 0.02, v0: 0.52, u1: 0.48, v1: 0.98 },
+                head:   { u0: 0.52, v0: 0.52, u1: 0.98, v1: 0.98 },
+                accent: { u0: 0.02, v0: 0.02, u1: 0.48, v1: 0.48 },
+                weapon: { u0: 0.52, v0: 0.02, u1: 0.98, v1: 0.48 }
+            };
+
+        const bR = this._rectPx(slots.body, sz);
+        const hR = this._rectPx(slots.head, sz);
+        const aR = this._rectPx(slots.accent, sz);
+        const wR = this._rectPx(slots.weapon, sz);
+
+        const drawRivetedPlates = (r, plateShade, seamCol, rivetCol, rows = 3, cols = 3) => {
+            ctx.save();
+            ctx.beginPath(); ctx.rect(r.x - 3, r.y - 3, r.w + 6, r.h + 6); ctx.clip();
+            const cw = r.w / cols, ch = r.h / rows;
+            ctx.strokeStyle = seamCol;
+            ctx.lineWidth = Math.max(1, sz * 0.006);
+            for (let gx = 0; gx < cols; gx++) {
+                for (let gy = 0; gy < rows; gy++) {
+                    const px = r.x + gx * cw, py = r.y + gy * ch;
+                    const pg = ctx.createLinearGradient(px, py, px, py + ch);
+                    pg.addColorStop(0, 'rgba(255,255,255,0.18)');
+                    pg.addColorStop(1, plateShade);
+                    ctx.fillStyle = pg;
+                    ctx.fillRect(px + 1, py + 1, cw - 2, ch - 2);
+                    ctx.strokeRect(px + 0.5, py + 0.5, cw - 1, ch - 1);
+                    ctx.fillStyle = rivetCol;
+                    const rr = Math.max(1, sz * 0.0065);
+                    ctx.beginPath();
+                    ctx.arc(px + 3, py + 3, rr, 0, Math.PI * 2);
+                    ctx.arc(px + cw - 3, py + 3, rr, 0, Math.PI * 2);
+                    ctx.arc(px + 3, py + ch - 3, rr, 0, Math.PI * 2);
+                    ctx.arc(px + cw - 3, py + ch - 3, rr, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            ctx.restore();
+        };
+
+        const drawCracks = (r, col, count = 10, lw = 1.4) => {
+            ctx.save();
+            ctx.beginPath(); ctx.rect(r.x - 2, r.y - 2, r.w + 4, r.h + 4); ctx.clip();
+            ctx.strokeStyle = col;
+            ctx.lineWidth = Math.max(1, lw * (sz / 256));
+            for (let i = 0; i < count; i++) {
+                let x = r.x + rand() * r.w, y = r.y + rand() * r.h;
+                ctx.beginPath(); ctx.moveTo(x, y);
+                for (let s = 0; s < 3; s++) {
+                    x += (rand() - 0.5) * r.w * 0.28;
+                    y += (rand() - 0.5) * r.h * 0.28;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+            ctx.restore();
+        };
+
+        if (key === 'slime' || key === 'slime_mini') {
+            // Gelatina lucida con base densa, riflesso cupolare e microbolle interne sospese
+            this._paintRegionBase(ctx, bR, '#f6fff8', 'rgba(10,36,24,0.34)', 'rgba(255,255,255,0.42)', rand, 5);
+            const glossG = ctx.createRadialGradient(bR.x + bR.w * 0.28, bR.y + bR.h * 0.26, 1, bR.x + bR.w * 0.28, bR.y + bR.h * 0.26, bR.w * 0.34);
+            glossG.addColorStop(0, 'rgba(255,255,255,0.58)');
+            glossG.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = glossG;
+            ctx.fillRect(bR.x, bR.y, bR.w, bR.h);
+            for (let i = 0; i < 14; i++) {
+                const bx = bR.x + rand() * bR.w, by = bR.y + rand() * bR.h, br = (0.025 + rand() * 0.045) * bR.w;
+                ctx.fillStyle = 'rgba(255,255,255,0.28)';
+                ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill();
+                ctx.strokeStyle = 'rgba(15,45,30,0.18)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            this._paintRegionBase(ctx, hR, '#eef8f2', 'rgba(10,20,18,0.22)', 'rgba(255,255,255,0.45)', rand, 4);
+            this._paintRegionBase(ctx, aR, '#eefaf4', 'rgba(12,32,24,0.26)', 'rgba(255,255,255,0.30)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#eefaf4', 'rgba(12,32,24,0.26)', 'rgba(255,255,255,0.30)', rand, 4);
+        } else if (key === 'orc') {
+            // Pelle muscolosa con tracolla in cuoio, segni tribali e armatura chiodata
+            this._paintRegionBase(ctx, bR, '#f3f6ee', 'rgba(22,30,14,0.28)', 'rgba(255,255,235,0.16)', rand, 5);
+            // Tracolla di cuoio diagonale sul torso frontale
+            ctx.save(); ctx.beginPath(); ctx.rect(bR.x, bR.y, bR.w, bR.h); ctx.clip();
+            ctx.strokeStyle = 'rgba(66,36,18,0.68)';
+            ctx.lineWidth = Math.max(4, bR.w * 0.11);
+            ctx.beginPath(); ctx.moveTo(bR.x, bR.y + bR.h * 0.15); ctx.lineTo(bR.x + bR.w * 0.55, bR.y + bR.h * 0.72); ctx.stroke();
+            ctx.strokeStyle = 'rgba(210,170,95,0.55)';
+            ctx.lineWidth = Math.max(1, sz * 0.006);
+            ctx.beginPath(); ctx.moveTo(bR.x, bR.y + bR.h * 0.15); ctx.lineTo(bR.x + bR.w * 0.55, bR.y + bR.h * 0.72); ctx.stroke();
+            ctx.restore();
+            // Pittura di guerra e cicatrice sulla testa
+            this._paintRegionBase(ctx, hR, '#f4f7ef', 'rgba(24,32,14,0.26)', 'rgba(255,255,240,0.16)', rand, 5);
+            ctx.fillStyle = 'rgba(180,35,25,0.42)';
+            ctx.fillRect(hR.x + hR.w * 0.06, hR.y + hR.h * 0.26, hR.w * 0.24, Math.max(2, hR.h * 0.07));
+            drawCracks(hR, 'rgba(30,22,16,0.34)', 5, 1.5);
+            // Parti scure e braccia/gambe
+            this._paintRegionBase(ctx, aR, '#e4e0dc', 'rgba(16,14,14,0.34)', 'rgba(255,255,255,0.18)', rand, 4);
+            drawRivetedPlates(aR, 'rgba(16,14,16,0.26)', 'rgba(10,10,12,0.42)', 'rgba(255,255,255,0.35)', 2, 2);
+            this._paintRegionBase(ctx, wR, '#f0f2ea', 'rgba(28,32,18,0.26)', 'rgba(255,255,240,0.15)', rand, 4);
+            ctx.fillStyle = 'rgba(64,38,20,0.45)';
+            ctx.fillRect(wR.x, wR.y + wR.h * 0.70, wR.w, wR.h * 0.14);
+        } else if (key === 'skeleton_archer') {
+            // Osso invecchiato, costole scolpite e legno dell'arco
+            this._paintRegionBase(ctx, bR, '#f8f5ec', 'rgba(42,36,26,0.30)', 'rgba(255,255,250,0.22)', rand, 5);
+            ctx.fillStyle = 'rgba(32,26,22,0.38)';
+            for (let r = 0; r < 4; r++) {
+                ctx.fillRect(bR.x + bR.w * 0.12, bR.y + bR.h * (0.18 + r * 0.14), bR.w * 0.76, Math.max(1.5, bR.h * 0.045));
+            }
+            this._paintRegionBase(ctx, hR, '#faf7f0', 'rgba(40,34,26,0.28)', 'rgba(255,255,255,0.24)', rand, 5);
+            drawCracks(hR, 'rgba(38,30,24,0.32)', 7, 1.2);
+            this._paintRegionBase(ctx, aR, '#e2ddd8', 'rgba(18,16,22,0.36)', 'rgba(255,255,255,0.14)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#f0e6da', 'rgba(54,32,16,0.34)', 'rgba(255,246,232,0.18)', rand, 4);
+            for (let g = 0; g < 6; g++) {
+                ctx.strokeStyle = 'rgba(48,26,12,0.24)';
+                ctx.beginPath(); ctx.moveTo(wR.x, wR.y + (g + 0.5) * (wR.h / 6)); ctx.lineTo(wR.x + wR.w, wR.y + (g + 0.5) * (wR.h / 6)); ctx.stroke();
+            }
+        } else if (key === 'mage' || key === 'dark_prophet') {
+            const isProphet = (key === 'dark_prophet');
+            this._paintRobeSlot(ctx, slots.body, sz, {
+                robeBase: isProphet ? '#faf2ee' : '#f2eeff',
+                robeShade: isProphet ? 'rgba(42,10,6,0.30)' : 'rgba(22,12,48,0.28)',
+                foldCol: isProphet ? 'rgba(38,8,6,0.28)' : 'rgba(20,10,44,0.26)',
+                hemCol: isProphet ? 'rgba(255,130,45,0.55)' : 'rgba(180,120,255,0.52)',
+                trimCol: isProphet ? 'rgba(255,220,110,0.85)' : 'rgba(220,195,255,0.82)',
+                sashCol: isProphet ? 'rgba(255,115,35,0.42)' : 'rgba(168,85,247,0.36)',
+                pattern: 'stars'
+            }, false, rand);
+            this._paintHeadSlot(ctx, slots.head, sz, {
+                headType: 'sphereFace',
+                headBase: isProphet ? '#f7f0ec' : '#f2eeff',
+                faceShadow: isProphet ? 'rgba(36,8,6,0.78)' : 'rgba(18,8,38,0.78)',
+                eyeCol: isProphet ? '#ffaa22' : '#d8b4fe',
+                browMark: isProphet ? '#ff5500' : '#c084fc'
+            }, true, rand);
+            this._paintRegionBase(ctx, aR, '#ece6ee', 'rgba(18,12,28,0.32)', 'rgba(255,255,255,0.18)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#ffffff', isProphet ? 'rgba(140,40,10,0.22)' : 'rgba(60,20,120,0.20)', 'rgba(255,255,255,0.40)', rand, 4);
+            drawCracks(wR, isProphet ? 'rgba(255,165,45,0.55)' : 'rgba(255,255,255,0.55)', 6, 1.4);
+        } else if (key === 'leaper') {
+            // Predatore feroce: manto tigrato/striato sul dorso, artigli e muso aggressivo
+            this._paintRegionBase(ctx, bR, '#f6f2ee', 'rgba(30,14,18,0.30)', 'rgba(255,248,240,0.20)', rand, 5);
+            ctx.save(); ctx.beginPath(); ctx.rect(bR.x, bR.y, bR.w, bR.h); ctx.clip();
+            ctx.strokeStyle = 'rgba(28,10,16,0.38)';
+            ctx.lineWidth = Math.max(2, bR.h * 0.07);
+            for (let s = 0; s < 5; s++) {
+                const sy = bR.y + bR.h * (0.14 + s * 0.17);
+                ctx.beginPath();
+                ctx.moveTo(bR.x, sy); ctx.lineTo(bR.x + bR.w * 0.5, sy + bR.h * 0.06); ctx.lineTo(bR.x + bR.w, sy);
+                ctx.stroke();
+            }
+            ctx.restore();
+            this._paintRegionBase(ctx, hR, '#f8f4f0', 'rgba(28,12,16,0.28)', 'rgba(255,255,255,0.22)', rand, 5);
+            drawCracks(hR, 'rgba(30,12,18,0.30)', 6, 1.5);
+            this._paintRegionBase(ctx, aR, '#efe8e4', 'rgba(26,14,18,0.32)', 'rgba(255,255,255,0.16)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#f2ece8', 'rgba(30,16,18,0.30)', 'rgba(255,255,255,0.20)', rand, 4);
+        } else if (key === 'goblin') {
+            // Imp kamikaze infuocato: bande chevron esplosive e faccino beffardo
+            this._paintRegionBase(ctx, bR, '#fff4e6', 'rgba(72,18,6,0.32)', 'rgba(255,250,210,0.34)', rand, 5);
+            ctx.save(); ctx.beginPath(); ctx.rect(bR.x, bR.y, bR.w, bR.h); ctx.clip();
+            ctx.fillStyle = 'rgba(255,220,75,0.58)';
+            for (let k = 0; k < 4; k++) {
+                ctx.fillRect(bR.x, bR.y + bR.h * (0.14 + k * 0.22), bR.w, Math.max(2, bR.h * 0.08));
+            }
+            ctx.restore();
+            this._paintRegionBase(ctx, hR, '#fff2e0', 'rgba(64,14,6,0.34)', 'rgba(255,245,200,0.32)', rand, 4);
+            this._paintRegionBase(ctx, aR, '#ffe8d6', 'rgba(80,12,24,0.30)', 'rgba(255,240,190,0.30)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#ffe4ec', 'rgba(110,8,48,0.28)', 'rgba(255,255,255,0.38)', rand, 4);
+        } else if (key === 'pyromancer' || key === 'fire_demon' || key === 'boss_red') {
+            // Crosta vulcanica/forgia con fessure magmatiche ardenti e piastre forgiate
+            this._paintRegionBase(ctx, bR, '#f6ebe6', 'rgba(36,10,6,0.36)', 'rgba(255,220,175,0.22)', rand, 5);
+            drawRivetedPlates(bR, 'rgba(36,10,8,0.24)', 'rgba(24,6,4,0.44)', 'rgba(255,195,95,0.55)', 2, 3);
+            drawCracks(bR, 'rgba(255,145,35,0.72)', 12, 1.8);
+            this._paintRegionBase(ctx, hR, '#f4eae6', 'rgba(38,10,8,0.36)', 'rgba(255,215,170,0.22)', rand, 5);
+            drawCracks(hR, 'rgba(255,165,45,0.68)', 8, 1.5);
+            this._paintRegionBase(ctx, aR, '#ece2de', 'rgba(26,8,6,0.38)', 'rgba(255,200,140,0.18)', rand, 4);
+            drawCracks(aR, 'rgba(255,120,25,0.55)', 8, 1.5);
+            this._paintRegionBase(ctx, wR, '#f5eae4', 'rgba(38,12,8,0.34)', 'rgba(255,230,175,0.26)', rand, 4);
+            drawCracks(wR, 'rgba(255,190,65,0.65)', 8, 1.5);
+        } else if (key === 'trapper' || key === 'crystal' || key === 'boss_blue') {
+            // Piastre glaciali/cinetiche sfaccettate con circuiti/venature luminose di ghiaccio
+            this._paintRegionBase(ctx, bR, '#eff8ff', 'rgba(14,34,62,0.28)', 'rgba(255,255,255,0.34)', rand, 5);
+            drawRivetedPlates(bR, 'rgba(12,34,64,0.20)', 'rgba(14,42,78,0.36)', 'rgba(186,230,253,0.75)', 2, 3);
+            drawCracks(bR, 'rgba(224,242,254,0.78)', 11, 1.5);
+            this._paintRegionBase(ctx, hR, '#f2faff', 'rgba(14,34,60,0.26)', 'rgba(255,255,255,0.38)', rand, 5);
+            drawCracks(hR, 'rgba(224,242,254,0.72)', 7, 1.3);
+            this._paintRegionBase(ctx, aR, '#e6f1fa', 'rgba(14,28,48,0.32)', 'rgba(224,242,254,0.32)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#eef8ff', 'rgba(14,36,64,0.24)', 'rgba(255,255,255,0.42)', rand, 4);
+            drawCracks(wR, 'rgba(186,230,253,0.78)', 9, 1.5);
+        } else if (key === 'roller') {
+            // Ruota corazzata a fasce rivettate con spigoli metallici
+            this._paintRegionBase(ctx, bR, '#f0f2f5', 'rgba(20,22,28,0.34)', 'rgba(255,255,255,0.26)', rand, 5);
+            drawRivetedPlates(bR, 'rgba(20,22,28,0.26)', 'rgba(12,14,18,0.48)', 'rgba(255,230,175,0.55)', 4, 2);
+            this._paintRegionBase(ctx, hR, '#e8ecf0', 'rgba(18,20,26,0.32)', 'rgba(255,255,255,0.28)', rand, 4);
+            this._paintRegionBase(ctx, aR, '#e4e8ee', 'rgba(16,18,24,0.36)', 'rgba(255,255,255,0.24)', rand, 4);
+            drawRivetedPlates(aR, 'rgba(18,20,26,0.28)', 'rgba(10,12,16,0.44)', 'rgba(255,255,255,0.40)', 2, 2);
+            this._paintRegionBase(ctx, wR, '#f8fafc', 'rgba(30,34,42,0.24)', 'rgba(255,255,255,0.42)', rand, 4);
+        } else if (key === 'golem') {
+            // Piastre monolitiche runiche con bordi smussati e glifi incisi
+            this._paintRegionBase(ctx, bR, '#eef2f6', 'rgba(16,24,36,0.30)', 'rgba(255,255,255,0.24)', rand, 5);
+            drawRivetedPlates(bR, 'rgba(16,24,36,0.24)', 'rgba(10,16,26,0.46)', 'rgba(125,211,252,0.62)', 3, 3);
+            this._paintRegionBase(ctx, hR, '#eef2f6', 'rgba(16,24,36,0.28)', 'rgba(255,255,255,0.26)', rand, 5);
+            drawRivetedPlates(hR, 'rgba(16,24,36,0.22)', 'rgba(10,16,26,0.44)', 'rgba(125,211,252,0.62)', 2, 2);
+            this._paintRegionBase(ctx, aR, '#e6ecf2', 'rgba(14,22,34,0.32)', 'rgba(255,255,255,0.22)', rand, 4);
+            drawRivetedPlates(aR, 'rgba(14,22,34,0.24)', 'rgba(10,16,26,0.44)', 'rgba(125,211,252,0.55)', 2, 2);
+            this._paintRegionBase(ctx, wR, '#edf2f7', 'rgba(16,24,36,0.28)', 'rgba(255,255,255,0.26)', rand, 4);
+            drawRivetedPlates(wR, 'rgba(16,24,36,0.22)', 'rgba(10,16,26,0.42)', 'rgba(125,211,252,0.55)', 2, 2);
+        } else if (key === 'ring_walker') {
+            // Sfera celeste/arcana con meridiani incisi e gambe-obelisco runiche
+            this._paintRegionBase(ctx, bR, '#f6f0ee', 'rgba(28,12,18,0.32)', 'rgba(255,240,228,0.26)', rand, 5);
+            ctx.save(); ctx.beginPath(); ctx.rect(bR.x, bR.y, bR.w, bR.h); ctx.clip();
+            ctx.strokeStyle = 'rgba(255,150,90,0.58)';
+            ctx.lineWidth = Math.max(1.2, sz * 0.007);
+            ctx.strokeRect(bR.x + bR.w * 0.06, bR.y + bR.h * 0.44, bR.w * 0.88, bR.h * 0.12);
+            ctx.beginPath();
+            ctx.arc(bR.x + bR.w * 0.26, bR.y + bR.h * 0.50, bR.w * 0.15, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+            this._paintRegionBase(ctx, hR, '#f6eeec', 'rgba(28,12,16,0.28)', 'rgba(255,245,235,0.28)', rand, 4);
+            this._paintRegionBase(ctx, aR, '#efe8e6', 'rgba(26,12,16,0.32)', 'rgba(255,230,210,0.20)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#f4ecea', 'rgba(28,12,16,0.34)', 'rgba(255,230,210,0.22)', rand, 4);
+            ctx.fillStyle = 'rgba(255,130,65,0.48)';
+            ctx.fillRect(wR.x + wR.w * 0.44, wR.y + wR.h * 0.08, wR.w * 0.12, wR.h * 0.84);
+        } else if (key === 'boss_green') {
+            // Carapace chitinoso stratificato con venature bioluminescenti
+            this._paintRegionBase(ctx, bR, '#f0faee', 'rgba(12,38,16,0.32)', 'rgba(235,255,220,0.26)', rand, 5);
+            ctx.save(); ctx.beginPath(); ctx.rect(bR.x, bR.y, bR.w, bR.h); ctx.clip();
+            for (let r = 0; r < 4; r++) {
+                const ry = bR.y + bR.h * (0.18 + r * 0.20);
+                ctx.strokeStyle = 'rgba(10,36,14,0.42)';
+                ctx.lineWidth = Math.max(1.5, sz * 0.008);
+                ctx.beginPath(); ctx.moveTo(bR.x, ry); ctx.quadraticCurveTo(bR.x + bR.w * 0.5, ry + bR.h * 0.09, bR.x + bR.w, ry); ctx.stroke();
+            }
+            ctx.restore();
+            drawCracks(bR, 'rgba(163,230,53,0.60)', 10, 1.4);
+            this._paintRegionBase(ctx, hR, '#eef8ec', 'rgba(12,36,14,0.30)', 'rgba(235,255,220,0.24)', rand, 5);
+            drawCracks(hR, 'rgba(163,230,53,0.55)', 6, 1.3);
+            this._paintRegionBase(ctx, aR, '#e6f2e4', 'rgba(12,32,14,0.34)', 'rgba(220,255,205,0.20)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#f2fce8', 'rgba(14,40,14,0.28)', 'rgba(240,255,225,0.32)', rand, 4);
+        } else {
+            this._paintRegionBase(ctx, bR, '#f4f4f6', 'rgba(20,22,30,0.26)', 'rgba(255,255,255,0.22)', rand, 5);
+            this._paintRegionBase(ctx, hR, '#f4f4f6', 'rgba(20,22,30,0.26)', 'rgba(255,255,255,0.22)', rand, 5);
+            this._paintRegionBase(ctx, aR, '#eceef2', 'rgba(20,22,30,0.28)', 'rgba(255,255,255,0.20)', rand, 4);
+            this._paintRegionBase(ctx, wR, '#f2f2f6', 'rgba(20,22,30,0.26)', 'rgba(255,255,255,0.22)', rand, 4);
+        }
+
+        const tex = this._finalizeTex(canvas, false, false);
+        this._enemyCache[key] = tex;
+        return tex;
+    },
+
+    getUtility(kind) {
+        if (this._utilCache[kind]) return this._utilCache[kind];
+        const mob = (typeof isTouchDevice !== 'undefined' && isTouchDevice);
+        const sz = (kind === 'crate' || kind === 'urn' || kind === 'coin' || kind === 'obelisk') ? (mob ? 128 : 256) : 128;
+        const canvas = document.createElement('canvas');
+        canvas.width = sz; canvas.height = sz;
+        const ctx = canvas.getContext('2d');
+        const rand = this._makeRand('util_' + kind);
+        let repX = true, repY = true;
+
+        if (kind === 'crate') {
+            repX = false; repY = false;
+            // Cassa di legno dipinta a mano 1:1 per faccia: cornice spessa, doghe orizzontali, traversa diagonale e borchie di ferro
+            ctx.fillStyle = '#c48342';
+            ctx.fillRect(0, 0, sz, sz);
+            const pad = Math.round(sz * 0.13);
+            const inner = sz - pad * 2;
+            // Doghe orizzontali interne con venatura morbida
+            const planks = 4;
+            const ph = inner / planks;
+            for (let p = 0; p < planks; p++) {
+                const py = pad + p * ph;
+                const shade = (p % 2 === 0) ? '#b87638' : '#c68444';
+                ctx.fillStyle = shade;
+                ctx.fillRect(pad, py, inner, ph);
+                for (let g = 0; g < 6; g++) {
+                    ctx.strokeStyle = rand() > 0.5 ? 'rgba(65,34,12,0.18)' : 'rgba(255,222,175,0.16)';
+                    ctx.lineWidth = Math.max(1, sz * 0.006);
+                    const gy = py + rand() * ph;
+                    ctx.beginPath(); ctx.moveTo(pad, gy); ctx.lineTo(pad + inner, gy + (rand() - 0.5) * 3); ctx.stroke();
+                }
+                ctx.fillStyle = 'rgba(42,20,8,0.55)';
+                ctx.fillRect(pad, py, inner, Math.max(1.5, sz * 0.010));
+            }
+            // Traversa diagonale in legno con ombra portata
+            ctx.save();
+            ctx.beginPath(); ctx.rect(pad, pad, inner, inner); ctx.clip();
+            ctx.strokeStyle = 'rgba(32,14,5,0.42)';
+            ctx.lineWidth = sz * 0.135;
+            ctx.beginPath(); ctx.moveTo(pad - 4, pad + 6); ctx.lineTo(pad + inner + 4, pad + inner + 6); ctx.stroke();
+            ctx.strokeStyle = '#9c5d28';
+            ctx.lineWidth = sz * 0.115;
+            ctx.beginPath(); ctx.moveTo(pad - 4, pad); ctx.lineTo(pad + inner + 4, pad + inner); ctx.stroke();
+            ctx.strokeStyle = 'rgba(245,198,132,0.34)';
+            ctx.lineWidth = sz * 0.022;
+            ctx.beginPath(); ctx.moveTo(pad - 2, pad - sz * 0.032); ctx.lineTo(pad + inner + 2, pad + inner - sz * 0.032); ctx.stroke();
+            ctx.restore();
+            // Ombra incassata lungo il bordo interno della cornice
+            ctx.strokeStyle = 'rgba(28,12,4,0.48)';
+            ctx.lineWidth = Math.max(3, sz * 0.028);
+            ctx.strokeRect(pad + 1, pad + 1, inner - 2, inner - 2);
+            // Cornice esterna in legno scuro con smusso superiore chiaro
+            ctx.strokeStyle = '#73411c';
+            ctx.lineWidth = pad;
+            ctx.strokeRect(pad * 0.5, pad * 0.5, sz - pad, sz - pad);
+            ctx.strokeStyle = 'rgba(240,192,126,0.30)';
+            ctx.lineWidth = Math.max(1.5, sz * 0.012);
+            ctx.strokeRect(pad * 0.18, pad * 0.18, sz - pad * 0.36, sz - pad * 0.36);
+            // Squadre angolari in ferro battuto e chiodi
+            const bSz = Math.round(sz * 0.15);
+            const corners = [[0, 0], [sz - bSz, 0], [0, sz - bSz], [sz - bSz, sz - bSz]];
+            for (let c = 0; c < 4; c++) {
+                const cx = corners[c][0], cy = corners[c][1];
+                ctx.fillStyle = '#3b424c';
+                ctx.fillRect(cx, cy, bSz, bSz);
+                ctx.strokeStyle = '#1f242b';
+                ctx.lineWidth = Math.max(1, sz * 0.008);
+                ctx.strokeRect(cx + 0.5, cy + 0.5, bSz - 1, bSz - 1);
+                ctx.fillStyle = '#9aa6b5';
+                ctx.beginPath();
+                ctx.arc(cx + bSz * 0.5, cy + bSz * 0.5, Math.max(1.8, sz * 0.018), 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else if (kind === 'urn') {
+            repX = true; repY = false;
+            // Anfora in terracotta smaltata allineata verticalmente alle coordinate Lathe (v=0 base -> v=1 orlo)
+            const g = ctx.createLinearGradient(0, 0, 0, sz);
+            g.addColorStop(0.00, '#5a2b17'); // Orlo smaltato scuro
+            g.addColorStop(0.14, '#b85f38'); // Collo caldo
+            g.addColorStop(0.32, '#cf7548'); // Spalla illuminata
+            g.addColorStop(0.56, '#b35a33'); // Pancia terracotta
+            g.addColorStop(0.84, '#7d3a20'); // Base ombreggiata
+            g.addColorStop(1.00, '#4a2112'); // Piede terroso
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, sz, sz);
+            // Fascia decorativa geometrica sulla pancia (seamless orizzontale)
+            const bandY = sz * 0.40, bandH = sz * 0.16;
+            ctx.fillStyle = '#472112';
+            ctx.fillRect(0, bandY, sz, bandH);
+            ctx.fillStyle = '#e6b272';
+            ctx.fillRect(0, bandY, sz, Math.max(1.5, sz * 0.014));
+            ctx.fillRect(0, bandY + bandH - Math.max(1.5, sz * 0.014), sz, Math.max(1.5, sz * 0.014));
+            // Motivo greca/chevron continuo
+            const teeth = 8, tw = sz / teeth;
+            ctx.strokeStyle = '#e8ba7d';
+            ctx.lineWidth = Math.max(1.5, sz * 0.014);
+            ctx.beginPath();
+            for (let t = 0; t <= teeth; t++) {
+                const tx = t * tw;
+                ctx.moveTo(tx, bandY + bandH * 0.72);
+                ctx.lineTo(tx + tw * 0.5, bandY + bandH * 0.28);
+                ctx.lineTo(tx + tw, bandY + bandH * 0.72);
+            }
+            ctx.stroke();
+            // Collare scuro sul collo
+            ctx.fillStyle = 'rgba(56,24,12,0.75)';
+            ctx.fillRect(0, sz * 0.18, sz, Math.max(2, sz * 0.032));
+            // Puntinatura ceramica morbida
+            for (let i = 0; i < 160; i++) {
+                ctx.fillStyle = rand() > 0.5 ? 'rgba(35,14,6,0.16)' : 'rgba(255,224,185,0.14)';
+                const dSz = Math.max(1, sz * 0.010);
+                ctx.fillRect(rand() * sz, rand() * sz, dSz, dSz);
+            }
+        } else if (kind === 'dark_iron') {
+            // Ferro battuto scuro pulito con micro-martellatura e smussi (sostituisce i puntini neri su enemyDark)
+            ctx.fillStyle = '#dadde4';
+            ctx.fillRect(0, 0, sz, sz);
+            for (let i = 0; i < 65; i++) {
+                const cx = rand() * sz, cy = rand() * sz, r = 8 + rand() * 14;
+                const rg = ctx.createRadialGradient(cx, cy, 1, cx, cy, r);
+                rg.addColorStop(0, rand() > 0.45 ? 'rgba(18,22,32,0.20)' : 'rgba(255,255,255,0.20)');
+                rg.addColorStop(1, 'rgba(255,255,255,0)');
+                ctx.fillStyle = rg;
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 40; i++) {
+                const x = rand() * sz, y = rand() * sz;
+                ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 12 + rand() * 14, y + (rand() - 0.5) * 4); ctx.stroke();
+            }
+        } else if (kind === 'rune_steel') {
+            // Acciaio runico a piastre per Golem e armature pesanti
+            ctx.fillStyle = '#e6ecf2';
+            ctx.fillRect(0, 0, sz, sz);
+            const cell = sz / 2;
+            ctx.strokeStyle = 'rgba(16,26,42,0.45)';
+            ctx.lineWidth = 2;
+            for (let gx = 0; gx < 2; gx++) {
+                for (let gy = 0; gy < 2; gy++) {
+                    const px = gx * cell, py = gy * cell;
+                    const pg = ctx.createLinearGradient(px, py, px, py + cell);
+                    pg.addColorStop(0, 'rgba(255,255,255,0.24)');
+                    pg.addColorStop(1, 'rgba(18,28,44,0.24)');
+                    ctx.fillStyle = pg;
+                    ctx.fillRect(px + 2, py + 2, cell - 4, cell - 4);
+                    ctx.strokeRect(px + 1, py + 1, cell - 2, cell - 2);
+                    ctx.fillStyle = 'rgba(140,215,255,0.48)';
+                    ctx.beginPath();
+                    ctx.arc(px + 7, py + 7, 2.2, 0, Math.PI * 2);
+                    ctx.arc(px + cell - 7, py + 7, 2.2, 0, Math.PI * 2);
+                    ctx.arc(px + 7, py + cell - 7, 2.2, 0, Math.PI * 2);
+                    ctx.arc(px + cell - 7, py + cell - 7, 2.2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        } else if (kind === 'wood_club') {
+            // Legno nodoso scuro + fascette di ferro per la clava dell'Orco
+            ctx.fillStyle = '#dfc8b4';
+            ctx.fillRect(0, 0, sz, sz);
+            for (let x = 0; x < sz; x += 4) {
+                ctx.fillStyle = (x % 8 === 0) ? 'rgba(65,36,16,0.22)' : 'rgba(255,235,210,0.14)';
+                ctx.fillRect(x, 0, 2, sz);
+            }
+            ctx.fillStyle = 'rgba(32,36,44,0.72)';
+            ctx.fillRect(0, sz * 0.24, sz, sz * 0.10);
+            ctx.fillRect(0, sz * 0.68, sz, sz * 0.10);
+        } else if (kind === 'obelisk') {
+            // Monolite scolpito con conci in pietra e canale verticale inciso di rune
+            ctx.fillStyle = '#dcdfe6';
+            ctx.fillRect(0, 0, sz, sz);
+            const courses = 6, ch = sz / courses;
+            ctx.strokeStyle = 'rgba(16,18,28,0.42)';
+            ctx.lineWidth = Math.max(1.5, sz * 0.009);
+            for (let c = 0; c < courses; c++) {
+                const cy = c * ch;
+                const cg = ctx.createLinearGradient(0, cy, 0, cy + ch);
+                cg.addColorStop(0, 'rgba(255,255,255,0.18)');
+                cg.addColorStop(1, 'rgba(14,16,26,0.26)');
+                ctx.fillStyle = cg;
+                ctx.fillRect(0, cy, sz, ch);
+                ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(sz, cy); ctx.stroke();
+            }
+            // Canale centrale con glifi incisi
+            const cx = sz * 0.5, rw = sz * 0.16;
+            ctx.fillStyle = 'rgba(14,16,28,0.34)';
+            ctx.fillRect(cx - rw * 0.5, 0, rw, sz);
+            ctx.strokeStyle = 'rgba(240,245,255,0.52)';
+            ctx.lineWidth = Math.max(1.5, sz * 0.009);
+            for (let g = 0; g < 5; g++) {
+                const gy = sz * (0.14 + g * 0.18);
+                const r = rw * 0.34;
+                ctx.beginPath();
+                ctx.moveTo(cx, gy - r); ctx.lineTo(cx + r, gy); ctx.lineTo(cx, gy + r); ctx.lineTo(cx - r, gy);
+                ctx.closePath(); ctx.stroke();
+            }
+        } else if (kind === 'bark') {
+            // Corteccia naturale tileable (zero effetto codice a barre)
+            ctx.fillStyle = '#9c9184';
+            ctx.fillRect(0, 0, sz, sz);
+            for (let i = 0; i < 42; i++) {
+                const bx = rand() * sz, by = rand() * sz;
+                const bw = 4 + rand() * 8, bh = 18 + rand() * 34;
+                const dark = rand() > 0.38;
+                ctx.fillStyle = dark ? 'rgba(38,30,22,0.44)' : 'rgba(218,208,194,0.30)';
+                for (let oy = -1; oy <= 1; oy++) {
+                    ctx.fillRect(bx, by + oy * sz, bw, bh);
+                }
+            }
+            ctx.strokeStyle = 'rgba(26,20,14,0.52)';
+            ctx.lineWidth = 1.6;
+            for (let i = 0; i < 24; i++) {
+                const x = rand() * sz;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.bezierCurveTo(x + (rand() - 0.5) * 10, sz * 0.33, x + (rand() - 0.5) * 10, sz * 0.66, x, sz);
+                ctx.stroke();
+            }
+        } else if (kind === 'coin') {
+            repX = false; repY = false;
+            const c = sz * 0.5;
+            const rg = ctx.createRadialGradient(c * 0.8, c * 0.72, sz * 0.04, c, c, c);
+            rg.addColorStop(0.0, '#fff4a8');
+            rg.addColorStop(0.55, '#f6c324');
+            rg.addColorStop(0.88, '#c98810');
+            rg.addColorStop(1.0, '#784604');
+            ctx.fillStyle = rg;
+            ctx.fillRect(0, 0, sz, sz);
+            // Doppio bordo zigrinato
+            ctx.strokeStyle = '#6e3d05';
+            ctx.lineWidth = sz * 0.045;
+            ctx.beginPath(); ctx.arc(c, c, sz * 0.43, 0, Math.PI * 2); ctx.stroke();
+            ctx.strokeStyle = '#fff1a6';
+            ctx.lineWidth = sz * 0.018;
+            ctx.beginPath(); ctx.arc(c, c, sz * 0.38, 0, Math.PI * 2); ctx.stroke();
+            // Emblema demone cornuto in rilievo dorato
+            ctx.fillStyle = '#6c3904';
+            ctx.beginPath();
+            ctx.moveTo(c - sz * 0.16, c - sz * 0.08); ctx.lineTo(c - sz * 0.25, c - sz * 0.28); ctx.lineTo(c - sz * 0.08, c - sz * 0.16); ctx.closePath(); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(c + sz * 0.16, c - sz * 0.08); ctx.lineTo(c + sz * 0.25, c - sz * 0.28); ctx.lineTo(c + sz * 0.08, c - sz * 0.16); ctx.closePath(); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(c - sz * 0.18, c - sz * 0.02); ctx.lineTo(c - sz * 0.05, c + sz * 0.04); ctx.lineTo(c - sz * 0.14, c + sz * 0.08); ctx.closePath(); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(c + sz * 0.18, c - sz * 0.02); ctx.lineTo(c + sz * 0.05, c + sz * 0.04); ctx.lineTo(c + sz * 0.14, c + sz * 0.08); ctx.closePath(); ctx.fill();
+            ctx.strokeStyle = '#6c3904';
+            ctx.lineWidth = sz * 0.036;
+            ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.arc(c, c + sz * 0.06, sz * 0.16, 0.24, Math.PI - 0.24); ctx.stroke();
+        } else if (kind === 'arcane_cube') {
+            repX = false; repY = false;
+            ctx.fillStyle = '#1b263b';
+            ctx.fillRect(0, 0, sz, sz);
+            const m = Math.round(sz * 0.11);
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = Math.max(2, sz * 0.055);
+            ctx.strokeRect(m * 0.5, m * 0.5, sz - m, sz - m);
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = Math.max(1.5, sz * 0.024);
+            ctx.strokeRect(m * 1.45, m * 1.45, sz - m * 2.9, sz - m * 2.9);
+            const c = sz * 0.5, r = sz * 0.21;
+            ctx.beginPath();
+            ctx.moveTo(c, c - r); ctx.lineTo(c + r, c); ctx.lineTo(c, c + r); ctx.lineTo(c - r, c);
+            ctx.closePath(); ctx.stroke();
+            ctx.fillStyle = '#bae6fd';
+            ctx.beginPath(); ctx.arc(c, c, sz * 0.05, 0, Math.PI * 2); ctx.fill();
+        } else if (kind === 'grimoire') {
+            repX = false; repY = false;
+            ctx.fillStyle = '#581c87';
+            ctx.fillRect(0, 0, sz, sz);
+            const m = Math.round(sz * 0.10);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = Math.max(2, sz * 0.045);
+            ctx.strokeRect(m, m, sz - m * 2, sz - m * 2);
+            const c = sz * 0.5, r = sz * 0.20;
+            ctx.beginPath(); ctx.arc(c, c, r, 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(c, c - r); ctx.lineTo(c + r * 0.7, c); ctx.lineTo(c, c + r); ctx.lineTo(c - r * 0.7, c);
+            ctx.closePath(); ctx.stroke();
+        }
+
+        const tex = this._finalizeTex(canvas, repX, repY);
+        this._utilCache[kind] = tex;
+        return tex;
+    }
+};
+
 function getEnemyTexture(type, bossElement = null) {
     const pt = (typeof Preloader !== 'undefined' && Preloader.textures) ? Preloader.textures : null;
-    const fallback = (typeof PcUltraGraphics !== 'undefined') ? PcUltraGraphics.getCharTex() : CHAR_GRUNGE_TEX;
-    if (!pt) return fallback;
-    if (type === 'boss' && bossElement) {
-        const bossCustomKey = 'enemy_boss_' + bossElement;
-        if (pt[bossCustomKey] && pt[bossCustomKey].image) return pt[bossCustomKey];
+    if (pt) {
+        if (type === 'boss' && bossElement) {
+            const bossCustomKey = 'enemy_boss_' + bossElement;
+            if (pt[bossCustomKey] && pt[bossCustomKey]._isExternalImg) return pt[bossCustomKey];
+        }
+        const customKey = 'enemy_' + type;
+        if (pt[customKey] && pt[customKey]._isExternalImg) return pt[customKey];
+        let key = null;
+        if (type === 'orc' || type === 'goblin' || type === 'leaper' || type === 'pyromancer') key = 'mon_flesh';
+        else if (type === 'skeleton_archer') key = 'mon_bone';
+        else if (type === 'slime' || type === 'slime_mini') key = 'mon_slime';
+        else if (type === 'fire_demon') key = 'mon_magma';
+        else if (type === 'golem' || type === 'trapper' || type === 'ring_walker') key = 'mon_rune_metal';
+        else if (type === 'mage' || type === 'dark_prophet') key = 'mon_cloth';
+        else if (type === 'roller') key = 'mon_chitin';
+        else if (type === 'boss') {
+            if (bossElement === 'blue') key = 'mon_rune_metal';
+            else if (bossElement === 'green') key = 'mon_chitin';
+            else key = 'mon_flesh';
+        } else if (type === 'dark_armor') {
+            key = 'mon_dark_armor';
+        }
+        if (key && pt[key] && pt[key]._isExternalImg) return pt[key];
     }
-    const customKey = 'enemy_' + type;
-    if (pt[customKey] && pt[customKey].image) return pt[customKey];
-    let key = null;
-    if (type === 'orc' || type === 'goblin' || type === 'leaper' || type === 'pyromancer') key = 'mon_flesh';
-    else if (type === 'skeleton_archer') key = 'mon_bone';
-    else if (type === 'slime' || type === 'slime_mini') key = 'mon_slime';
-    else if (type === 'fire_demon') key = 'mon_magma';
-    else if (type === 'golem' || type === 'trapper' || type === 'ring_walker') key = 'mon_rune_metal';
-    else if (type === 'mage' || type === 'dark_prophet') key = 'mon_cloth';
-    else if (type === 'roller') key = 'mon_chitin';
-    else if (type === 'boss') {
-        if (bossElement === 'blue') key = 'mon_rune_metal';
-        else if (bossElement === 'green') key = 'mon_chitin';
-        else key = 'mon_flesh';
-    } else if (type === 'dark_armor') {
-        key = 'mon_dark_armor';
-    }
-    return (key && pt[key]) ? pt[key] : fallback;
+    if (type === 'dark_armor') return ModelTextureFactory.getUtility('dark_iron');
+    return ModelTextureFactory.getEnemyAtlas(type, bossElement);
 }
 
 const SKIN_TEX_CACHE = {};
 function getSkinTexture(skinId, forceProcedural = false) {
     if (!skinId) return CHAR_GRUNGE_TEX;
-    if (!forceProcedural && typeof Preloader !== 'undefined' && Preloader.textures && Preloader.textures['skin_' + skinId]) {
-        return Preloader.textures['skin_' + skinId];
+    if (!forceProcedural && typeof Preloader !== 'undefined' && Preloader.textures) {
+        const pre = Preloader.textures['skin_' + skinId];
+        if (pre && pre._isExternalImg) return pre;
     }
-    if (SKIN_TEX_CACHE[skinId]) return SKIN_TEX_CACHE[skinId];
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 128; canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-
-    // Sfondo BIANCO PURO (come CHAR_GRUNGE_TEX) per mantenere colori vibranti e mai spenti
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, 128, 128);
-
-    let seed = 1337;
-    for (let c = 0; c < skinId.length; c++) seed = (seed * 31 + skinId.charCodeAt(c)) | 0;
-    const rand = () => {
-        seed = (seed * 1664525 + 1013904223) | 0;
-        return ((seed >>> 0) / 4294967296);
-    };
-
-    const presets = {
-        dark_mage:          { dark: 'rgba(18,10,34,0.42)',  accent: 'rgba(168,85,247,0.22)', scratch: 'rgba(15,8,28,0.48)',  grainCount: 680, scratchCount: 45, verticalGrain: true },
-        astral_arcanist:    { dark: 'rgba(14,32,68,0.34)',  accent: 'rgba(125,211,252,0.35)', scratch: 'rgba(30,58,138,0.38)', grainCount: 620, scratchCount: 38, starDots: true },
-        emerald_warden:     { dark: 'rgba(10,36,18,0.42)',  accent: 'rgba(110,231,183,0.28)', scratch: 'rgba(20,45,24,0.50)',  grainCount: 720, scratchCount: 52, verticalGrain: true },
-        crimson_inquisitor: { dark: 'rgba(36,8,12,0.46)',   accent: 'rgba(248,113,113,0.24)', scratch: 'rgba(20,5,8,0.58)',    grainCount: 780, scratchCount: 64, battleWear: true },
-        void_walker:        { dark: 'rgba(28,8,48,0.42)',   accent: 'rgba(216,180,254,0.36)', scratch: 'rgba(59,7,100,0.48)',  grainCount: 650, scratchCount: 46, starDots: true },
-        solar_archon:       { dark: 'rgba(56,28,6,0.34)',   accent: 'rgba(253,224,71,0.38)',  scratch: 'rgba(120,53,15,0.40)', grainCount: 640, scratchCount: 40, starDots: true },
-        cyber_phantom:      { dark: 'rgba(12,22,38,0.42)',  accent: 'rgba(103,232,249,0.32)', scratch: 'rgba(15,23,42,0.52)',  grainCount: 700, scratchCount: 48, techMicro: true }
-    };
-    const p = presets[skinId] || presets.dark_mage;
-
-    for (let i = 0; i < p.grainCount; i++) {
-        let r = rand();
-        ctx.fillStyle = r < 0.52 ? p.dark : (r < 0.80 ? '#ffffff' : p.accent);
-        let w = rand() * 3 + 1;
-        let h = p.verticalGrain ? (rand() * 5 + 1.5) : w;
-        ctx.fillRect(rand() * 128, rand() * 128, w, h);
+    if (typeof ModelTextureFactory !== 'undefined') {
+        const atlas = ModelTextureFactory.getSkinAtlas(skinId);
+        SKIN_TEX_CACHE[skinId] = atlas;
+        return atlas;
     }
-
-    // 2. Micro-dettagli di superficie isotropi (non creano mai righe storte sulle cuciture dei coni/cilindri)
-    if (p.starDots) {
-        ctx.fillStyle = '#ffffff';
-        for (let i = 0; i < 45; i++) {
-            let sx = rand() * 124 + 2, sy = rand() * 124 + 2;
-            ctx.fillRect(sx, sy, 2, 2);
-        }
-    } else if (p.techMicro) {
-        ctx.fillStyle = 'rgba(0,0,0,0.22)';
-        for (let y = 0; y < 128; y += 8) {
-            let shift = (y % 16 === 0) ? 0 : 4;
-            for (let x = shift; x < 128; x += 8) {
-                ctx.fillRect(x, y, 2, 2);
-            }
-        }
-    }
-
-    ctx.lineWidth = p.battleWear ? 2.0 : 1.6;
-    for (let i = 0; i < p.scratchCount; i++) {
-        ctx.strokeStyle = (i % 5 === 0) ? 'rgba(255,255,255,0.75)' : p.scratch;
-        let x = rand() * 128, y = rand() * 128;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + rand() * 14 - 7, y + rand() * 14 - 7);
-        ctx.stroke();
-    }
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(1, 1);
-    tex.encoding = THREE.sRGBEncoding;
-    tex.magFilter = THREE.NearestFilter;
-    SKIN_TEX_CACHE[skinId] = tex;
-    return tex;
+    return CHAR_GRUNGE_TEX;
 }
 
 function getSkinMatConfig(skinId) {
@@ -13351,9 +14479,11 @@ function applySkinMaterials(parts, skin) {
         m.envMapIntensity = isUltraPC ? 1.35 : 1.0;
         m.needsUpdate = true;
     }
-    if (isStarterHatSkin(skin)) {
+    if (skin.id === 'dark_mage') {
         if (parts.body && parts.body.material) parts.body.material.color.setHex(0x3b1561);
         if (parts.scarf && parts.scarf.material) parts.scarf.material.color.setHex(0xdc2626);
+    }
+    if (isStarterHatSkin(skin)) {
         if (parts.headAccentMesh && parts.body) parts.headAccentMesh.material = parts.body.material;
     } else {
         if (parts.headAccentMesh && parts.staffGem) parts.headAccentMesh.material = parts.staffGem.material;
@@ -13617,6 +14747,14 @@ const SharedGeo = {
     cone: new THREE.ConeGeometry(1, 1, (typeof isTouchDevice !== 'undefined' && !isTouchDevice) ? 16 : 8),
     icosahedron: new THREE.IcosahedronGeometry(1, 0),
     torus: new THREE.TorusGeometry(1, 0.1, (typeof isTouchDevice !== 'undefined' && !isTouchDevice) ? 12 : 8, (typeof isTouchDevice !== 'undefined' && !isTouchDevice) ? 36 : 24),
+    bowArc: (function() {
+        const g = new THREE.TorusGeometry(1.0, 0.12, 6, 14, Math.PI);
+        g.rotateZ(-Math.PI / 2);
+        g.rotateY(-Math.PI / 2);
+        g.computeVertexNormals();
+        g._uvKind = 'torus';
+        return g;
+    })(),
     tetrahedron: new THREE.TetrahedronGeometry(1, 0), bloodPlane: new THREE.PlaneGeometry(40, 40), rockDebris: new THREE.DodecahedronGeometry(1.5, 0),
     heart: (function(){ const shape = new THREE.Shape(); shape.moveTo(0, 1.5); shape.bezierCurveTo(2, 3.5, 4, 1.5, 0, -2.5); shape.bezierCurveTo(-4, 1.5, -2, 3.5, 0, 1.5); const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.5, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.2, bevelThickness: 0.2 }); geo.center(); return geo; })(),
     coin: (function() {
@@ -14117,24 +15255,10 @@ function createPatternTexture(type) {
         for(let i=0; i<8; i++) { let y = i*32; let offset = (i%2)*32; ctx.fillRect(offset+2, y+2, 60, 28); ctx.fillRect(offset+66, y+2, 60, 28); ctx.fillRect(offset+130, y+2, 60, 28); ctx.fillRect(offset+194, y+2, 60, 28); if(offset > 0) ctx.fillRect(-30, y+2, 60, 28); }
     } else if (type === 'blood') {
         let grad = ctx.createRadialGradient(128,128,0,128,128,128); grad.addColorStop(0, 'rgba(200,0,0,0.8)'); grad.addColorStop(0.5, 'rgba(100,0,0,0.5)'); grad.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = grad; ctx.fillRect(0,0,256,256);
-    } else if (type === 'crate') {
-        ctx.fillStyle = '#C07D3E'; ctx.fillRect(0, 0, 256, 256);
-        ctx.strokeStyle = '#5C3317'; ctx.lineWidth = 24;
-        ctx.strokeRect(12, 12, 232, 232);
-        ctx.beginPath(); ctx.moveTo(12, 12); ctx.lineTo(244, 244); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(244, 12); ctx.lineTo(12, 244); ctx.stroke();
-        ctx.strokeStyle = 'rgba(0,0,0,0.1)'; ctx.lineWidth = 2;
-        for(let i=0; i<20; i++) { ctx.beginPath(); ctx.moveTo(0, Math.random()*256); ctx.lineTo(256, Math.random()*256); ctx.stroke(); }
-    } else if (type === 'urn') {
-        ctx.fillStyle = '#A35233'; ctx.fillRect(0, 0, 256, 256);
-        ctx.fillStyle = '#4A2511';
-        ctx.fillRect(0, 40, 256, 25);
-        ctx.fillRect(0, 150, 256, 15);
-        ctx.fillRect(0, 200, 256, 10);
-        for(let i=0; i<300; i++) {
-            ctx.fillStyle = Math.random() > 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
-            ctx.fillRect(Math.random()*256, Math.random()*256, 4, 4);
-        }
+    } else if (type === 'crate' && typeof ModelTextureFactory !== 'undefined') {
+        return ModelTextureFactory.getUtility('crate');
+    } else if (type === 'urn' && typeof ModelTextureFactory !== 'undefined') {
+        return ModelTextureFactory.getUtility('urn');
     }
     const tex = new THREE.CanvasTexture(canvas); tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
     tex.encoding = THREE.sRGBEncoding;
@@ -14354,7 +15478,7 @@ const GLOBAL_ALPHA_TEX = createOrganicAlphaMap();
         spriteClayDust: new THREE.SpriteMaterial({color: 0xc9643e, map: GLOW_TEX, transparent: true, opacity: 0.58, blending: THREE.NormalBlending, depthWrite: false, alphaTest: 0.02}),
         spriteBlackSmoke: new THREE.SpriteMaterial({color: 0x050505, map: GLOW_TEX, transparent: true, opacity: 0.95, blending: THREE.NormalBlending, depthWrite: false, alphaTest: 0.05}),
         arrow: new THREE.MeshPhongMaterial({color: 0x888888, emissive: 0x444444}),
-        orcClub: new THREE.MeshStandardMaterial({color: 0x5c4033, emissive: 0x3a0c00, roughness: 0.85, map: CHAR_GRUNGE_TEX}),
+        orcClub: new THREE.MeshStandardMaterial({color: 0x6e4b38, emissive: 0x200802, roughness: 0.82, map: ModelTextureFactory.getUtility('wood_club')}),
         playerArrow: createOrbMaterial(0xffff00),
         spriteYellow: new THREE.SpriteMaterial({color: 0xffff00, map: GLOW_TEX, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false}),
         homingArrow: new ProjMatClass(isTouchDevice ? { color: ESSENCE_COLORS.green } : { color: 0x000000, emissive: ESSENCE_COLORS.green, emissiveIntensity: 2.0 }),
@@ -14373,11 +15497,12 @@ const GLOBAL_ALPHA_TEX = createOrganicAlphaMap();
     prophetShield: new THREE.MeshBasicMaterial({color: 0xff5500, transparent: true, opacity: 0.35, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false}),
 
    enemyDark: new THREE.MeshStandardMaterial({
-        color: 0x444444, // Schiarito per permettere allo sporco di creare contrasto!
-        roughness: 0.9,
-        map: CHAR_GRUNGE_TEX,
-        bumpMap: isTouchDevice ? null : CHAR_GRUNGE_TEX,
-        bumpScale: 0.08
+        color: 0x464a54,
+        roughness: 0.78,
+        metalness: 0.14,
+        map: ModelTextureFactory.getUtility('dark_iron'),
+        bumpMap: isTouchDevice ? null : ModelTextureFactory.getUtility('dark_iron'),
+        bumpScale: 0.06
     }),
     enemyEye: new THREE.MeshBasicMaterial({color: 0xff0000}),
     leaperTeeth: new THREE.MeshBasicMaterial({color: 0xffffff}),
@@ -14396,11 +15521,11 @@ const GLOBAL_ALPHA_TEX = createOrganicAlphaMap();
     prophetGem: new THREE.MeshBasicMaterial({color: 0xff5500}),
     golemHead: new THREE.MeshPhongMaterial({color: 0x002244, emissive: 0x00ffff, emissiveIntensity: 1.5, flatShading: true}),
     golemArmor: (typeof AppSettings !== 'undefined' && AppSettings.useMobileLimits)
-        ? new THREE.MeshLambertMaterial({color: 0x3b4859, emissive: 0x07111c, flatShading: true})
-        : new THREE.MeshPhongMaterial({color: 0x3b4859, emissive: 0x07111c, shininess: 32, specular: 0x30455c, flatShading: true}),
+        ? new THREE.MeshLambertMaterial({color: 0x455569, emissive: 0x07111c, map: ModelTextureFactory.getUtility('rune_steel'), flatShading: true})
+        : new THREE.MeshPhongMaterial({color: 0x455569, emissive: 0x07111c, map: ModelTextureFactory.getUtility('rune_steel'), shininess: 34, specular: 0x38526e, flatShading: true}),
     golemShieldFrame: (typeof AppSettings !== 'undefined' && AppSettings.useMobileLimits)
-        ? new THREE.MeshLambertMaterial({color: 0x1e293b, emissive: 0x051423, flatShading: true})
-        : new THREE.MeshPhongMaterial({color: 0x1e293b, emissive: 0x051423, shininess: 46, specular: 0x4b7094, flatShading: true}),
+        ? new THREE.MeshLambertMaterial({color: 0x263447, emissive: 0x051423, map: ModelTextureFactory.getUtility('rune_steel'), flatShading: true})
+        : new THREE.MeshPhongMaterial({color: 0x263447, emissive: 0x051423, map: ModelTextureFactory.getUtility('rune_steel'), shininess: 46, specular: 0x4b7094, flatShading: true}),
     golemCore: new THREE.MeshPhongMaterial({color: 0x38f2ff, emissive: 0x00d9ff, emissiveIntensity: 1.4, flatShading: true}),
     golemShield: new THREE.MeshPhongMaterial({color: 0x00ffff, transparent: true, opacity: 0.42, emissive: 0x0088ff, flatShading: true}),
     golemShieldGlow: new THREE.SpriteMaterial({color: 0x00ffff, map: GLOW_TEX, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false}),
@@ -14410,12 +15535,12 @@ const GLOBAL_ALPHA_TEX = createOrganicAlphaMap();
     iconCorrupted: new THREE.SpriteMaterial({map: createAuraIcon('corrupted'), color: 0xffffff, transparent: true, depthWrite: false}),
 
     deadObelisk: new THREE.MeshStandardMaterial({
-        color: 0x111115,
-        roughness: 0.9,
-        metalness: 0.1,
-        map: CHAR_GRUNGE_TEX,
-        bumpMap: isTouchDevice ? null : CHAR_GRUNGE_TEX,
-        bumpScale: 0.15,
+        color: 0x1c1e26,
+        roughness: 0.84,
+        metalness: 0.14,
+        map: ModelTextureFactory.getUtility('obelisk'),
+        bumpMap: isTouchDevice ? null : ModelTextureFactory.getUtility('obelisk'),
+        bumpScale: 0.12,
         vertexColors: true
     }),
 
@@ -14438,31 +15563,103 @@ SharedMat.coinRim = new THREE.MeshStandardMaterial({
     roughness: 0.22
 });
 
-SharedGeo.crate = new THREE.BoxGeometry(24, 24, 24);
+SharedGeo.crate = (function() {
+    const remapRect = (geo, u0, v0, u1, v1) => {
+        const ng = geo.index ? geo.toNonIndexed() : geo;
+        ng.clearGroups();
+        const uv = ng.attributes.uv;
+        for (let i = 0; i < uv.count; i++) {
+            uv.setXY(i, u0 + uv.getX(i) * (u1 - u0), v0 + uv.getY(i) * (v1 - v0));
+        }
+        uv.needsUpdate = true;
+        if (ng !== geo) geo.dispose();
+        return ng;
+    };
+    const parts = [];
+    // Nucleo incassato in doghe con UV 1:1 per ogni faccia (combacia perfettamente sia con la texture procedurale sia con crate.png)
+    const core = new THREE.BoxGeometry(22.4, 22.4, 22.4);
+    parts.push(remapRect(core, 0.0, 0.0, 1.0, 1.0));
+    // 4 montanti angolari + 8 traverse perimetrali in rilievo 3D mappate sul bordo legno scuro della texture
+    const addBeam = (sx, sy, sz, px, py, pz) => {
+        const b = new THREE.BoxGeometry(sx, sy, sz);
+        b.translate(px, py, pz);
+        parts.push(remapRect(b, 0.02, 0.02, 0.11, 0.11));
+    };
+    const p = 10.9;
+    addBeam(2.2, 24.0, 2.2, -p, 0, -p);
+    addBeam(2.2, 24.0, 2.2,  p, 0, -p);
+    addBeam(2.2, 24.0, 2.2, -p, 0,  p);
+    addBeam(2.2, 24.0, 2.2,  p, 0,  p);
+    addBeam(20.0, 2.2, 2.2, 0,  p, -p);
+    addBeam(20.0, 2.2, 2.2, 0,  p,  p);
+    addBeam(20.0, 2.2, 2.2, 0, -p, -p);
+    addBeam(20.0, 2.2, 2.2, 0, -p,  p);
+    addBeam(2.2, 2.2, 20.0, -p,  p, 0);
+    addBeam(2.2, 2.2, 20.0,  p,  p, 0);
+    addBeam(2.2, 2.2, 20.0, -p, -p, 0);
+    addBeam(2.2, 2.2, 20.0,  p, -p, 0);
+    const merged = THREE.BufferGeometryUtils.mergeBufferGeometries(parts, false);
+    merged.computeVertexNormals();
+    parts.forEach(g => g.dispose());
+    return merged;
+})();
 
-const urnPoints = [];
-urnPoints.push(new THREE.Vector2(0, 0));
-urnPoints.push(new THREE.Vector2(5, 0));
-urnPoints.push(new THREE.Vector2(7, 3));
-urnPoints.push(new THREE.Vector2(16, 16));
-urnPoints.push(new THREE.Vector2(12, 23));
-urnPoints.push(new THREE.Vector2(5, 28));
-urnPoints.push(new THREE.Vector2(5, 32));
-urnPoints.push(new THREE.Vector2(7, 34));
-urnPoints.push(new THREE.Vector2(0, 34));
+SharedGeo.urn = (function() {
+    const urnPoints = [
+        new THREE.Vector2(0.0, 0.0),
+        new THREE.Vector2(5.6, 0.0),
+        new THREE.Vector2(7.6, 3.2),
+        new THREE.Vector2(15.6, 13.5),
+        new THREE.Vector2(15.2, 18.8),
+        new THREE.Vector2(10.8, 24.0),
+        new THREE.Vector2(5.6, 27.6),
+        new THREE.Vector2(5.4, 31.6),
+        new THREE.Vector2(7.8, 34.0),
+        new THREE.Vector2(0.0, 34.0)
+    ];
+    // 12 facce low-poly nitide + 2 manici laterali stilizzati fusi in una singola draw-call InstancedMesh
+    const lathe = new THREE.LatheGeometry(urnPoints, 12);
+    lathe.translate(0, -17, 0);
+    const parts = [];
+    const baseBody = lathe.index ? lathe.toNonIndexed() : lathe;
+    baseBody.clearGroups();
+    if (baseBody !== lathe) lathe.dispose();
+    parts.push(baseBody);
 
-SharedGeo.urn = new THREE.LatheGeometry(urnPoints, 24);
-SharedGeo.urn.translate(0, -17, 0);
+    const addHandle = (side) => {
+        const hArc = new THREE.TorusGeometry(5.0, 1.22, 5, 8, Math.PI);
+        hArc.rotateZ(side > 0 ? -Math.PI / 2 : Math.PI / 2);
+        hArc.scale(1.15, 1.10, 0.90);
+        hArc.rotateZ(side * 0.40);
+        hArc.translate(side * 7.6, 6.6, 0);
+        const nh = hArc.index ? hArc.toNonIndexed() : hArc;
+        nh.clearGroups();
+        const uv = nh.attributes.uv;
+        for (let i = 0; i < uv.count; i++) {
+            uv.setXY(i, 0.1 + uv.getX(i) * 0.8, 0.72 + uv.getY(i) * 0.10);
+        }
+        uv.needsUpdate = true;
+        if (nh !== hArc) hArc.dispose();
+        parts.push(nh);
+    };
+    addHandle(-1);
+    addHandle(1);
 
-SharedMat.crate = new THREE.MeshPhongMaterial({ map: createPatternTexture('crate'), shininess: 10 });
-SharedMat.urn = new THREE.MeshPhongMaterial({ map: createPatternTexture('urn'), shininess: 30, flatShading: true });
+    const merged = THREE.BufferGeometryUtils.mergeBufferGeometries(parts, false);
+    merged.computeVertexNormals();
+    parts.forEach(g => g.dispose());
+    return merged;
+})();
+
+SharedMat.crate = new THREE.MeshPhongMaterial({ map: createPatternTexture('crate'), shininess: 14, flatShading: true });
+SharedMat.urn = new THREE.MeshPhongMaterial({ map: createPatternTexture('urn'), shininess: 32, flatShading: true });
 
 // Materiali e geometrie condivise per Pool (Essence, Entity auras, Coin, ExtraLife) e sprite dinamici
 SharedGeo.coinGlow = new THREE.PlaneGeometry(55, 55);
 SharedGeo.dropGlow = new THREE.PlaneGeometry(35, 35);
 SharedMat.coinGlow = new THREE.MeshBasicMaterial({ map: GLOW_TEX, color: 0xffaa00, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
-SharedMat.heart = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, roughness: 0.1, metalness: 0.5, emissiveIntensity: 2.0 });
-SharedMat.heartGlow = new THREE.MeshBasicMaterial({ map: GLOW_TEX, color: 0xffffff, transparent: true, opacity: 0.78, blending: THREE.AdditiveBlending, depthWrite: false });
+SharedMat.heart = new THREE.MeshStandardMaterial({ color: 0xff5a7a, emissive: 0xff1648, roughness: 0.18, metalness: 0.25, emissiveIntensity: 1.35, flatShading: true });
+SharedMat.heartGlow = new THREE.MeshBasicMaterial({ map: GLOW_TEX, color: 0xff3366, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false });
 
 SharedMat.spritePurple = new THREE.SpriteMaterial({ color: 0xa855f7, map: GLOW_TEX, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, alphaTest: 0.02 });
 SharedMat.spriteGoblinGlow = new THREE.SpriteMaterial({ color: 0xff5500, map: GLOW_TEX, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
@@ -14681,11 +15878,51 @@ const ModelFactory = {
             let pivot = new THREE.Group();
             pivot.position.y = size * 1.35;
 
-            let body = new THREE.Mesh(SharedGeo.tetrahedron, mat);
-            body.scale.set(size * 1.65, size * 1.65, size * 2.1);
+            // Scafo Imp-Bomba affusolato con corna, occhi feroci e anello esplosivo (ruota su Z come un dardo)
+            let body = new THREE.Group();
+            let hull = new THREE.Mesh(SharedGeo.icosahedron, mat);
+            hull.scale.set(size * 0.96, size * 0.86, size * 1.15);
+            let nose = new THREE.Mesh(SharedGeo.cone, mat);
+            nose.rotation.x = Math.PI / 2;
+            nose.scale.set(size * 0.68, size * 1.25, size * 0.68);
+            nose.position.set(0, 0, size * 1.22);
+            let tailCone = new THREE.Mesh(SharedGeo.cone, darkMat);
+            tailCone.rotation.x = -Math.PI / 2;
+            tailCone.scale.set(size * 0.56, size * 0.95, size * 0.56);
+            tailCone.position.set(0, 0, -size * 1.05);
+            let band = new THREE.Mesh(SharedGeo.torus, darkMat);
+            band.scale.set(size * 0.92, size * 0.92, size * 0.72);
+            let gEyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
+            gEyeL.scale.set(size * 0.26, size * 0.14, size * 0.18);
+            gEyeL.position.set(-size * 0.34, size * 0.28, size * 0.86);
+            gEyeL.rotation.z = -0.32;
+            let gEyeR = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
+            gEyeR.scale.set(size * 0.26, size * 0.14, size * 0.18);
+            gEyeR.position.set(size * 0.34, size * 0.28, size * 0.86);
+            gEyeR.rotation.z = 0.32;
+            let gHornL = new THREE.Mesh(SharedGeo.cone, darkMat);
+            gHornL.scale.set(size * 0.16, size * 0.78, size * 0.16);
+            gHornL.position.set(-size * 0.48, size * 0.68, -size * 0.18);
+            gHornL.rotation.set(-0.65, 0, 0.52);
+            let gHornR = new THREE.Mesh(SharedGeo.cone, darkMat);
+            gHornR.scale.set(size * 0.16, size * 0.78, size * 0.16);
+            gHornR.position.set(size * 0.48, size * 0.68, -size * 0.18);
+            gHornR.rotation.set(-0.65, 0, -0.52);
+            body.add(hull, nose, tailCone, band, gEyeL, gEyeR, gHornL, gHornR);
 
-            let wings = new THREE.Mesh(SharedGeo.tetrahedron, SharedMat.goblinWings);
-            wings.scale.set(size * 2.2, size * 0.8, size * 2.2);
+            // Ali a rotore energetico a doppia lama angolare (ruotano su Y)
+            let wings = new THREE.Group();
+            for (let s = -1; s <= 1; s += 2) {
+                let blade = new THREE.Mesh(SharedGeo.cone, darkMat);
+                blade.scale.set(size * 0.38, size * 1.95, size * 0.12);
+                blade.position.set(s * size * 1.25, size * 0.10, -size * 0.08);
+                blade.rotation.set(0.18, 0, -s * 1.32);
+                let energyFin = new THREE.Mesh(SharedGeo.cone, SharedMat.goblinWings);
+                energyFin.scale.set(size * 0.52, size * 2.25, size * 0.14);
+                energyFin.position.set(s * size * 1.38, size * 0.14, -size * 0.10);
+                energyFin.rotation.set(0.18, 0, -s * 1.32);
+                wings.add(blade, energyFin);
+            }
 
             let glow = new THREE.Sprite(SharedMat.spriteGoblinGlow);
             glow.scale.set(size * 3.8, size * 3.8, 1);
@@ -14704,18 +15941,51 @@ const ModelFactory = {
             parts.chargeGlow = chargeGlow;
         }
         else if (type === 'slime' || type === 'slime_mini') {
+            // Base gelatinosa aderente al terreno + cupola sfaccettata low-poly
+            let puddle = new THREE.Mesh(SharedGeo.cylinder, mat);
+            puddle.scale.set(size * 1.56, size * 0.16, size * 1.56);
+            puddle.position.y = size * 0.08;
 
-            let body = new THREE.Mesh(SharedGeo.sphere, mat);
+            let body = new THREE.Mesh(SharedGeo.icosahedron, mat);
             body.scale.set(size * 1.5, size * 0.8, size * 1.5);
-            body.position.y = size * 0.8;
+            body.position.y = size * 0.78;
 
+            // Occhi espressivi, pupille luminose, sopracciglia e bolle figli di body: rimbalzano insieme alla gelatina!
             let eyeL = new THREE.Mesh(SharedGeo.sphere, darkMat);
-            eyeL.scale.set(size*0.3, size*0.3, size*0.2);
-            eyeL.position.set(-size*0.6, size*1.1, size*1.3);
+            eyeL.scale.set(0.18, 0.34, 0.14);
+            eyeL.position.set(-0.36, 0.24, 0.80);
 
             let eyeR = new THREE.Mesh(SharedGeo.sphere, darkMat);
-            eyeR.scale.set(size*0.3, size*0.3, size*0.2);
-            eyeR.position.set(size*0.6, size*1.1, size*1.3);
+            eyeR.scale.set(0.18, 0.34, 0.14);
+            eyeR.position.set(0.36, 0.24, 0.80);
+
+            let glintL = new THREE.Mesh(SharedGeo.box, SharedMat.leaperTeeth);
+            glintL.scale.set(0.08, 0.14, 0.06);
+            glintL.position.set(-0.32, 0.34, 0.90);
+
+            let glintR = new THREE.Mesh(SharedGeo.box, SharedMat.leaperTeeth);
+            glintR.scale.set(0.08, 0.14, 0.06);
+            glintR.position.set(0.40, 0.34, 0.90);
+
+            let browL = new THREE.Mesh(SharedGeo.box, darkMat);
+            browL.scale.set(0.28, 0.10, 0.10);
+            browL.position.set(-0.36, 0.50, 0.80);
+            browL.rotation.z = -0.26;
+
+            let browR = new THREE.Mesh(SharedGeo.box, darkMat);
+            browR.scale.set(0.28, 0.10, 0.10);
+            browR.position.set(0.36, 0.50, 0.80);
+            browR.rotation.z = 0.26;
+
+            let bubbleA = new THREE.Mesh(SharedGeo.icosahedron, mat);
+            bubbleA.scale.set(0.24, 0.42, 0.24);
+            bubbleA.position.set(-0.56, 0.56, -0.22);
+
+            let bubbleB = new THREE.Mesh(SharedGeo.icosahedron, mat);
+            bubbleB.scale.set(0.17, 0.30, 0.17);
+            bubbleB.position.set(0.52, 0.64, -0.32);
+
+            body.add(eyeL, eyeR, glintL, glintR, browL, browR, bubbleA, bubbleB);
 
             if (!SharedMat.spritePurple) {
                 SharedMat.spritePurple = new THREE.SpriteMaterial({color: 0xaa00ff, map: GLOW_TEX, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false});
@@ -14724,7 +15994,7 @@ const ModelFactory = {
             glow.scale.set(size * 5, size * 5, 1);
             glow.position.y = size * 0.8;
 
-            group.add(body); group.add(eyeL); group.add(eyeR); group.add(glow);
+            group.add(puddle, body, glow);
             parts.body = body;
         } else if (type === 'orc') {
             // Gambe tozze da bruto con stivali corazzati
@@ -14753,15 +16023,34 @@ const ModelFactory = {
             torso.position.set(0, size * 1.56, size * 0.04);
             torso.rotation.x = 0.12;
 
+            let buckle = new THREE.Mesh(SharedGeo.box, SharedMat.golemShieldFrame);
+            buckle.scale.set(size * 0.40, size * 0.34, size * 0.14);
+            buckle.position.set(0, size * 0.92, size * 0.50);
+
             let shoulderPad = new THREE.Mesh(SharedGeo.box, darkMat);
             shoulderPad.scale.set(size * 0.76, size * 0.34, size * 0.88);
             shoulderPad.position.set(-size * 1.10, size * 2.16, size * 0.02);
             shoulderPad.rotation.z = 0.28;
 
-            // Testa incassata, arcata scura, occhi rossi e doppie zanne
+            let padSpike = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+            padSpike.scale.set(size * 0.14, size * 0.44, size * 0.14);
+            padSpike.position.set(-size * 1.24, size * 2.48, size * 0.02);
+            padSpike.rotation.z = 0.36;
+
+            // Testa incassata, orecchie a punta, arcata scura, occhi rossi e doppie zanne
             let head = new THREE.Mesh(SharedGeo.box, mat);
             head.scale.set(size * 0.88, size * 0.74, size * 0.82);
             head.position.set(0, size * 2.38, size * 0.26);
+
+            let earL = new THREE.Mesh(SharedGeo.cone, mat);
+            earL.scale.set(size * 0.15, size * 0.44, size * 0.12);
+            earL.position.set(-size * 0.58, size * 2.44, size * 0.22);
+            earL.rotation.set(0, 0, 1.18);
+
+            let earR = new THREE.Mesh(SharedGeo.cone, mat);
+            earR.scale.set(size * 0.15, size * 0.44, size * 0.12);
+            earR.position.set(size * 0.58, size * 2.44, size * 0.22);
+            earR.rotation.set(0, 0, -1.18);
 
             let brow = new THREE.Mesh(SharedGeo.box, darkMat);
             brow.scale.set(size * 0.96, size * 0.22, size * 0.90);
@@ -14815,13 +16104,19 @@ const ModelFactory = {
             let clubHead = new THREE.Mesh(SharedGeo.icosahedron, SharedMat.orcClub);
             clubHead.scale.set(size * 0.44, size * 0.56, size * 0.44);
             clubHead.position.set(0, size * 0.82, 0);
+            let clubBand = new THREE.Mesh(SharedGeo.cylinder, darkMat);
+            clubBand.scale.set(size * 0.24, size * 0.22, size * 0.24);
+            clubBand.position.set(0, size * 0.36, 0);
             let clubSpikes = new THREE.Mesh(SharedGeo.box, darkMat);
             clubSpikes.scale.set(size * 1.02, size * 0.18, size * 0.18);
             clubSpikes.position.set(0, size * 0.86, 0);
-            clubGroup.add(clubShaft, clubHead, clubSpikes);
+            let clubSpikesZ = new THREE.Mesh(SharedGeo.box, darkMat);
+            clubSpikesZ.scale.set(size * 0.18, size * 0.18, size * 1.02);
+            clubSpikesZ.position.set(0, size * 0.86, 0);
+            clubGroup.add(clubShaft, clubBand, clubHead, clubSpikes, clubSpikesZ);
             armR.add(clubGroup);
 
-            group.add(legL, legR, belt, torso, shoulderPad, head, brow, eyeL, eyeR, jaw, tuskL, tuskR, armL, armR);
+            group.add(legL, legR, belt, buckle, torso, shoulderPad, padSpike, head, earL, earR, brow, eyeL, eyeR, jaw, tuskL, tuskR, armL, armR);
             parts.armL = armL; parts.armR = armR; parts.legL = legL; parts.legR = legR; parts.club = clubGroup;
         } else if (type === 'skeleton_archer') {
             let bodyGroup = new THREE.Group();
@@ -14837,22 +16132,39 @@ const ModelFactory = {
             darkCore.scale.set(size * 0.36, size * 1.38, size * 0.24);
             darkCore.position.set(0, size * 1.54, size * 0.05);
 
-            // Teschio con cappuccio da cecchino e occhi rossi accesi
+            // Costole scolpite + clavicole scheletriche
+            let clavicle = new THREE.Mesh(SharedGeo.box, mat);
+            clavicle.scale.set(size * 1.14, size * 0.16, size * 0.26);
+            clavicle.position.set(0, size * 2.16, size * 0.08);
+            bodyGroup.add(clavicle);
+            for (let rb = 0; rb < 3; rb++) {
+                let ribBar = new THREE.Mesh(SharedGeo.box, mat);
+                ribBar.scale.set(size * (0.76 - rb * 0.13), size * 0.11, size * 0.34);
+                ribBar.position.set(0, size * (1.92 - rb * 0.26), size * 0.14);
+                bodyGroup.add(ribBar);
+            }
+
+            // Teschio con mandibola, cappuccio da cecchino e occhi rossi accesi
             let skull = new THREE.Group();
             skull.position.set(0, size * 2.66, size * 0.04);
-            let cranium = new THREE.Mesh(SharedGeo.sphere, mat);
-            cranium.scale.set(size * 0.56, size * 0.54, size * 0.58);
+            let cranium = new THREE.Mesh(SharedGeo.icosahedron, mat);
+            cranium.scale.set(size * 0.56, size * 0.52, size * 0.58);
+            let skullJaw = new THREE.Mesh(SharedGeo.box, mat);
+            skullJaw.scale.set(size * 0.46, size * 0.22, size * 0.42);
+            skullJaw.position.set(0, -size * 0.38, size * 0.14);
             let cowlHood = new THREE.Mesh(SharedGeo.cone, darkMat);
-            cowlHood.scale.set(size * 0.66, size * 0.96, size * 0.68);
-            cowlHood.position.set(0, size * 0.16, -size * 0.16);
+            cowlHood.scale.set(size * 0.68, size * 1.00, size * 0.70);
+            cowlHood.position.set(0, size * 0.18, -size * 0.18);
             cowlHood.rotation.x = -0.80;
-            let eyeL = new THREE.Mesh(SharedGeo.sphere, SharedMat.enemyEye);
-            eyeL.scale.setScalar(size * 0.115);
-            eyeL.position.set(size * 0.19, -size * 0.02, size * 0.48);
-            let eyeR = new THREE.Mesh(SharedGeo.sphere, SharedMat.enemyEye);
-            eyeR.scale.setScalar(size * 0.115);
-            eyeR.position.set(-size * 0.19, -size * 0.02, size * 0.48);
-            skull.add(cranium, cowlHood, eyeL, eyeR);
+            let eyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
+            eyeL.scale.set(size * 0.17, size * 0.11, size * 0.10);
+            eyeL.position.set(size * 0.20, -size * 0.02, size * 0.48);
+            eyeL.rotation.z = 0.18;
+            let eyeR = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
+            eyeR.scale.set(size * 0.17, size * 0.11, size * 0.10);
+            eyeR.position.set(-size * 0.20, -size * 0.02, size * 0.48);
+            eyeR.rotation.z = -0.18;
+            skull.add(cranium, skullJaw, cowlHood, eyeL, eyeR);
 
             // Faretra essenziale sulle spalle con due impennaggi
             let quiver = new THREE.Group();
@@ -14883,12 +16195,23 @@ const ModelFactory = {
             let armR = makeArcherArm(-size * 0.52);
             armR.rotation.set(-1.35, 0, 0.52);
 
-            // Arco circolare identico + corda e freccia animata
+            // Vero arco ricurvo low-poly allineato ai puntali della corda
             let bowGroup = new THREE.Group();
             bowGroup.position.set(0, size * 1.88, size * 0.85);
-            let bow = new THREE.Mesh(SharedGeo.torus, darkMat);
-            bow.scale.set(size * 1.15, size * 1.15, size * 0.22);
-            bow.rotation.y = Math.PI / 2;
+            let bow = new THREE.Mesh(SharedGeo.bowArc, darkMat);
+            bow.scale.set(size * 0.85, size * 1.15, size * 0.66);
+            let bowGrip = new THREE.Mesh(SharedGeo.cylinder, mat);
+            bowGrip.scale.set(size * 0.13, size * 0.34, size * 0.13);
+            bowGrip.position.set(0, 0, size * 0.66);
+            let bowTipTop = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+            bowTipTop.scale.set(size * 0.09, size * 0.24, size * 0.09);
+            bowTipTop.position.set(0, size * 1.18, -size * 0.04);
+            bowTipTop.rotation.x = -0.45;
+            let bowTipBot = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+            bowTipBot.scale.set(size * 0.09, size * 0.24, size * 0.09);
+            bowTipBot.position.set(0, -size * 1.18, -size * 0.04);
+            bowTipBot.rotation.x = Math.PI + 0.45;
+            bowGroup.add(bowGrip, bowTipTop, bowTipBot);
 
             let bowStringTop = new THREE.Mesh(SharedGeo.cylinder, SharedMat.leaperTeeth);
             bowStringTop.scale.set(size * 0.028, size * 1.15, size * 0.028);
@@ -15102,7 +16425,13 @@ const ModelFactory = {
             let jawBone = new THREE.Mesh(SharedGeo.box, SharedMat.pyroObsidian);
             jawBone.scale.set(size * 0.62, size * 0.24, size * 0.72);
             jawBone.position.set(0, -size * 0.08, size * 0.28);
-            lowerJaw.add(jawBone);
+            let jawFangL = new THREE.Mesh(SharedGeo.cone, SharedMat.pyroPilot);
+            jawFangL.scale.set(size * 0.09, size * 0.24, size * 0.09);
+            jawFangL.position.set(-size * 0.22, size * 0.08, size * 0.56);
+            let jawFangR = new THREE.Mesh(SharedGeo.cone, SharedMat.pyroPilot);
+            jawFangR.scale.set(size * 0.09, size * 0.24, size * 0.09);
+            jawFangR.position.set(size * 0.22, size * 0.08, size * 0.56);
+            lowerJaw.add(jawBone, jawFangL, jawFangR);
             lowerJaw.rotation.x = 0.06;
 
             let pilotCore = new THREE.Mesh(SharedGeo.icosahedron, SharedMat.pyroPilot);
@@ -15157,50 +16486,248 @@ const ModelFactory = {
             parts.armR = armR;
             parts.fireShield = fireShield;
         } else if (type === 'mage' || type === 'dark_prophet') {
-            let robe = new THREE.Mesh(SharedGeo.cone, darkMat); robe.scale.set(size*1.2, size*3.6, size*1.2); robe.position.y = size*1.8;
-            let hood = new THREE.Mesh(SharedGeo.sphere, mat); hood.scale.set(size*0.8, size*0.8, size*0.8); hood.position.y = size*2.8;
-            let crystals = new THREE.Group(); crystals.position.y = size*1.5;
+            const isProphet = (type === 'dark_prophet');
+            // Veste occulta con mantellina sulle spalle e maniche tese in incantesimo
+            let robe = new THREE.Mesh(SharedGeo.cone, mat);
+            robe.scale.set(size * 1.24, size * 3.15, size * 1.24);
+            robe.position.y = size * 1.58;
 
-            if (type === 'dark_prophet') {
+            let mantle = new THREE.Mesh(SharedGeo.cone, darkMat);
+            mantle.scale.set(size * 1.18, size * 1.05, size * 1.12);
+            mantle.position.set(0, size * 2.28, -size * 0.04);
+
+            let sleeveL = new THREE.Mesh(SharedGeo.cone, darkMat);
+            sleeveL.scale.set(size * 0.30, size * 1.05, size * 0.30);
+            sleeveL.position.set(-size * 0.80, size * 1.98, size * 0.42);
+            sleeveL.rotation.set(1.05, 0, 0.34);
+
+            let sleeveR = new THREE.Mesh(SharedGeo.cone, darkMat);
+            sleeveR.scale.set(size * 0.30, size * 1.05, size * 0.30);
+            sleeveR.position.set(size * 0.80, size * 1.98, size * 0.42);
+            sleeveR.rotation.set(1.05, 0, -0.34);
+
+            // Testa incappucciata nell'ombra con occhi luminosi penetranti
+            let headGroup = new THREE.Group();
+            headGroup.position.set(0, size * 2.92, size * 0.04);
+
+            let faceShadow = new THREE.Mesh(SharedGeo.sphere, darkMat);
+            faceShadow.scale.set(size * 0.56, size * 0.58, size * 0.56);
+
+            let cowl = new THREE.Mesh(SharedGeo.cone, mat);
+            cowl.scale.set(size * 0.84, size * 1.38, size * 0.88);
+            cowl.position.set(0, size * 0.34, -size * 0.24);
+            cowl.rotation.x = -0.68;
+
+            let eyeMat = isProphet ? SharedMat.prophetGem : SharedMat.enemyEye;
+            let mEyeL = new THREE.Mesh(SharedGeo.box, eyeMat);
+            mEyeL.scale.set(size * 0.16, size * 0.09, size * 0.08);
+            mEyeL.position.set(-size * 0.19, size * 0.04, size * 0.52);
+            mEyeL.rotation.z = -0.22;
+
+            let mEyeR = new THREE.Mesh(SharedGeo.box, eyeMat);
+            mEyeR.scale.set(size * 0.16, size * 0.09, size * 0.08);
+            mEyeR.position.set(size * 0.19, size * 0.04, size * 0.52);
+            mEyeR.rotation.z = 0.22;
+
+            headGroup.add(faceShadow, cowl, mEyeL, mEyeR);
+
+            if (isProphet) {
+                // Corona bicornuta da Profeta Oscuro
+                let pHornL = new THREE.Mesh(SharedGeo.cone, SharedMat.prophetGem);
+                pHornL.scale.set(size * 0.14, size * 0.78, size * 0.14);
+                pHornL.position.set(-size * 0.46, size * 0.72, size * 0.06);
+                pHornL.rotation.set(0.18, 0, 0.46);
+                let pHornR = new THREE.Mesh(SharedGeo.cone, SharedMat.prophetGem);
+                pHornR.scale.set(size * 0.14, size * 0.78, size * 0.14);
+                pHornR.position.set(size * 0.46, size * 0.72, size * 0.06);
+                pHornR.rotation.set(0.18, 0, -0.46);
+                headGroup.add(pHornL, pHornR);
+            }
+
+            let crystals = new THREE.Group();
+            crystals.position.y = size * 1.65;
+
+            if (isProphet) {
                 let staffGroup = new THREE.Group();
-                staffGroup.position.set(-size, size*1.5, size*0.5);
-                staffGroup.rotation.x = Math.PI/4;
+                staffGroup.position.set(-size * 1.15, size * 1.10, size * 0.45);
+                staffGroup.rotation.x = Math.PI / 5;
 
                 let staff = new THREE.Mesh(SharedGeo.cylinder, darkMat);
-                staff.scale.set(size*0.2, size*3, size*0.2);
+                staff.scale.set(size * 0.17, size * 3.0, size * 0.17);
 
-                let staffGem = new THREE.Mesh(SharedGeo.sphere, SharedMat.prophetGem);
-                staffGem.scale.set(size*0.35, size*0.35, size*0.35);
-                staffGem.position.set(0, size*1.5, 0);
+                let prongL = new THREE.Mesh(SharedGeo.cone, darkMat);
+                prongL.scale.set(size * 0.11, size * 0.62, size * 0.11);
+                prongL.position.set(-size * 0.24, size * 1.48, 0);
+                prongL.rotation.z = 0.42;
+
+                let prongR = new THREE.Mesh(SharedGeo.cone, darkMat);
+                prongR.scale.set(size * 0.11, size * 0.62, size * 0.11);
+                prongR.position.set(size * 0.24, size * 1.48, 0);
+                prongR.rotation.z = -0.42;
+
+                let staffGem = new THREE.Mesh(SharedGeo.icosahedron, SharedMat.prophetGem);
+                staffGem.scale.setScalar(size * 0.36);
+                staffGem.position.set(0, size * 1.64, 0);
 
                 let staffGlow = new THREE.Sprite(SharedMat.prophetSpriteGlow);
-                staffGlow.scale.set(size*2.5, size*2.5, 1);
-                staffGlow.position.set(0, size*1.5, 0);
+                staffGlow.scale.set(size * 2.6, size * 2.6, 1);
+                staffGlow.position.set(0, size * 1.64, 0);
 
-                staffGroup.add(staff);
-                staffGroup.add(staffGem);
-                staffGroup.add(staffGlow);
+                staffGroup.add(staff, prongL, prongR, staffGem, staffGlow);
 
-                let book = new THREE.Mesh(SharedGeo.box, mat); book.scale.set(size*0.8, size*0.2, size*0.6); book.position.set(size, size*1.5, size*0.8); book.rotation.z = Math.PI/4;
-                crystals.add(staffGroup); crystals.add(book);
+                // Grimorio aperto a V orbitante con pagine luminose
+                let bookGroup = new THREE.Group();
+                bookGroup.position.set(size * 1.12, size * 1.15, size * 0.68);
+                bookGroup.rotation.set(0.32, -0.45, 0.22);
+                let bCovL = new THREE.Mesh(SharedGeo.box, darkMat);
+                bCovL.scale.set(size * 0.54, size * 0.10, size * 0.72);
+                bCovL.position.set(-size * 0.24, 0, 0); bCovL.rotation.z = 0.38;
+                let bCovR = new THREE.Mesh(SharedGeo.box, darkMat);
+                bCovR.scale.set(size * 0.54, size * 0.10, size * 0.72);
+                bCovR.position.set(size * 0.24, 0, 0); bCovR.rotation.z = -0.38;
+                let bPages = new THREE.Mesh(SharedGeo.box, SharedMat.prophetGem);
+                bPages.scale.set(size * 0.82, size * 0.09, size * 0.62);
+                bPages.position.set(0, size * 0.08, 0);
+                bookGroup.add(bCovL, bCovR, bPages);
+
+                crystals.add(staffGroup, bookGroup);
 
                 let selfGlow = new THREE.Sprite(SharedMat.prophetSpriteGlow);
                 selfGlow.scale.set(size * 6, size * 6, 1);
                 selfGlow.position.y = size * 1.5;
                 group.add(selfGlow);
             } else {
-                for(let i=0; i<3; i++) { let c = new THREE.Mesh(SharedGeo.icosahedron, mat); c.scale.set(size*0.4, size*0.6, size*0.4); c.position.set(Math.cos(i*Math.PI*2/3)*size*1.5, 0, Math.sin(i*Math.PI*2/3)*size*1.5); crystals.add(c); }
+                // 3 schegge cristalline bifacciali affilate orbitanti
+                for (let i = 0; i < 3; i++) {
+                    let a = (i * Math.PI * 2) / 3;
+                    let shard = new THREE.Group();
+                    shard.position.set(Math.cos(a) * size * 1.52, Math.sin(i * 2.1) * size * 0.22, Math.sin(a) * size * 1.52);
+                    let topS = new THREE.Mesh(SharedGeo.cone, mat);
+                    topS.scale.set(size * 0.28, size * 0.62, size * 0.28);
+                    topS.position.y = size * 0.30;
+                    let botS = new THREE.Mesh(SharedGeo.cone, mat);
+                    botS.scale.set(size * 0.28, size * 0.46, size * 0.28);
+                    botS.rotation.x = Math.PI;
+                    botS.position.y = -size * 0.22;
+                    shard.add(topS, botS);
+                    crystals.add(shard);
+                }
             }
-            group.add(robe); group.add(hood); group.add(crystals); parts.crystals = crystals;
+            group.add(robe, mantle, sleeveL, sleeveR, headGroup, crystals);
+            parts.torso = robe;
+            parts.head = headGroup;
+            parts.crystals = crystals;
         } else if (type === 'leaper') {
-            let body = new THREE.Mesh(SharedGeo.sphere, mat); body.scale.set(size*1.2, size*1.2, size*1.2); body.position.y = size*1.2;
-            let teeth = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth); teeth.scale.set(size*0.8, size*3.0, size*0.8); teeth.position.set(0, size*1.2, size); teeth.rotation.x = Math.PI/2;
-            group.add(body); group.add(teeth);
+            // Segugio-Imp predatore accucciato pronto al balzo: zampe molleggiate, fauci con 3 zanne, orecchie e coda uncinata
+            let body = new THREE.Mesh(SharedGeo.icosahedron, mat);
+            body.scale.set(size * 1.05, size * 0.84, size * 1.38);
+            body.position.set(0, size * 1.08, -size * 0.08);
+
+            // Cresta dorsale seghettata
+            for (let s = 0; s < 3; s++) {
+                let spine = new THREE.Mesh(SharedGeo.cone, darkMat);
+                spine.scale.set(size * 0.16, size * (0.58 - s * 0.10), size * 0.24);
+                spine.position.set(0, size * (1.84 - s * 0.10), size * (0.34 - s * 0.48));
+                spine.rotation.x = -0.68;
+                group.add(spine);
+            }
+
+            // 4 zampe angolari pronte allo scatto con artigli
+            const buildPounceLimb = (sx, sz, hScale, tiltX) => {
+                let lg = new THREE.Group();
+                lg.position.set(sx, size * 0.86, sz);
+                let upper = new THREE.Mesh(SharedGeo.box, darkMat);
+                upper.scale.set(size * 0.34, size * hScale, size * 0.40);
+                upper.position.set(0, -size * hScale * 0.42, 0);
+                upper.rotation.x = tiltX;
+                let paw = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+                paw.scale.set(size * 0.20, size * 0.42, size * 0.20);
+                paw.rotation.x = Math.PI / 2;
+                paw.position.set(0, -size * 0.72, size * 0.26);
+                lg.add(upper, paw);
+                return lg;
+            };
+            let legFL = buildPounceLimb(-size * 0.86, size * 0.58, 0.82, -0.32);
+            let legFR = buildPounceLimb(size * 0.86, size * 0.58, 0.82, -0.32);
+            let legBL = buildPounceLimb(-size * 0.96, -size * 0.74, 0.96, 0.45);
+            let legBR = buildPounceLimb(size * 0.96, -size * 0.74, 0.96, 0.45);
+
+            // Testa feroce, muso spalancato, 3 zanne affilate, occhi rossi obliqui e orecchie lunghe
+            let headGroup = new THREE.Group();
+            headGroup.position.set(0, size * 1.24, size * 1.05);
+
+            let snout = new THREE.Mesh(SharedGeo.box, mat);
+            snout.scale.set(size * 1.04, size * 0.62, size * 0.96);
+            snout.position.set(0, size * 0.14, size * 0.16);
+
+            let brow = new THREE.Mesh(SharedGeo.box, darkMat);
+            brow.scale.set(size * 1.12, size * 0.22, size * 0.88);
+            brow.position.set(0, size * 0.48, size * 0.14);
+            brow.rotation.x = 0.22;
+
+            let lowerJaw = new THREE.Mesh(SharedGeo.box, darkMat);
+            lowerJaw.scale.set(size * 0.92, size * 0.22, size * 0.82);
+            lowerJaw.position.set(0, -size * 0.28, size * 0.24);
+            lowerJaw.rotation.x = 0.22;
+
+            let eyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
+            eyeL.scale.set(size * 0.24, size * 0.12, size * 0.14);
+            eyeL.position.set(-size * 0.34, size * 0.28, size * 0.64);
+            eyeL.rotation.z = -0.30;
+
+            let eyeR = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
+            eyeR.scale.set(size * 0.24, size * 0.12, size * 0.14);
+            eyeR.position.set(size * 0.34, size * 0.28, size * 0.64);
+            eyeR.rotation.z = 0.30;
+
+            // 3 zanne bianche affilate
+            for (let f = -1; f <= 1; f++) {
+                let fang = new THREE.Mesh(SharedGeo.cone, SharedMat.leaperTeeth);
+                let fH = (f === 0) ? size * 0.42 : size * 0.56;
+                fang.scale.set(size * 0.12, fH, size * 0.12);
+                fang.position.set(f * size * 0.30, -size * 0.08, size * 0.64);
+                fang.rotation.x = Math.PI + 0.18;
+                headGroup.add(fang);
+            }
+
+            let earL = new THREE.Mesh(SharedGeo.cone, mat);
+            earL.scale.set(size * 0.20, size * 0.92, size * 0.24);
+            earL.position.set(-size * 0.56, size * 0.68, -size * 0.22);
+            earL.rotation.set(-0.78, 0, 0.48);
+
+            let earR = new THREE.Mesh(SharedGeo.cone, mat);
+            earR.scale.set(size * 0.20, size * 0.92, size * 0.24);
+            earR.position.set(size * 0.56, size * 0.68, -size * 0.22);
+            earR.rotation.set(-0.78, 0, -0.48);
+
+            headGroup.add(snout, brow, lowerJaw, eyeL, eyeR, earL, earR);
+
+            // Coda frusta uncinata
+            let tail = new THREE.Mesh(SharedGeo.cone, darkMat);
+            tail.scale.set(size * 0.20, size * 1.45, size * 0.20);
+            tail.position.set(0, size * 1.18, -size * 1.56);
+            tail.rotation.x = -1.12;
+
+            group.add(body, legFL, legFR, legBL, legBR, headGroup, tail);
+            parts.torso = body;
+            parts.head = headGroup;
        } else if (type === 'fire_demon') {
 
             let pelvis = new THREE.Mesh(SharedGeo.cylinder, darkMat);
             pelvis.scale.set(size * 0.68, size * 0.36, size * 0.52);
-            pelvis.position.set(0, size * 0.36, 0);
+            pelvis.position.set(0, size * 0.46, 0);
+
+            // Zampe demoniache digitigrade che ancorano il bacino al terreno
+            for (let s = -1; s <= 1; s += 2) {
+                let dLeg = new THREE.Mesh(SharedGeo.triLeg, darkMat);
+                dLeg.scale.set(size * 0.46, size * 0.54, size * 0.46);
+                dLeg.position.set(s * size * 0.44, size * 0.48, 0);
+                dLeg.rotation.z = s * 0.14;
+                let hoof = new THREE.Mesh(SharedGeo.box, mat);
+                hoof.scale.set(size * 0.36, size * 0.14, size * 0.48);
+                hoof.position.set(s * size * 0.48, size * 0.07, size * 0.08);
+                group.add(dLeg, hoof);
+            }
 
             let spine = new THREE.Mesh(SharedGeo.box, darkMat);
             spine.scale.set(size * 0.32, size * 1.96, size * 0.28);
@@ -15268,6 +16795,12 @@ const ModelFactory = {
             let head = new THREE.Mesh(SharedGeo.box, darkMat);
             head.scale.set(size * 0.66, size * 0.60, size * 0.62);
             head.position.set(0, size * 2.96, -size * 0.18);
+
+            let fdBrow = new THREE.Mesh(SharedGeo.box, mat);
+            fdBrow.scale.set(size * 0.76, size * 0.16, size * 0.68);
+            fdBrow.position.set(0, size * 3.24, -size * 0.14);
+            fdBrow.rotation.x = 0.16;
+            group.add(fdBrow);
 
             let eyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye);
             eyeL.scale.set(size * 0.16, size * 0.11, size * 0.06);
@@ -15354,6 +16887,19 @@ const ModelFactory = {
             visor.scale.set(size * 0.54, size * 0.14, size * 0.20);
             visor.position.set(0, size * 3.16, size * 0.42);
 
+            let chestIce = new THREE.Mesh(SharedGeo.icosahedron, SharedMat.trapperIceBright);
+            chestIce.scale.set(size * 0.22, size * 0.34, size * 0.16);
+            chestIce.position.set(0, size * 2.38, size * 0.48);
+            group.add(chestIce);
+
+            for (let c = -1; c <= 1; c++) {
+                let crownSpike = new THREE.Mesh(SharedGeo.cone, c === 0 ? SharedMat.trapperIceBright : SharedMat.trapperIceSpike);
+                crownSpike.scale.set(size * 0.14, size * (c === 0 ? 0.76 : 0.58), size * 0.14);
+                crownSpike.position.set(c * size * 0.34, size * (c === 0 ? 3.84 : 3.68), -size * 0.16);
+                crownSpike.rotation.set(-0.34, 0, -c * 0.42);
+                group.add(crownSpike);
+            }
+
             let armL = new THREE.Mesh(SharedGeo.cylinder, darkMat);
             armL.scale.set(size * 0.18, size * 0.78, size * 0.18);
             armL.position.set(-size * 0.74, size * 2.24, size * 0.28);
@@ -15406,14 +16952,48 @@ const ModelFactory = {
             parts.stirHand = stirHand;
             parts.armL = armL;
         } else if (type === 'crystal') {
-            let base = new THREE.Mesh(SharedGeo.cylinder, darkMat); base.scale.set(size, size*0.5, size); base.position.y = size*0.25;
-            let gem = new THREE.Mesh(SharedGeo.icosahedron, mat); gem.scale.set(size*0.8, size*2.5, size*0.8); gem.position.y = size*1.8;
-            let ring = new THREE.Mesh(SharedGeo.torus, mat); ring.scale.set(size*1.5, size*1.5, size*0.2); ring.position.y = size*1.8; ring.rotation.x = Math.PI/2;
+            let base = new THREE.Mesh(SharedGeo.cylinder, darkMat);
+            base.scale.set(size * 1.15, size * 0.36, size * 1.15);
+            base.position.y = size * 0.18;
+
+            let plinth = new THREE.Mesh(SharedGeo.cylinder, darkMat);
+            plinth.scale.set(size * 0.78, size * 0.28, size * 0.78);
+            plinth.position.y = size * 0.48;
+
+            for (let p = 0; p < 4; p++) {
+                let pa = (p * Math.PI) / 2 + Math.PI / 4;
+                let prong = new THREE.Mesh(SharedGeo.cone, darkMat);
+                prong.scale.set(size * 0.22, size * 1.05, size * 0.22);
+                prong.position.set(Math.cos(pa) * size * 0.92, size * 0.78, Math.sin(pa) * size * 0.92);
+                prong.rotation.set(Math.sin(pa) * 0.42, 0, -Math.cos(pa) * 0.42);
+                group.add(prong);
+            }
+
+            // Cluster cristallino a 3 punte che fluttua e vibra all'unisono
+            let gem = new THREE.Group();
+            gem.position.y = size * 1.8;
+            let mainShard = new THREE.Mesh(SharedGeo.icosahedron, mat);
+            mainShard.scale.set(size * 0.76, size * 2.25, size * 0.76);
+            let subShardA = new THREE.Mesh(SharedGeo.cone, mat);
+            subShardA.scale.set(size * 0.36, size * 1.35, size * 0.36);
+            subShardA.position.set(-size * 0.48, -size * 0.28, size * 0.24);
+            subShardA.rotation.set(0.24, 0, 0.42);
+            let subShardB = new THREE.Mesh(SharedGeo.cone, mat);
+            subShardB.scale.set(size * 0.32, size * 1.18, size * 0.32);
+            subShardB.position.set(size * 0.46, -size * 0.34, -size * 0.22);
+            subShardB.rotation.set(-0.22, 0, -0.44);
+            gem.add(mainShard, subShardA, subShardB);
+
+            let ring = new THREE.Mesh(SharedGeo.torus, mat);
+            ring.scale.set(size * 1.5, size * 1.5, size * 0.22);
+            ring.position.y = size * 1.8;
+            ring.rotation.x = Math.PI / 2;
+
             let dangerRing = new THREE.Mesh(SharedGeo.auraRing, mat);
             dangerRing.rotation.x = -Math.PI / 2;
             dangerRing.position.y = 0.8;
             dangerRing.visible = false;
-            group.add(base); group.add(gem); group.add(ring); group.add(dangerRing);
+            group.add(base, plinth, gem, ring, dangerRing);
             parts.ring = ring; parts.gem = gem; parts.dangerRing = dangerRing;
             } else if (type === 'roller') {
 
@@ -15453,7 +17033,27 @@ const ModelFactory = {
             eyeR.position.set(size * 0.28, size * 0.22, size * 0.88);
             eyeR.rotation.z = -0.25;
 
-            wheelGroup.add(coreShell, armorPlates, rimL, rimR, eyeL, eyeR);
+            let rBrowL = new THREE.Mesh(SharedGeo.box, darkMat);
+            rBrowL.scale.set(size * 0.32, size * 0.11, size * 0.22);
+            rBrowL.position.set(-size * 0.28, size * 0.35, size * 0.88);
+            rBrowL.rotation.z = -0.28;
+
+            let rBrowR = new THREE.Mesh(SharedGeo.box, darkMat);
+            rBrowR.scale.set(size * 0.32, size * 0.11, size * 0.22);
+            rBrowR.position.set(size * 0.28, size * 0.35, size * 0.88);
+            rBrowR.rotation.z = 0.28;
+
+            let hubL = new THREE.Mesh(SharedGeo.cone, SharedMat.rollerSpike);
+            hubL.scale.set(size * 0.36, size * 0.44, size * 0.36);
+            hubL.position.set(-size * 0.94, 0, 0);
+            hubL.rotation.z = Math.PI / 2;
+
+            let hubR = new THREE.Mesh(SharedGeo.cone, SharedMat.rollerSpike);
+            hubR.scale.set(size * 0.36, size * 0.44, size * 0.36);
+            hubR.position.set(size * 0.94, 0, 0);
+            hubR.rotation.z = -Math.PI / 2;
+
+            wheelGroup.add(coreShell, armorPlates, rimL, rimR, eyeL, eyeR, rBrowL, rBrowR, hubL, hubR);
 
             const numMainSpikes = 8;
             for (let i = 0; i < numMainSpikes; i++) {
@@ -15537,12 +17137,20 @@ const ModelFactory = {
             backSlab.position.set(0, size * 1.84, -size * 0.74);
             group.add(backSlab);
 
-            let rearCore = new THREE.Mesh(SharedGeo.box, SharedMat.golemCore);
-            rearCore.scale.set(size * 0.44, size * 0.70, size * 0.18);
-            rearCore.position.set(0, size * 1.82, -size * 0.92);
+            let rearCore = new THREE.Mesh(SharedGeo.icosahedron, SharedMat.golemCore);
+            rearCore.scale.set(size * 0.34, size * 0.56, size * 0.22);
+            rearCore.position.set(0, size * 1.82, -size * 0.96);
             group.add(rearCore);
 
-            // Elmo incassato con visiera e sopracciglio corrucciato (allineato agli occhi Pursuer)
+            for (let s = -1; s <= 1; s += 2) {
+                let vent = new THREE.Mesh(SharedGeo.box, SharedMat.golemShieldFrame);
+                vent.scale.set(size * 0.26, size * 0.58, size * 0.34);
+                vent.position.set(s * size * 0.68, size * 2.52, -size * 0.56);
+                vent.rotation.set(-0.22, 0, -s * 0.18);
+                group.add(vent);
+            }
+
+            // Elmo incassato con cresta monolitica, visiera e sopracciglio corrucciato (allineato agli occhi Pursuer)
             let head = new THREE.Mesh(SharedGeo.box, SharedMat.golemArmor);
             head.scale.set(size * 1.04, size * 0.68, size * 0.84);
             head.position.set(0, size * 2.70, size * 0.14);
@@ -15558,6 +17166,11 @@ const ModelFactory = {
             brow.position.set(0, size * 3.00, size * 0.18);
             brow.rotation.x = 0.16;
             group.add(brow);
+
+            let helmCrest = new THREE.Mesh(SharedGeo.box, SharedMat.golemShieldFrame);
+            helmCrest.scale.set(size * 0.24, size * 0.36, size * 0.78);
+            helmCrest.position.set(0, size * 3.22, size * 0.10);
+            group.add(helmCrest);
 
             // Spallacci larghi e magli corazzati
             const buildTankArm = (side) => {
@@ -15656,6 +17269,20 @@ const ModelFactory = {
             let body = new THREE.Mesh(SharedGeo.planetSphere, mat);
             body.scale.setScalar(size * 0.80);
             body.position.y = size * 2.55;
+
+            // Occhio ciclope frontale corazzato + guglia polare per leggibilità immediata della direzione
+            let eyeHousing = new THREE.Mesh(SharedGeo.torus, darkMat);
+            eyeHousing.scale.set(size * 0.34, size * 0.34, size * 0.65);
+            eyeHousing.position.set(0, size * 2.58, size * 0.74);
+
+            let eyeLens = new THREE.Mesh(SharedGeo.icosahedron, SharedMat.enemyEye);
+            eyeLens.scale.set(size * 0.26, size * 0.22, size * 0.16);
+            eyeLens.position.set(0, size * 2.58, size * 0.78);
+
+            let poleSpire = new THREE.Mesh(SharedGeo.cone, darkMat);
+            poleSpire.scale.set(size * 0.18, size * 0.54, size * 0.18);
+            poleSpire.position.set(0, size * 3.55, 0);
+            group.add(eyeHousing, eyeLens, poleSpire);
 
             let fireRingCoreMat = new THREE.MeshBasicMaterial({
                 color: 0xff3318,
@@ -15776,6 +17403,12 @@ const ModelFactory = {
                 visor.scale.set(size * 0.52, size * 0.14, size * 0.20);
                 visor.position.set(0, size * 3.04, size * 0.44);
 
+                let arcCrest = new THREE.Mesh(SharedGeo.cone, trimMat);
+                arcCrest.scale.set(size * 0.16, size * 0.52, size * 0.28);
+                arcCrest.position.set(0, size * 3.52, size * 0.14);
+                arcCrest.rotation.x = 0.28;
+                bodyPivot.add(arcCrest);
+
                 let hornL = new THREE.Mesh(SharedGeo.cone, trimMat);
                 hornL.scale.set(size * 0.12, size * 0.75, size * 0.12);
                 hornL.position.set(-size * 0.32, size * 3.45, -size * 0.05);
@@ -15874,7 +17507,11 @@ const ModelFactory = {
                 sacCore.scale.set(size * 0.74, size * 0.68, size * 0.96);
                 let sacRing = new THREE.Mesh(SharedGeo.torus, darkMat);
                 sacRing.scale.set(size * 0.78, size * 0.78, size * 0.28);
-                sac.add(sacCore, sacRing);
+                let tailStinger = new THREE.Mesh(SharedGeo.cone, darkMat);
+                tailStinger.scale.set(size * 0.22, size * 0.88, size * 0.22);
+                tailStinger.position.set(0, -size * 0.14, -size * 1.15);
+                tailStinger.rotation.x = -1.72;
+                sac.add(sacCore, sacRing, tailStinger);
 
                 let core = new THREE.Mesh(SharedGeo.energyOrb, coreMat);
                 core.scale.setScalar(size * 0.44);
@@ -16097,9 +17734,13 @@ const ModelFactory = {
                 let armRMesh = new THREE.Mesh(SharedGeo.cylinder, darkMat);
                 armRMesh.scale.set(size * 0.30, size * 1.45, size * 0.30);
                 armRMesh.position.y = -size * 0.65;
+                let hiltGem = new THREE.Mesh(SharedGeo.icosahedron, coreMat);
+                hiltGem.scale.setScalar(size * 0.16);
+                hiltGem.position.set(0, -size * 1.25, size * 0.46);
                 let swordHilt = new THREE.Mesh(SharedGeo.box, darkMat);
-                swordHilt.scale.set(size * 0.68, size * 0.16, size * 0.24);
+                swordHilt.scale.set(size * 0.74, size * 0.18, size * 0.24);
                 swordHilt.position.set(0, -size * 1.25, size * 0.38);
+                armR.add(hiltGem);
                 let sword = new THREE.Mesh(SharedGeo.box, mat);
                 sword.scale.set(size * 0.20, size * 2.45, size * 0.52);
                 sword.position.set(0, -size * 1.25, size * 1.55);
@@ -17742,7 +19383,7 @@ this.dirLight = new THREE.DirectionalLight(0x335577, 1.4);
         this.scene.add(this.dirLight.target);
         this.updateShadowConfig();
 
-        this.rimLight = new THREE.DirectionalLight(0x88bbff, AppSettings.isUltraPC ? (isTouchDevice ? 0.12 : 0.18) : 0.0);
+        this.rimLight = new THREE.DirectionalLight(0x88bbff, AppSettings.isUltraPC ? (isTouchDevice ? 0.16 : 0.18) : 0.0);
         this.rimLight.position.set(420, 460, 420);
         this.rimLight.castShadow = false;
         this.scene.add(this.rimLight);
@@ -18081,19 +19722,20 @@ prewarmShaders() {
     },
     getBloomSpec(themeIdx) {
         const isIce = (themeIdx === 2);
+        const isHdr = !!this._hdrComposer;
         if (isTouchDevice) {
             return {
-                strength: isIce ? 0.085 : 0.105,
+                strength: isHdr ? (isIce ? 0.068 : 0.082) : (isIce ? 0.085 : 0.105),
                 radius: isIce ? 0.10 : 0.12,
-                threshold: isIce ? 0.92 : 0.89
+                threshold: isHdr ? (isIce ? 1.04 : 0.98) : (isIce ? 0.92 : 0.89)
             };
         }
         return {
-            strength: isIce
-                ? (AppSettings.isUltraPC ? 0.095 : 0.12)
-                : (AppSettings.isUltraPC ? 0.12 : 0.16),
+            strength: isHdr
+                ? (isIce ? (AppSettings.isUltraPC ? 0.080 : 0.10) : (AppSettings.isUltraPC ? 0.098 : 0.125))
+                : (isIce ? (AppSettings.isUltraPC ? 0.095 : 0.12) : (AppSettings.isUltraPC ? 0.12 : 0.16)),
             radius: isIce ? 0.12 : 0.15,
-            threshold: isIce ? 0.90 : 0.87
+            threshold: isHdr ? (isIce ? 1.02 : 0.96) : (isIce ? 0.90 : 0.87)
         };
     },
     applyBloomSpec(themeIdx = this.currentThemeIndex) {
@@ -18110,11 +19752,16 @@ prewarmShaders() {
     ensureComposer() {
         if (this.composer || !this.renderer || !this.scene || !this.camera || AppSettings.useMobileLimits) return;
         const renderScene = new THREE.RenderPass(this.scene, this.camera);
+        const hdrInfo = (typeof PcUltraGraphics !== 'undefined' && PcUltraGraphics.createComposerRenderTarget)
+            ? PcUltraGraphics.createComposerRenderTarget(this.renderer, this.width, this.height)
+            : { rt: null, isHdr: false };
+        this._hdrComposer = !!hdrInfo.isHdr;
         const bSpec = this.getBloomSpec(this.currentThemeIndex);
         const bloomDiv = 2;
         this.bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(Math.max(1, Math.floor(this.width / bloomDiv)), Math.max(1, Math.floor(this.height / bloomDiv))), bSpec.strength, bSpec.radius, bSpec.threshold);
-        this.composer = new THREE.EffectComposer(this.renderer);
+        this.composer = hdrInfo.rt ? new THREE.EffectComposer(this.renderer, hdrInfo.rt) : new THREE.EffectComposer(this.renderer);
         if (this.composer.setPixelRatio) this.composer.setPixelRatio(AppSettings.getTargetPixelRatio());
+        this.composer.setSize(this.width, this.height);
         this.composer.addPass(renderScene);
         this.composer.addPass(this.bloomPass);
         this.ultraPostPass = PcUltraGraphics.createPostPass();
@@ -19001,7 +20648,7 @@ if (this.floor >= 3 && type !== 'dark_prophet' && Math.random() < (this.floor <=
                 this.dirLight.color.lerp(Game._colorDawnLight, dt * 1.4);
             }
             if (this.rimLight) {
-                const targetRim = (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? (isTouchDevice ? 0.12 : 0.18) : 0.0;
+                const targetRim = (typeof AppSettings !== 'undefined' && AppSettings.isUltraPC) ? (isTouchDevice ? 0.16 : 0.18) : 0.0;
                 this.rimLight.intensity += (targetRim - this.rimLight.intensity) * Math.min(1, dt * 1.4);
             }
             if (typeof PcUltraGraphics !== 'undefined' && typeof AppSettings !== 'undefined' && AppSettings.isUltraPC && this.scene && !this.scene.environment) {
@@ -19518,7 +21165,7 @@ loop(timestamp) {
                 }
                 const tMist = this.currentThemeIndex;
                 this.mistMat1.opacity = isTouchDevice
-                    ? (AppSettings.isUltra ? (tMist === 2 ? 0.16 : (tMist === 1 ? 0.18 : 0.21)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
+                    ? (AppSettings.isUltra ? (tMist === 2 ? 0.18 : (tMist === 1 ? 0.21 : 0.24)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
                     : (AppSettings.isUltraPC ? (tMist === 2 ? 0.21 : (tMist === 1 ? 0.23 : 0.26)) : (tMist === 2 ? 0.27 : (tMist === 1 ? 0.29 : 0.33)));
             }
         }
@@ -20004,7 +21651,7 @@ startGame(diffMult) {
         if (this.mistMat1) {
             const tMist = targetThemeIdx;
             this.mistMat1.opacity = isTouchDevice
-                ? (AppSettings.isUltra ? (tMist === 2 ? 0.16 : (tMist === 1 ? 0.18 : 0.21)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
+                ? (AppSettings.isUltra ? (tMist === 2 ? 0.18 : (tMist === 1 ? 0.21 : 0.24)) : (tMist === 2 ? 0.24 : (tMist === 1 ? 0.26 : 0.30)))
                 : (AppSettings.isUltraPC ? (tMist === 2 ? 0.21 : (tMist === 1 ? 0.23 : 0.26)) : (tMist === 2 ? 0.27 : (tMist === 1 ? 0.29 : 0.33)));
         }
 
@@ -26265,33 +27912,38 @@ class Player extends Entity {
     _buildRelicPetModels() {
 
         let grimoire = new THREE.Group();
-        let coverMat = new THREE.MeshStandardMaterial({ color: 0x581c87, emissive: 0x3b0764, roughness: 0.4 });
-        let pageMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+        let coverMat = new THREE.MeshStandardMaterial({ color: 0x8b46d6, emissive: 0x2e0654, roughness: 0.45, map: ModelTextureFactory.getUtility('grimoire') });
+        let pageMat = new THREE.MeshBasicMaterial({ color: 0xfef3a8 });
+        let spine = new THREE.Mesh(SharedGeo.cylinder, coverMat);
+        spine.scale.set(1.1, 9.0, 1.1); spine.rotation.x = Math.PI / 2; spine.position.set(0, -0.7, 0);
         let coverL = new THREE.Mesh(SharedGeo.box, coverMat);
-        coverL.scale.set(6.2, 1.1, 8.8); coverL.position.set(-2.8, 0, 0); coverL.rotation.z = 0.32;
+        coverL.scale.set(6.2, 1.0, 8.8); coverL.position.set(-2.9, 0.1, 0); coverL.rotation.z = 0.34;
         let coverR = new THREE.Mesh(SharedGeo.box, coverMat);
-        coverR.scale.set(6.2, 1.1, 8.8); coverR.position.set(2.8, 0, 0); coverR.rotation.z = -0.32;
-        let pages = new THREE.Mesh(SharedGeo.box, pageMat);
-        pages.scale.set(9.2, 1.2, 7.8); pages.position.set(0, 0.8, 0);
+        coverR.scale.set(6.2, 1.0, 8.8); coverR.position.set(2.9, 0.1, 0); coverR.rotation.z = -0.34;
+        let pageL = new THREE.Mesh(SharedGeo.box, pageMat);
+        pageL.scale.set(5.4, 0.9, 7.8); pageL.position.set(-2.5, 0.9, 0); pageL.rotation.z = 0.28;
+        let pageR = new THREE.Mesh(SharedGeo.box, pageMat);
+        pageR.scale.set(5.4, 0.9, 7.8); pageR.position.set(2.5, 0.9, 0); pageR.rotation.z = -0.28;
         let gRing = new THREE.Mesh(SharedGeo.torus, new THREE.MeshBasicMaterial({ color: 0xfbbf24, wireframe: true }));
-        gRing.scale.set(7.5, 7.5, 1.5); gRing.rotation.x = Math.PI / 2;
+        gRing.scale.set(7.6, 7.6, 1.5); gRing.rotation.x = Math.PI / 2;
         let gGlow = new THREE.Sprite(SharedMat.spriteYellow); gGlow.scale.set(28, 28, 1);
-        grimoire.add(coverL, coverR, pages, gRing, gGlow);
+        grimoire.add(spine, coverL, coverR, pageL, pageR, gRing, gGlow);
         grimoire.visible = false;
 
         let skull = new THREE.Group();
-        let boneMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, emissive: 0x330505, roughness: 0.5 });
-        let cranium = new THREE.Mesh(SharedGeo.sphere, boneMat); cranium.scale.set(5.2, 5.2, 5.8);
-        let jaw = new THREE.Mesh(SharedGeo.box, boneMat); jaw.scale.set(4.6, 3.0, 4.6); jaw.position.set(0, -3.8, 1.0);
-        let eyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye); eyeL.scale.set(1.7, 1.7, 1.7); eyeL.position.set(-1.8, 0.4, 4.6);
-        let eyeR = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye); eyeR.scale.set(1.7, 1.7, 1.7); eyeR.position.set(1.8, 0.4, 4.6);
+        let boneMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, emissive: 0x2b0505, roughness: 0.55, flatShading: true });
+        let cranium = new THREE.Mesh(SharedGeo.icosahedron, boneMat); cranium.scale.set(5.3, 5.1, 5.7);
+        let brow = new THREE.Mesh(SharedGeo.box, boneMat); brow.scale.set(6.2, 1.6, 2.4); brow.position.set(0, 1.8, 4.0); brow.rotation.x = 0.18;
+        let jaw = new THREE.Mesh(SharedGeo.box, boneMat); jaw.scale.set(4.5, 2.6, 4.2); jaw.position.set(0, -3.7, 1.1);
+        let eyeL = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye); eyeL.scale.set(1.8, 1.4, 1.4); eyeL.position.set(-1.9, 0.3, 4.7); eyeL.rotation.z = -0.18;
+        let eyeR = new THREE.Mesh(SharedGeo.box, SharedMat.enemyEye); eyeR.scale.set(1.8, 1.4, 1.4); eyeR.position.set(1.9, 0.3, 4.7); eyeR.rotation.z = 0.18;
         let sGlow = new THREE.Sprite(SharedMat.spriteRed); sGlow.scale.set(30, 30, 1);
-        skull.add(cranium, jaw, eyeL, eyeR, sGlow);
+        skull.add(cranium, brow, jaw, eyeL, eyeR, sGlow);
         skull.userData.glow = sGlow;
         skull.visible = false;
 
         let box = new THREE.Group();
-        let cubeMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, emissive: 0x082f49, metalness: 0.8, roughness: 0.2 });
+        let cubeMat = new THREE.MeshStandardMaterial({ color: 0xdbeafe, emissive: 0x0a3454, metalness: 0.55, roughness: 0.28, map: ModelTextureFactory.getUtility('arcane_cube') });
         let wireMat = new THREE.MeshBasicMaterial({ color: 0x00ddff, wireframe: true });
         let cube = new THREE.Mesh(SharedGeo.box, cubeMat); cube.scale.set(7.5, 7.5, 7.5);
         let wire = new THREE.Mesh(SharedGeo.box, wireMat); wire.scale.set(9.0, 9.0, 9.0);
@@ -35375,54 +37027,12 @@ const Preloader = {
         return tex;
     },
     createCoinFallbackTexture() {
-        const size = 128;
-        const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#f5b800';
-        ctx.fillRect(0, 0, size, size);
-        ctx.beginPath();
-        ctx.arc(64, 64, 58, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffd700';
-        ctx.fill();
-        ctx.lineWidth = 6;
-        ctx.strokeStyle = '#5a2e00';
-        ctx.stroke();
-        // Corna stilizzate e sorriso demoniaco di fallback
-        ctx.fillStyle = '#5a2e00';
-        ctx.beginPath();
-        ctx.moveTo(42, 46); ctx.lineTo(30, 24); ctx.lineTo(50, 38); ctx.closePath(); ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(86, 46); ctx.lineTo(98, 24); ctx.lineTo(78, 38); ctx.closePath(); ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(40, 56); ctx.lineTo(56, 62); ctx.lineTo(44, 68); ctx.closePath(); ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(88, 56); ctx.lineTo(72, 62); ctx.lineTo(84, 68); ctx.closePath(); ctx.fill();
-        ctx.beginPath();
-        ctx.arc(64, 72, 22, 0.2, Math.PI - 0.2);
-        ctx.lineWidth = 5;
-        ctx.stroke();
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.wrapS = THREE.ClampToEdgeWrapping;
-        tex.wrapT = THREE.ClampToEdgeWrapping;
-        tex.encoding = THREE.sRGBEncoding;
-        return tex;
+        if (typeof ModelTextureFactory !== 'undefined') return ModelTextureFactory.getUtility('coin');
+        return CHAR_GRUNGE_TEX;
     },
     createBarkFallbackTexture() {
-        const size = 64;
-        const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#a89f94';
-        ctx.fillRect(0, 0, size, size);
-        for (let i = 0; i < 24; i++) {
-            const x = (i * 5) % size;
-            ctx.fillStyle = (i % 2 === 0) ? '#403830' : '#dfd7cc';
-            ctx.fillRect(x, 0, 2, size);
-        }
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.wrapS = THREE.RepeatWrapping;
-        tex.wrapT = THREE.RepeatWrapping;
-        tex.encoding = THREE.sRGBEncoding;
-        return tex;
+        if (typeof ModelTextureFactory !== 'undefined') return ModelTextureFactory.getUtility('bark');
+        return CHAR_GRUNGE_TEX;
     },
     init(onComplete) {
         const loadingText = document.getElementById('loadingText');
@@ -35523,6 +37133,7 @@ const Preloader = {
                             Preloader._preferredPrefix = curPrefix;
                         }
                         resolvedReal = true;
+                        tex._isExternalImg = true;
                         applyImage(img);
                         markOneDone();
                     } else {
@@ -35567,7 +37178,7 @@ const Preloader = {
         this.textures.treeBark.wrapT = THREE.RepeatWrapping;
         this.textures.treeBark.repeat.set(2, 4);
 
-        this.textures.arcaneBox = loadTerrainTex('arcane_box.png', () => createPatternTexture('wall'));
+        this.textures.arcaneBox = loadTerrainTex('arcane_box.png', () => ModelTextureFactory.getUtility('arcane_cube'));
         this.textures.arcaneBox.wrapS = THREE.ClampToEdgeWrapping;
         this.textures.arcaneBox.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -35575,14 +37186,20 @@ const Preloader = {
         this.textures.runeCircle.wrapS = THREE.ClampToEdgeWrapping;
         this.textures.runeCircle.wrapT = THREE.ClampToEdgeWrapping;
 
-        const monTexKeys = [
-            'mon_dark_armor', 'mon_flesh', 'mon_bone', 'mon_slime',
-            'mon_magma', 'mon_rune_metal', 'mon_cloth', 'mon_chitin'
-        ];
-        monTexKeys.forEach(mk => {
-            const mt = loadTerrainTex(`${mk}.png`, () => CHAR_GRUNGE_TEX);
-            mt.wrapS = THREE.RepeatWrapping;
-            mt.wrapT = THREE.RepeatWrapping;
+        const monFallbackMap = {
+            mon_dark_armor: () => ModelTextureFactory.getUtility('dark_iron'),
+            mon_flesh:      () => ModelTextureFactory.getEnemyAtlas('orc'),
+            mon_bone:       () => ModelTextureFactory.getEnemyAtlas('skeleton_archer'),
+            mon_slime:      () => ModelTextureFactory.getEnemyAtlas('slime'),
+            mon_magma:      () => ModelTextureFactory.getEnemyAtlas('fire_demon'),
+            mon_rune_metal: () => ModelTextureFactory.getUtility('rune_steel'),
+            mon_cloth:      () => ModelTextureFactory.getEnemyAtlas('mage'),
+            mon_chitin:     () => ModelTextureFactory.getEnemyAtlas('boss', 'green')
+        };
+        Object.keys(monFallbackMap).forEach(mk => {
+            const mt = loadTerrainTex(`${mk}.png`, monFallbackMap[mk]);
+            mt.wrapS = (mk === 'mon_dark_armor' || mk === 'mon_rune_metal') ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+            mt.wrapT = (mk === 'mon_dark_armor' || mk === 'mon_rune_metal') ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
             mt.repeat.set(1, 1);
             this.textures[mk] = mt;
         });
@@ -35629,7 +37246,7 @@ const Preloader = {
             }
             if (SharedMat.golemArmor) { SharedMat.golemArmor.map = this.textures.mon_rune_metal; SharedMat.golemArmor.needsUpdate = true; }
             if (SharedMat.golemShieldFrame) { SharedMat.golemShieldFrame.map = this.textures.mon_rune_metal; SharedMat.golemShieldFrame.needsUpdate = true; }
-            if (SharedMat.orcClub) { SharedMat.orcClub.map = this.textures.mon_dark_armor; SharedMat.orcClub.needsUpdate = true; }
+            if (SharedMat.orcClub) { SharedMat.orcClub.map = ModelTextureFactory.getUtility('wood_club'); SharedMat.orcClub.needsUpdate = true; }
         }
 
         this.textures.water = loadTerrainTex('forest_water.png', () => this.createLiquidTexture('water'));
