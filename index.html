@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/BufferGeometryUtils.js"></script>
-    <script src="js/custom_models.js"></script>
+    <!-- Nuovi modelli 3D e texture UV-matched attivi di default (per riattivare override esterni: window.USE_EXTERNAL_CUSTOM_MODELS = true / window.USE_EXTERNAL_MODEL_TEXTURES = true) -->
     <style>
     @keyframes gold-pulse {
     0%, 100% { opacity: 1; transform: scale(1); text-shadow: 0 0 5px #fbbf24; }
@@ -7456,7 +7456,8 @@ const UVAtlasMapper = {
                 });
             }
             const subRects = this.packSubRects(this.ENEMY_SLOTS[sk], list.length, sk === 'body' || sk === 'head');
-            const customEnemy = (typeof window !== 'undefined' && window.CUSTOM_MODELS && window.CUSTOM_MODELS.enemies)
+            const useExternalModels = (typeof window !== 'undefined' && window.USE_EXTERNAL_CUSTOM_MODELS === true);
+            const customEnemy = (useExternalModels && window.CUSTOM_MODELS && window.CUSTOM_MODELS.enemies)
                 ? window.CUSTOM_MODELS.enemies[cacheKey]
                 : null;
             for (let j = 0; j < list.length; j++) {
@@ -8404,7 +8405,8 @@ const PlayerGeometryBuilder = {
             }
         }
 
-        const customSkin = (typeof window !== 'undefined' && window.CUSTOM_MODELS && window.CUSTOM_MODELS.skins)
+        const useExternalModels = (typeof window !== 'undefined' && window.USE_EXTERNAL_CUSTOM_MODELS === true);
+        const customSkin = (useExternalModels && window.CUSTOM_MODELS && window.CUSTOM_MODELS.skins)
             ? window.CUSTOM_MODELS.skins[skinId]
             : null;
         const pickPart = (key, partsList, slotRect, preferPrimary) => {
@@ -12746,7 +12748,8 @@ const PcUltraGraphics = {
     },
 
     getSkinTex(skinId) {
-        if (skinId && typeof Preloader !== 'undefined' && Preloader.textures) {
+        const useExtModelTex = (typeof window !== 'undefined' && window.USE_EXTERNAL_MODEL_TEXTURES === true);
+        if (useExtModelTex && skinId && typeof Preloader !== 'undefined' && Preloader.textures) {
             const pre = Preloader.textures['skin_' + skinId];
             if (pre && pre._isExternalImg) return pre;
         }
@@ -14364,7 +14367,8 @@ const ModelTextureFactory = {
 };
 
 function getEnemyTexture(type, bossElement = null) {
-    const pt = (typeof Preloader !== 'undefined' && Preloader.textures) ? Preloader.textures : null;
+    const useExtModelTex = (typeof window !== 'undefined' && window.USE_EXTERNAL_MODEL_TEXTURES === true);
+    const pt = (useExtModelTex && typeof Preloader !== 'undefined' && Preloader.textures) ? Preloader.textures : null;
     if (pt) {
         if (type === 'boss' && bossElement) {
             const bossCustomKey = 'enemy_boss_' + bossElement;
@@ -14396,7 +14400,8 @@ function getEnemyTexture(type, bossElement = null) {
 const SKIN_TEX_CACHE = {};
 function getSkinTexture(skinId, forceProcedural = false) {
     if (!skinId) return CHAR_GRUNGE_TEX;
-    if (!forceProcedural && typeof Preloader !== 'undefined' && Preloader.textures) {
+    const useExtModelTex = (typeof window !== 'undefined' && window.USE_EXTERNAL_MODEL_TEXTURES === true);
+    if (useExtModelTex && !forceProcedural && typeof Preloader !== 'undefined' && Preloader.textures) {
         const pre = Preloader.textures['skin_' + skinId];
         if (pre && pre._isExternalImg) return pre;
     }
@@ -37152,8 +37157,14 @@ const Preloader = {
             return tex;
         };
 
+        const useExtModelTex = (typeof window !== 'undefined' && window.USE_EXTERNAL_MODEL_TEXTURES === true);
+        const loadModelTex = (fileName, proceduralFn) => {
+            if (useExtModelTex) return loadTerrainTex(fileName, proceduralFn);
+            return proceduralFn();
+        };
+
         this.textures.smoke = this.createSmokeTexture();
-        this.textures.coin = loadTerrainTex('coin.png', () => this.createCoinFallbackTexture());
+        this.textures.coin = loadModelTex('coin.png', () => this.createCoinFallbackTexture());
         this.textures.coin.wrapS = THREE.ClampToEdgeWrapping;
         this.textures.coin.wrapT = THREE.ClampToEdgeWrapping;
         if (typeof SharedMat !== 'undefined' && SharedMat.coin) {
@@ -37165,20 +37176,20 @@ const Preloader = {
         const fbCrate = (typeof SharedMat !== 'undefined' && SharedMat.crate) ? SharedMat.crate.map : null;
         const fbUrn = (typeof SharedMat !== 'undefined' && SharedMat.urn) ? SharedMat.urn.map : null;
 
-        this.textures.crate = loadTerrainTex('crate.png', () => fbCrate || createPatternTexture('crate'));
+        this.textures.crate = loadModelTex('crate.png', () => fbCrate || createPatternTexture('crate'));
         this.textures.crate.wrapS = THREE.ClampToEdgeWrapping;
         this.textures.crate.wrapT = THREE.ClampToEdgeWrapping;
 
-        this.textures.urn = loadTerrainTex('urn.png', () => fbUrn || createPatternTexture('urn'));
+        this.textures.urn = loadModelTex('urn.png', () => fbUrn || createPatternTexture('urn'));
         this.textures.urn.wrapS = THREE.RepeatWrapping;
         this.textures.urn.wrapT = THREE.ClampToEdgeWrapping;
 
-        this.textures.treeBark = loadTerrainTex('tree_bark.png', () => this.createBarkFallbackTexture());
+        this.textures.treeBark = loadModelTex('tree_bark.png', () => this.createBarkFallbackTexture());
         this.textures.treeBark.wrapS = THREE.RepeatWrapping;
         this.textures.treeBark.wrapT = THREE.RepeatWrapping;
         this.textures.treeBark.repeat.set(2, 4);
 
-        this.textures.arcaneBox = loadTerrainTex('arcane_box.png', () => ModelTextureFactory.getUtility('arcane_cube'));
+        this.textures.arcaneBox = loadModelTex('arcane_box.png', () => ModelTextureFactory.getUtility('arcane_cube'));
         this.textures.arcaneBox.wrapS = THREE.ClampToEdgeWrapping;
         this.textures.arcaneBox.wrapT = THREE.ClampToEdgeWrapping;
 
@@ -37197,7 +37208,7 @@ const Preloader = {
             mon_chitin:     () => ModelTextureFactory.getEnemyAtlas('boss', 'green')
         };
         Object.keys(monFallbackMap).forEach(mk => {
-            const mt = loadTerrainTex(`${mk}.png`, monFallbackMap[mk]);
+            const mt = loadModelTex(`${mk}.png`, monFallbackMap[mk]);
             mt.wrapS = (mk === 'mon_dark_armor' || mk === 'mon_rune_metal') ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
             mt.wrapT = (mk === 'mon_dark_armor' || mk === 'mon_rune_metal') ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
             mt.repeat.set(1, 1);
@@ -37209,15 +37220,15 @@ const Preloader = {
             'crimson_inquisitor', 'void_walker', 'solar_archon', 'cyber_phantom'
         ];
         skinIds.forEach(sid => {
-            const sk = loadTerrainTex(`skin_${sid}.png`, () => getSkinTexture(sid, true));
-            sk.wrapS = THREE.RepeatWrapping;
-            sk.wrapT = THREE.RepeatWrapping;
+            const sk = loadModelTex(`skin_${sid}.png`, () => getSkinTexture(sid, true));
+            sk.wrapS = useExtModelTex ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
+            sk.wrapT = useExtModelTex ? THREE.RepeatWrapping : THREE.ClampToEdgeWrapping;
             sk.repeat.set(1, 1);
             this.textures['skin_' + sid] = sk;
         });
 
-        // Texture personalizzate opzionali per singoli nemici: aggiungi l'ID (es. 'enemy_orc', 'enemy_boss_red')
-        // a window.CUSTOM_ENEMY_TEXTURES prima di Preloader.init oppure usa Preloader.loadOptionalEnemyTexture(key, file)
+        // Texture personalizzate opzionali per singoli nemici: imposta window.USE_EXTERNAL_MODEL_TEXTURES = true
+        // e aggiungi l'ID (es. 'enemy_orc', 'enemy_boss_red') a window.CUSTOM_ENEMY_TEXTURES prima di Preloader.init
         this.loadOptionalEnemyTexture = (key, fileName) => {
             const ct = loadTerrainTex(fileName, () => CHAR_GRUNGE_TEX);
             ct.wrapS = THREE.RepeatWrapping;
@@ -37226,7 +37237,7 @@ const Preloader = {
             this.textures[key] = ct;
             return ct;
         };
-        const customEnemyTexList = (typeof window !== 'undefined' && Array.isArray(window.CUSTOM_ENEMY_TEXTURES))
+        const customEnemyTexList = (useExtModelTex && Array.isArray(window.CUSTOM_ENEMY_TEXTURES))
             ? window.CUSTOM_ENEMY_TEXTURES
             : [];
         customEnemyTexList.forEach(ck => {
